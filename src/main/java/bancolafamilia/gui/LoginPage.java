@@ -40,9 +40,9 @@ public class LoginPage extends PaginaInterfaz<LoginView>{
             return;
         }
         
-        final User user = banco.getUser(username);
+        final User user = banco.findUserByUsername(username);
         
-        if (user == null || !user.password.equals(password)) {
+        if (user == null || !user.getPassword().equals(password)) {
             view.showIncorrectUserOrPasswordError();
             return;
         }
