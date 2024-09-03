@@ -25,27 +25,41 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 import bancolafamilia.banco.Banco;
 
+
+/*
+ * Maneja toda la interfaz. Tiene un bucle que va dibujando cada página
+ * En todo momento hay una página actual que se está renderizando
+ * Cuando se debe pasar de página, la página actual retorna la siguiente
+ * a la que se debe pasar, y la clase interfaz la cambia y renderiza
+*/
 public class Interfaz {
 
-    private final Screen screen;
-    private final WindowBasedTextGUI gui;
+    private final Screen screen;            // pantalla
+    private final WindowBasedTextGUI gui;   // gui
     
-    private PaginaInterfaz<?> paginaActual;
+    private PageController<?> paginaActual; // pagina actual
 
     public Interfaz(Banco banco) throws IOException {
         this.screen = new DefaultTerminalFactory().createScreen();
         this.gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLACK));
+        
+        // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
+        // por la que uno esté armando en ese momento.
         this.paginaActual = new LoginPage(banco, gui);
     }
 
+    // Inicializa la pantalla y empieza el loop de la interfaz
     public void start() throws IOException {
         screen.startScreen();
         guiLoop();
     }
 
+    // Loop. Ejecuta la página inicial. Al terminar de ejecutarse una página,
+    // la misma retorna la siguiente página que se debe ejecutar.
+    // El loop hace esto hasta que una página retorne null, y ahí termina el programa.
     private void guiLoop() throws IOException {
         while (paginaActual != null) {
-            PaginaInterfaz<?> nuevaPagina = paginaActual.run();
+            PageController<?> nuevaPagina = paginaActual.run();
             this.paginaActual = nuevaPagina;
         }
         stop();
