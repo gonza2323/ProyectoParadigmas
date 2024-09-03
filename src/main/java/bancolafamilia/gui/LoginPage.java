@@ -1,6 +1,7 @@
 package bancolafamilia.gui;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.swing.Action;
 
@@ -21,6 +22,8 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 import bancolafamilia.banco.Banco;
+import bancolafamilia.banco.Cliente;
+import bancolafamilia.banco.Gerente;
 import bancolafamilia.banco.User;
 
 
@@ -70,13 +73,23 @@ class LoginPage extends PageController<LoginView>{
         // Buscamos si existe el usuario en el banco, falta implementar bien
         final User user = banco.findUserByUsername(username);
         
+        // Si el usuario no existe o la contraseña es errónea, error
         if (user == null || !user.getPassword().equals(password)) {
             view.showIncorrectUserOrPasswordError(); // otro método de LoginView
             return;
         }
         
-        // Si el login es válido, cambiamos a la página UserMenuPage
-        CambiarPagina(new UserMenuPage(banco, gui));
+        // Si todo sale bien, pasamos a la siguiente página
+        PageController<?> nextPage;
+        
+        if (user instanceof Cliente)
+            nextPage = new ClientMenuPage(banco, gui, (Cliente)user);
+        else if (user instanceof Gerente)
+            nextPage = new ManagerMenuPage(banco, gui, (Gerente)user);
+        else
+            nextPage = null;
+        
+        CambiarPagina(nextPage);
     }
 
     // Método para manejar cuando el usuario aprieta Cerrar
