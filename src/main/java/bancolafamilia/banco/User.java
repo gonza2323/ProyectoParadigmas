@@ -1,6 +1,6 @@
 package bancolafamilia.banco;
 
-public class User {
+public abstract class User {
 
     private final String nombre;
     private final int dni;

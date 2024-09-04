@@ -13,25 +13,25 @@ import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
+import bancolafamilia.banco.AsesorFinanciero;
 import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Gerente;
 
-public class ManagerMenuPage extends PageController<ManagerMenuView>{
-    private Gerente manager;
+public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMenuView>{
+    private AsesorFinanciero asesor;
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager) {
-        super(banco, new ManagerMenuView(gui, manager.getNombre()), gui);
+    public AsesorFinancieroMenuPage(Banco banco, WindowBasedTextGUI gui, AsesorFinanciero asesor) {
+        super(banco, new AsesorFinancieroMenuView(gui, asesor.getNombre()), gui);
 
-        this.manager = manager;
+        this.asesor = asesor;
     }
 }
 
-class ManagerMenuView extends PageView {
+class AsesorFinancieroMenuView extends PageView {
     private final String name;
 
-    public ManagerMenuView(WindowBasedTextGUI gui, String name) {
+    public AsesorFinancieroMenuView(WindowBasedTextGUI gui, String name) {
         super(gui);
         this.name = name;
     }

@@ -24,6 +24,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import bancolafamilia.banco.Banco;
+import bancolafamilia.banco.Cliente;
 
 
 /*

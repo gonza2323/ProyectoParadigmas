@@ -14,24 +14,24 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
 import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Gerente;
+import bancolafamilia.banco.Cajero;
 
-public class ManagerMenuPage extends PageController<ManagerMenuView>{
-    private Gerente manager;
+public class CajeroMenuPage extends PageController<CajeroMenuView>{
+    private Cajero cajero;
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager) {
-        super(banco, new ManagerMenuView(gui, manager.getNombre()), gui);
+    public CajeroMenuPage(Banco banco, WindowBasedTextGUI gui, Cajero cajero) {
+        super(banco, new CajeroMenuView(gui, cajero.getNombre()), gui);
 
-        this.manager = manager;
+        this.cajero = cajero;
     }
 }
 
-class ManagerMenuView extends PageView {
+class CajeroMenuView extends PageView {
     private final String name;
 
-    public ManagerMenuView(WindowBasedTextGUI gui, String name) {
+    public CajeroMenuView(WindowBasedTextGUI gui, String name) {
         super(gui);
         this.name = name;
     }

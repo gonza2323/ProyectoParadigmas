@@ -5,16 +5,3 @@ public class Empleado extends User {
         super(nombre, dni, username, password);
     }
 }
-
-class Cajero extends Empleado {
-    public Cajero(String nombre, int dni, String username, String password) {
-        super(nombre, dni, username, password);
-    }
-}
-
-
-class AgenteEspecial extends Empleado {
-    public AgenteEspecial(String nombre, int dni, String username, String password) {
-        super(nombre, dni, username, password);
-    }
-}

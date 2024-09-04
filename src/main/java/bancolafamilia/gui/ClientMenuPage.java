@@ -14,47 +14,92 @@ import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
 
-public class ClientMenuPage extends PageController<UserMenuView>{
-    Cliente client;
+public class ClientMenuPage extends PageController<ClientMenuView>{
+    private Cliente client;
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
     public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Cliente client) {
-        super(banco, new UserMenuView(gui, client.getNombre(), client.getBalance()), gui);
+        super(banco, new ClientMenuView(gui, client.getNombre(), client.getBalance()), gui);
 
         this.client = client;
+
+        view.bindTransferButton(() -> handleTransferButton());
+        view.bindHistoryButton(() -> handleHistoryButton());
+        view.bindLoanButton(() -> handleLoanButton());
+        view.bindAdviceButton(() -> handleAdviceButton());
+        view.bindExitButton(() -> handleExitButton());
+    }
+
+    private void handleTransferButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar TRANSFERENCIAS");
+    }
+
+    private void handleHistoryButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar MOVMIENTOS");
+    }
+
+    private void handleLoanButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar PRESTAMOS");
+    }
+
+    private void handleAdviceButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar ASESORAMIENTO");
+    }
+
+    private void handleExitButton() {
+        // TODO Auto-generated method stub
+        CambiarPagina(new LoginPage(banco, gui));;
     }
 }
 
-class UserMenuView extends PageView {
+class ClientMenuView extends PageView {
+    
     private final String name;
-    private final float balance; 
+    private final float balance;
 
-    public UserMenuView(WindowBasedTextGUI gui, String name, float balance) {
+    private final Button transferButton;
+    private final Button historyButton;
+    private final Button loanButton;
+    private final Button adviceButton;
+    private final Button exitButton;
+    
+
+    public ClientMenuView(WindowBasedTextGUI gui, String name, float balance) {
         super(gui);
         this.name = name;
         this.balance = balance;
+        
+        transferButton = new Button("Transferencia");
+        historyButton = new Button("Movimientos");
+        loanButton = new Button("Préstamos");
+        adviceButton = new Button("Asesoramiento");
+        exitButton = new Button("Salir");
     }
 
     public void startUI() {
         // Crea una ventana y le dice que se centre
-        // Siempre hace falta una ventana (preferentemente solo 1)
-        BasicWindow window = new BasicWindow();
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN)); // Centrada, pero hay más opciones
+        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
+        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+                                      Window.Hint.FIT_TERMINAL_WINDOW,
+                                      Window.Hint.NO_DECORATIONS));
 
-        // La ventana solo puede contener un elemento, entonces
-        // creamos un "panel", que puede tener muchos objectos organizados de distintas formas
-        // En este caso, que organice todo en 2 columnas
+        // Panel
         Panel contentPanel = new Panel(new GridLayout(2));
         window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // Configuramos la separación entre columnas y filas pa que quede lindo
         GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
-        gridLayout.setHorizontalSpacing(3);
+        gridLayout.setHorizontalSpacing(1);
         gridLayout.setVerticalSpacing(1);
         
         // Mensaje de bienvenida
@@ -62,7 +107,7 @@ class UserMenuView extends PageView {
         welcomeMsg.setLayoutData(GridLayout.createLayoutData(
                 GridLayout.Alignment.BEGINNING,     // Alinear izquierda
                 GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horzontalmente
+                true,      // Expandirse lo que pueda horizontalmente
                 false,       // Expandirse lo que pueda verticalmente
                 2,                   // Ocupar 2 columnas
                 1));                   // Ocupar 1 fila
@@ -73,7 +118,7 @@ class UserMenuView extends PageView {
         balanceIndicator.setLayoutData(GridLayout.createLayoutData(
                 GridLayout.Alignment.BEGINNING,     // Alinear izquierda
                 GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horzontalmente
+                true,      // Expandirse lo que pueda horizontalmente
                 false,       // Expandirse lo que pueda verticalmente
                 2,                   // Ocupar 2 columnas
                 1));                   // Ocupar 1 fila
@@ -87,33 +132,50 @@ class UserMenuView extends PageView {
         
         LayoutData leftJustify = GridLayout.createLayoutData(
             GridLayout.Alignment.BEGINNING,
-            GridLayout.Alignment.CENTER,
+            GridLayout.Alignment.BEGINNING,
             true,
-            true,
+            false,
             2,
             1);
 
         // Añadimos los botones creados en el constructor
         contentPanel.addComponent(
-            new Button("Transferencia")
+            transferButton
                 .setLayoutData(leftJustify));
         contentPanel.addComponent(
-            new Button("Préstamos")
+            historyButton
                 .setLayoutData(leftJustify));
         contentPanel.addComponent(
-            new Button("Movimientos")
+            loanButton
                 .setLayoutData(leftJustify));
         contentPanel.addComponent(
-            new Button("Salir")
+            adviceButton
+                .setLayoutData(leftJustify));
+        contentPanel.addComponent(
+            exitButton
                 .setLayoutData(leftJustify));
 
-        // LO MÁS IMPROTANTE. Finalmente se añade la ventana a la pantalla y espera el input
-        // del usuario. Si no el programa continua y se cierra, ya que la página siguiente
-        // es "null" por defecto.
+        // Agregar ventana a la gui
         gui.addWindowAndWait(window);
+    }
 
-        // La ejecución no continúa hasta que se cierre la ventana, que ocurrirá en la lógica
-        // del controlador cuando este llame a cambiarPagina(PageController). Mientras tanto,
-        // seguirá renderizando la página actual.
+    public void bindTransferButton(Runnable action) {
+        transferButton.addListener(transferButton -> action.run());
+    }
+
+    public void bindHistoryButton(Runnable action) {
+        historyButton.addListener(historyButton -> action.run());
+    }
+
+    public void bindLoanButton(Runnable action) {
+        loanButton.addListener(loanButton -> action.run());
+    }
+
+    public void bindAdviceButton(Runnable action) {
+        adviceButton.addListener(adviceButton -> action.run());
+    }
+
+    public void bindExitButton(Runnable action) {
+        exitButton.addListener(closeButton -> action.run());
     }
 }

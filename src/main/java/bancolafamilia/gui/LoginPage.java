@@ -25,6 +25,9 @@ import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
 import bancolafamilia.banco.Gerente;
 import bancolafamilia.banco.User;
+import bancolafamilia.banco.AgenteEspecial;
+import bancolafamilia.banco.AsesorFinanciero;
+import bancolafamilia.banco.Cajero;
 
 
 /*
@@ -70,7 +73,7 @@ class LoginPage extends PageController<LoginView>{
             return;
         }
         
-        // Buscamos si existe el usuario en el banco, falta implementar bien
+        // Buscamos si existe el usuario en el banco
         final User user = banco.findUserByUsername(username);
         
         // Si el usuario no existe o la contraseña es errónea, error
@@ -84,6 +87,12 @@ class LoginPage extends PageController<LoginView>{
         
         if (user instanceof Cliente)
             nextPage = new ClientMenuPage(banco, gui, (Cliente)user);
+        else if (user instanceof Cajero)
+            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user);
+        else if (user instanceof AsesorFinanciero)
+            nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user);
+        else if (user instanceof AgenteEspecial)
+            nextPage = new AgenteEspecialMenuPage(banco, gui, (AgenteEspecial)user);
         else if (user instanceof Gerente)
             nextPage = new ManagerMenuPage(banco, gui, (Gerente)user);
         else
@@ -164,7 +173,7 @@ class LoginView extends PageView {
 
         // Crea una ventana y le dice que se centre
         // Siempre hace falta una ventana (preferentemente solo 1)
-        BasicWindow window = new BasicWindow();
+        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
         window.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
 
         // La ventana solo puede contener un elemento, entonces
@@ -175,7 +184,7 @@ class LoginView extends PageView {
         
         // Configuramos la separación entre columnas y filas pa que quede lindo
         GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
-        gridLayout.setHorizontalSpacing(3);
+        gridLayout.setHorizontalSpacing(1);
         gridLayout.setVerticalSpacing(1);
         
         // Crea una etiqueta (texto) y configura como se va a organizar
