@@ -2,6 +2,7 @@ package bancolafamilia.gui;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.BasicWindow;
@@ -15,6 +16,8 @@ import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
@@ -37,13 +40,50 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleTransferButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar TRANSFERENCIAS");
+        String alias = view.requestAlias();
+
+        if (alias == null)
+            return;
+
+        Cliente recipient = banco.findClientByAlias(alias);
+
+        if (recipient == null) {
+            view.showNonExistantAliasError();
+            return;
+        }
+
+        if (recipient == client) {
+            view.showCantTransferToSelfError();
+            return;
+        }
+
+        float amount;
+        try {
+            amount = Float.parseFloat(view.requestAmount());
+        } catch (NumberFormatException e) {
+            return;
+        } catch (NullPointerException e) {
+            return;
+        }
+
+        if (client.getBalance() < amount) {
+            view.showInsufficientFundsError();
+            return;
+        }
+
+        boolean success = banco.transferMoney(client, recipient, amount);
+
+        if (success) {
+            view.updateBalance(client.getBalance());
+            view.showSuccessMsg();
+        } else {
+            view.showTransferError();
+        }
     }
 
     private void handleHistoryButton() {
         // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar MOVMIENTOS");
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar MOVIMIENTOS");
     }
 
     private void handleLoanButton() {
@@ -65,7 +105,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 class ClientMenuView extends PageView {
     
     private final String name;
-    private final float balance;
+    private final Label balanceIndicator;
 
     private final Button transferButton;
     private final Button historyButton;
@@ -77,13 +117,78 @@ class ClientMenuView extends PageView {
     public ClientMenuView(WindowBasedTextGUI gui, String name, float balance) {
         super(gui);
         this.name = name;
-        this.balance = balance;
+        this.balanceIndicator = new Label("");
+        
+        updateBalance(balance);
         
         transferButton = new Button("Transferencia");
         historyButton = new Button("Movimientos");
         loanButton = new Button("Préstamos");
         adviceButton = new Button("Asesoramiento");
         exitButton = new Button("Salir");
+    }
+
+    public void showCantTransferToSelfError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("No puede transferirse a sí mismo")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showInsufficientFundsError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("Fondos insuficientes")
+            .build()
+            .showDialog(gui);
+    }
+
+    public String requestAlias() {
+        return new TextInputDialogBuilder()
+            .setTitle("TRANSFERENCIA")
+            .setDescription("Ingrese el alias del destinatario")
+            .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showNonExistantAliasError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("Alias inexistente")
+            .build()
+            .showDialog(gui);
+    }
+
+    public String requestAmount() {
+        return new TextInputDialogBuilder()
+            .setTitle("TRANSFERENCIA")
+            .setDescription("Ingrese el monto a transferir")
+            .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showSuccessMsg() {
+        new MessageDialogBuilder()
+            .setTitle("")
+            .setText("Transferencia exitosa")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void updateBalance(float balance) {
+        balanceIndicator.setText("$ " + new DecimalFormat("#.##").format(balance));
+    }
+
+    public void showTransferError() {
+        // TODO Auto-generated method stub
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("Se produjo un error desconocido")
+            .build()
+            .showDialog(gui);
     }
 
     public void startUI() {
@@ -114,7 +219,6 @@ class ClientMenuView extends PageView {
         contentPanel.addComponent(welcomeMsg);           // Añadir el componente al panel
 
         // Balance
-        Label balanceIndicator = new Label("$ " + new DecimalFormat("#.##").format(balance));
         balanceIndicator.setLayoutData(GridLayout.createLayoutData(
                 GridLayout.Alignment.BEGINNING,     // Alinear izquierda
                 GridLayout.Alignment.BEGINNING,     // Alinear arriba
