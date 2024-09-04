@@ -50,7 +50,7 @@ public class Interfaz {
         Cliente prueba = new Cliente("Armando", 54213856, "armando", "1234");
         banco.addUser(prueba);
         prueba.setAlias("que.es.eso");
-        prueba.depositFunds(7500);
+        banco.depositFunds(prueba, 7500);
         this.paginaActual = new ClientMenuPage(banco, gui, prueba);
     }
 

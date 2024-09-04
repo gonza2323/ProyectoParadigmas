@@ -23,9 +23,9 @@ public class App {
         cliente2.setAlias("muy.bien.tu");
         cliente3.setAlias("muchas.gracias.chau");
 
-        cliente1.depositFunds(10000);
-        cliente2.depositFunds(2000);
-        cliente3.depositFunds(5000);
+        banco.depositFunds(cliente1, 10000);
+        banco.depositFunds(cliente2, 2000);
+        banco.depositFunds(cliente3, 5000);
 
         banco.addUser(new Gerente("admin", 1237, "admin", "hunter2"));
 
