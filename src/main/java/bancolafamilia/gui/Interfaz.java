@@ -20,8 +20,11 @@ import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.swing.SwingTerminal;
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
@@ -41,7 +44,16 @@ public class Interfaz {
     private PageController<?> paginaActual; // pagina actual
 
     public Interfaz(Banco banco) throws IOException {
-        this.screen = new DefaultTerminalFactory().createScreen();
+        
+        DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
+        Terminal terminal;
+
+        if (isOperatingSystemWindows())
+            terminal = terminalFactory.createTerminalEmulator();
+        else
+            terminal = terminalFactory.createTerminal();
+
+        this.screen = new TerminalScreen(terminal);
         this.gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLACK));
         
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
@@ -73,5 +85,9 @@ public class Interfaz {
 
     private void stop() throws IOException {
         screen.stopScreen();
+    }
+
+    private static boolean isOperatingSystemWindows() {
+        return System.getProperty("os.name", "").toLowerCase().startsWith("windows");
     }
 }
