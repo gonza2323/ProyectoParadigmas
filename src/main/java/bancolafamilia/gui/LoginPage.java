@@ -1,33 +1,11 @@
 package bancolafamilia.gui;
 
-import java.util.Arrays;
-import java.util.Optional;
-
-import javax.swing.Action;
-
+import bancolafamilia.banco.*;
 import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Button.Listener;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.EmptySpace;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.TextBox;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
-import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
-import bancolafamilia.banco.Gerente;
-import bancolafamilia.banco.User;
-import bancolafamilia.banco.AgenteEspecial;
-import bancolafamilia.banco.AsesorFinanciero;
-import bancolafamilia.banco.Cajero;
+import java.util.Arrays;
 
 
 /*
@@ -53,6 +31,7 @@ class LoginPage extends PageController<LoginView>{
         // cuando se aprieta cada botón
         view.bindLoginButton(() -> handleLoginButton());
         view.bindCloseButton(() -> handleCloseButton());
+
     }
 
     // Método para manejar cuando el usuario aprieta Login
@@ -105,6 +84,7 @@ class LoginPage extends PageController<LoginView>{
     public void handleCloseButton() {
         CambiarPagina(null); // Cambiamos de página a null (termina el programa)
     }
+
 }
 
 
@@ -158,6 +138,7 @@ class LoginView extends PageView {
     public void bindCloseButton(Runnable action) {
         closeButton.addListener(closeButton -> action.run());
     }
+
 
     // Métodos para leer los campos username y password
     public String getUsernameField() {

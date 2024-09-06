@@ -1,19 +1,26 @@
 package bancolafamilia.banco;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Date;
+
 
 public class Banco {
 
     private float reservas;
     private float depositos;
-    private ArrayList<User> users;
+    private final ArrayList<User> users;
+    private final Map<Class<? extends Operacion>, List<Operacion>> mapaOperaciones; //Map es una estructura que asocia claves con valores en este caso la key es la subclase de la clase operacion y el value es una lista de instancias de la subclase de la clase operacion - con esto va a ser mas facil buscar operaciones
+
 
     public Banco() {
         reservas = 0.0f;
         depositos = 0.0f;
         this.users = new ArrayList<User>();
+        this.mapaOperaciones = new HashMap<>();
+        crearMapaOperaciones();
+
+
     }
 
     public User findUserByUsername(String username) {
@@ -50,9 +57,14 @@ public class Banco {
         
         if (amount < 0 || sender.getBalance() < amount)
             return false;
-        
+
         sender.balance -= amount;
         recipient.balance += amount;
+
+        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount, "done");
+
+        mapaOperaciones.get(Transferencia.class).add(transferencia); //me falta aplicar el metodo para las otras operaciones y para buscarlas
+
         return true;
     }
 
@@ -69,5 +81,14 @@ public class Banco {
 
     public float getReservas() {
         return reservas;
+    }
+
+    public void crearMapaOperaciones(){
+        mapaOperaciones.put(Transferencia.class, new ArrayList<>());
+        mapaOperaciones.put(Deposito.class, new ArrayList<>());
+        mapaOperaciones.put(Retiro.class, new ArrayList<>());
+        mapaOperaciones.put(Prestamo.class, new ArrayList<>());
+
+
     }
 }

@@ -1,26 +1,15 @@
 package bancolafamilia.gui;
 
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.regex.Pattern;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.LayoutData;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import bancolafamilia.banco.Banco;
+import bancolafamilia.banco.Cliente;
+import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
-import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
     private Cliente client;
@@ -31,12 +20,14 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         super(banco, new ClientMenuView(gui, client.getNombre(), client.getBalance()), gui);
 
         this.client = client;
-
-        view.bindTransferButton(() -> handleTransferButton());
+        //PageController recibe la genericidad V que hereda de PageView y ahí se define la variable "view" del tipo V
+        //por lo tanto todos los metodos que usa view estan en la ClientMenuView que hereda de Pageview
+        view.bindTransferButton(() -> handleTransferButton()); //handleTransferButton() es el action.run() de la linea 266
         view.bindHistoryButton(() -> handleHistoryButton());
         view.bindLoanButton(() -> handleLoanButton());
         view.bindAdviceButton(() -> handleAdviceButton());
         view.bindExitButton(() -> handleExitButton());
+        //view.bindChangePasswordButton(() -> handleChangePasswordButton());
     }
 
     private void handleTransferButton() {
@@ -100,8 +91,15 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         // TODO Auto-generated method stub
         CambiarPagina(new LoginPage(banco, gui));;
     }
+
+    /*private void handleChangePasswordButton() {
+        //PageController<?> nextPage;
+        CambiarPagina(new ChangePasswordPage(banco, gui, client));
+
+    }*/
 }
 
+//cuando la clase no tiene modificador de acceso, el acceso por defecto es el "acceso por paquete" o package private lo que quiere decir que la clase solo sera accesible dentro del mismo paquete. O sea, solo puede acceder a ella la clase clientMenuPage
 class ClientMenuView extends PageView {
     
     private final String name;
@@ -112,6 +110,7 @@ class ClientMenuView extends PageView {
     private final Button loanButton;
     private final Button adviceButton;
     private final Button exitButton;
+    //private final Button changePasswordButton;
     
 
     public ClientMenuView(WindowBasedTextGUI gui, String name, float balance) {
@@ -125,6 +124,7 @@ class ClientMenuView extends PageView {
         historyButton = new Button("Movimientos");
         loanButton = new Button("Préstamos");
         adviceButton = new Button("Asesoramiento");
+        //changePasswordButton = new Button("Cambiar contraseña");
         exitButton = new Button("Salir");
     }
 
@@ -258,6 +258,9 @@ class ClientMenuView extends PageView {
         contentPanel.addComponent(
             exitButton
                 .setLayoutData(leftJustify));
+//        contentPanel.addComponent(
+//                changePasswordButton.setLayoutData(leftJustify)
+//        );
 
         // Agregar ventana a la gui
         gui.addWindowAndWait(window);
@@ -282,4 +285,6 @@ class ClientMenuView extends PageView {
     public void bindExitButton(Runnable action) {
         exitButton.addListener(closeButton -> action.run());
     }
+
+//    public void bindChangePasswordButton(Runnable action) { changePasswordButton.addListener(changePasswordButton -> action.run());}
 }
