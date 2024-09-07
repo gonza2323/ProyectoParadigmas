@@ -1,33 +1,18 @@
 package bancolafamilia.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimeZone;
-
-import com.googlecode.lanterna.TerminalSize;
+import bancolafamilia.banco.Banco;
+import bancolafamilia.banco.Cliente;
 import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.ComboBox;
 import com.googlecode.lanterna.gui2.DefaultWindowManager;
 import com.googlecode.lanterna.gui2.EmptySpace;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.TextBox;
-import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.swing.SwingTerminal;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 
-import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
+import java.io.IOException;
 
 
 /*
@@ -59,10 +44,11 @@ public class Interfaz {
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
         // this.paginaActual = new LoginPage(banco, gui);
+
         Cliente prueba = new Cliente("Armando", 54213856, "armando", "1234");
         banco.addUser(prueba);
         prueba.setAlias("que.es.eso");
-        banco.depositFunds(prueba, 7500);
+        banco.depositFunds(prueba, 30000000);
         this.paginaActual = new ClientMenuPage(banco, gui, prueba);
     }
 

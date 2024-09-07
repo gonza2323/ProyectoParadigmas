@@ -5,23 +5,29 @@ import java.util.stream.Collectors;
 import java.util.Date;
 
 
-public class Banco {
+public class Banco implements ITransaccion{
 
     private float reservas;
     private float depositos;
     private final ArrayList<User> users;
-    private final Map<Class<? extends Operacion>, List<Operacion>> mapaOperaciones; //Map es una estructura que asocia claves con valores en este caso la key es la subclase de la clase operacion y el value es una lista de instancias de la subclase de la clase operacion - con esto va a ser mas facil buscar operaciones
-
+    private ArrayList<Empleado> empleados;
+    private  Queue<Operacion> operacionesPendientes;
+    private  Queue<Operacion> operacionesAprobadas;
+    //private  Queue<Operacion> operacionesDenegadas; no se si es util
 
     public Banco() {
         reservas = 0.0f;
         depositos = 0.0f;
         this.users = new ArrayList<User>();
-        this.mapaOperaciones = new HashMap<>();
-        crearMapaOperaciones();
+        this.empleados = new ArrayList<>();
+        this.operacionesPendientes = new LinkedList<>();
+        this.operacionesAprobadas = new LinkedList<>();
+
+
 
 
     }
+
 
     public User findUserByUsername(String username) {
         for (User user : users)
@@ -40,6 +46,10 @@ public class Banco {
 
         if (user instanceof Cliente)
             ((Cliente)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
+
+        if (user instanceof Empleado){
+            empleados.add((Empleado) user);
+        }
         
         users.add(user);
     }
@@ -53,20 +63,86 @@ public class Banco {
         return null;
     }
 
-    public boolean transferMoney(Cliente sender, Cliente recipient, float amount) {
-        
+    public void agregarOperacion(Operacion operacion){ //metodo de la interfaz Itransacciones
+        operacionesPendientes.add(operacion);
+    }
+
+    public void aprobarOperacion(Operacion operacion){ //metodo propio
+        operacion.aprobar();
+    }
+
+
+
+    //no se si esta bueno porque tengo que vaciar todo el queue para que se pueda aprobar una operacion
+
+    public void procesarOperacion(Empleado empleado){
+        while (!operacionesPendientes.isEmpty()){
+            Operacion operacion = operacionesPendientes.poll();
+            empleado.receptSolicitud(operacion);
+
+            if (operacion.isAprobada() == null){
+                operacionesPendientes.add(operacion); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
+            } else if (operacion.isAprobada()) {
+                operacionesAprobadas.add(operacion); //se agrega a la lista de op. aprobadas
+            }
+
+
+        }
+    }
+
+    public boolean hayOpEnCola(Queue<Operacion> operacionesPendientes){
+        return (!operacionesPendientes.isEmpty());
+    }
+
+    public boolean solicitudTransferencia(Cliente sender, Cliente recipient, float amount) {
+        //le llega la solicitud al banco de transferir dinero
+
+        //1. el bco se asegura que los datos sean correctos
         if (amount < 0 || sender.getBalance() < amount)
             return false;
 
-        sender.balance -= amount;
-        recipient.balance += amount;
+        //2. el bco crea la operacion
+        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount);
 
-        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount, "done");
+        //3. Verifica si el monto permite transferencia inmediata - transeferencias comunes
+        if (amount <= 1000000) {
+            aprobarOperacion(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
+            this.transferMoney(sender, recipient, amount, transferencia);
+            return true;
+        } else {
+            //3.1 agrega la operacion a la cola de op. pendientes de solicitud
+            this.agregarOperacion(transferencia);
 
-        mapaOperaciones.get(Transferencia.class).add(transferencia); //me falta aplicar el metodo para las otras operaciones y para buscarlas
+            //3.2 verfica si hay operaciones en la cola y si hay se las delega a cada empleado - esto no se si va acá
+            if (this.hayOpEnCola(operacionesPendientes)) {
+                for (Empleado empleado : empleados) {
+                    procesarOperacion(empleado); //en este paso el estado de la transferencia cambia
+                }
+            }
+            //3.3 verifica si el gerente ha aprobado la operacion y hace lo necesario
+            if (transferencia.isAprobada()) {
+                this.transferMoney(sender, recipient, amount, transferencia);
+                return true;
+            } else {
+                return false;
+                //3.3.1 lo guarda en operaciones denegadas - no se si es necesario
+                //para el gerente el proceso se aprobacion de transferencias esta automatizado porque aprueda todas las tranasferencias especiales que son mayores al limite de transferencia del cliente y menores al monto maximo diario que establece el banco que puede transferir un cliente
+                //en operacion.isAprobada() podemos ver directamente el estado
+            }
 
-        return true;
+        }
     }
+
+
+    public void transferMoney(Cliente sender, Cliente recipient, float amount, Operacion transferencia){
+        //3.3.1 se hace la transferencia
+        transferencia.realizarOperacion(sender, amount);
+        //se regista en los movimientos de los dos clientes (sender y recipient)
+        sender.agregarOperacion(transferencia);
+        recipient.agregarOperacion(transferencia);
+
+    }
+
 
     public boolean depositFunds(Cliente client, float amount) {
         if (amount < 0)
@@ -83,12 +159,12 @@ public class Banco {
         return reservas;
     }
 
-    public void crearMapaOperaciones(){
-        mapaOperaciones.put(Transferencia.class, new ArrayList<>());
-        mapaOperaciones.put(Deposito.class, new ArrayList<>());
-        mapaOperaciones.put(Retiro.class, new ArrayList<>());
-        mapaOperaciones.put(Prestamo.class, new ArrayList<>());
-
-
-    }
+//    public void crearMapaOperaciones(){
+//        mapaOperaciones.put(Transferencia.class, new ArrayList<>());
+//        mapaOperaciones.put(Deposito.class, new ArrayList<>());
+//        mapaOperaciones.put(Retiro.class, new ArrayList<>());
+//        mapaOperaciones.put(Prestamo.class, new ArrayList<>());
+//
+//
+//    }
 }

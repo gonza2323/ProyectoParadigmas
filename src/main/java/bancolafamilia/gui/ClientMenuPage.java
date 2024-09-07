@@ -62,7 +62,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.transferMoney(client, recipient, amount);
+
+        boolean success = banco.solicitudTransferencia(client, recipient, amount);
 
         if (success) {
             view.updateBalance(client.getBalance());
@@ -170,6 +171,7 @@ class ClientMenuView extends PageView {
             .showDialog(gui);
     }
 
+
     public void showSuccessMsg() {
         new MessageDialogBuilder()
             .setTitle("")
@@ -186,7 +188,7 @@ class ClientMenuView extends PageView {
         // TODO Auto-generated method stub
         new MessageDialogBuilder()
             .setTitle("ERROR")
-            .setText("Se produjo un error desconocido")
+            .setText("Transferencia denegada") //antes: "Se produjo un error desconocido"
             .build()
             .showDialog(gui);
     }
