@@ -44,6 +44,7 @@ public abstract class PageController<V extends PageView> {
 
     // Método que se llama desde la clase Interfaz para rendeirzar la página
     public final PageController<?> run() {
+        
         view.startUI();  // Renderizar la view
         view.closeView();// Cerrar la página actual
         return nextPage; // Retornamos la siguiente página

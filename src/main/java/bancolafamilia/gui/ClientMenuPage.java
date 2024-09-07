@@ -28,9 +28,11 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
     public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Cliente client) {
-        super(banco, new ClientMenuView(gui, client.getNombre(), client.getBalance()), gui);
+        super(banco, new ClientMenuView(gui, client.getNombre()), gui);
 
         this.client = client;
+
+        view.updateBalance(client.getBalance());
 
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
@@ -97,7 +99,6 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleExitButton() {
-        // TODO Auto-generated method stub
         CambiarPagina(new LoginPage(banco, gui));;
     }
 }
@@ -114,12 +115,10 @@ class ClientMenuView extends PageView {
     private final Button exitButton;
     
 
-    public ClientMenuView(WindowBasedTextGUI gui, String name, float balance) {
+    public ClientMenuView(WindowBasedTextGUI gui, String name) {
         super(gui);
         this.name = name;
         this.balanceIndicator = new Label("");
-        
-        updateBalance(balance);
         
         transferButton = new Button("Transferencia");
         historyButton = new Button("Movimientos");

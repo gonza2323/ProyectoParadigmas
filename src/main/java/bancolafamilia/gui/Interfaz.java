@@ -46,24 +46,20 @@ public class Interfaz {
     public Interfaz(Banco banco) throws IOException {
         
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
-        Terminal terminal;
+        
+        if (isOperatingSystemWindows()) {
+            System.setProperty("sun.java2d.uiScale", "1"); // Corrige texto borroso en pantallas hdpi
+            terminalFactory.setPreferTerminalEmulator(true);
+        }
 
-        if (isOperatingSystemWindows())
-            terminal = terminalFactory.createTerminalEmulator();
-        else
-            terminal = terminalFactory.createTerminal();
-
+        Terminal terminal = terminalFactory.createTerminal();
         this.screen = new TerminalScreen(terminal);
         this.gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLACK));
         
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
         // this.paginaActual = new LoginPage(banco, gui);
-        Cliente prueba = new Cliente("Armando", 54213856, "armando", "1234");
-        banco.addUser(prueba);
-        prueba.setAlias("que.es.eso");
-        banco.depositFunds(prueba, 7500);
-        this.paginaActual = new ClientMenuPage(banco, gui, prueba);
+        this.paginaActual = new LoginPage(banco, gui);
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz
