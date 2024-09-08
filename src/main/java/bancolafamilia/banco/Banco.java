@@ -74,10 +74,11 @@ public class Banco implements IOpBcoCliente {
     }
 
     public void procesarOperacion(Empleado empleado){
-        while (!operacionesPendientes.isEmpty()){
+        int longitud = operacionesPendientes.size();
+        while (longitud > 0){
             Operacion operacion = operacionesPendientes.poll();
             empleado.receptSolicitud(operacion);
-
+            longitud -= 1;
             if (operacion.isAprobada() == null){
                 operacionesPendientes.add(operacion); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
             } else if (operacion.isAprobada()) {

@@ -32,7 +32,7 @@ public class App {
 
         banco.depositFunds(cliente1, 10000);
         banco.depositFunds(cliente2, 2000);
-        banco.depositFunds(cliente3, 5000);
+        banco.depositFunds(cliente3, 50000000);
 
         //Gerente gerente = new Gerente("admin", 1237, "admin", "hunter2");
         banco.addUser(new Gerente("admin", 1237, "admin", "hunter2"));
