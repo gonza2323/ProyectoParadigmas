@@ -6,8 +6,12 @@ public abstract class Empleado extends User {
     }
 
     public abstract void receptSolicitud(Operacion operacion);
-    //este metodo no se si esta bien pero no se como implementar aprobarOperacion solo en las subclases gerente y cajero que son los unicos que se requiere que aprueben operaciones
-    //si hago que implemente la interfaz ITransacciones vana a tener que usar todos los metodos y hay metodos en la interfaz que no deben poder usar los empleados
+    //cajero recibe solicitudes de deposito y retiro - implementa IOpBcoEmpleado
+    //gerente recibe solicitudes de transferencias grandes - implementa IOpBcoCliente
+    //asesor financiero recibe solicitudes para brindar consejo
+    //Agente de bolsa recibe solicitud para invertir en la bolsa
+    //Asistente ejecutivo recibe solicitud del gerente y busca al cliente
+
 
 
 

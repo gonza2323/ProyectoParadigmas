@@ -1,6 +1,6 @@
 package bancolafamilia.banco;
 
-public class Gerente extends Empleado{
+public class Gerente extends Empleado implements IOpBcoEmpleado {
 
 
     public Gerente(String nombre, int dni, String username, String password) {
@@ -16,7 +16,7 @@ public class Gerente extends Empleado{
     }
 
 
-    private void aprobarOperacion(Operacion operacion) {
+    public void aprobarOperacion(Operacion operacion) {
         if (operacion instanceof Transferencia){ //si llego esta solicitud es porque la transferencia supera el monto de una transaferias común
             //el gerente verifica que el monto no supere el monto diario
             if (operacion.getMonto() > Transferencia.montoMax){

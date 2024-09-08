@@ -4,7 +4,7 @@ package bancolafamilia.banco;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Cliente extends User implements ITransaccion {
+public class Cliente extends User implements IOpBcoCliente {
 
     public float balance;
     private String alias;

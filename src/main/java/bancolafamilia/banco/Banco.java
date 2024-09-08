@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 import java.util.Date;
 
 
-public class Banco implements ITransaccion{
+public class Banco implements IOpBcoCliente {
 
     private float reservas;
     private float depositos;
     private final ArrayList<User> users;
     private ArrayList<Empleado> empleados;
-    private  Queue<Operacion> operacionesPendientes;
-    private  Queue<Operacion> operacionesAprobadas;
+    private final Queue<Operacion> operacionesPendientes;
+    private final Queue<Operacion> operacionesAprobadas;
     //private  Queue<Operacion> operacionesDenegadas; no se si es util
 
     public Banco() {
@@ -47,7 +47,7 @@ public class Banco implements ITransaccion{
         if (user instanceof Cliente)
             ((Cliente)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
 
-        if (user instanceof Empleado){
+        if (user instanceof Empleado){ //agregue esto para que se haga la lista de empleados y despues iterar sobre ella en la linea 118
             empleados.add((Empleado) user);
         }
         
@@ -63,6 +63,8 @@ public class Banco implements ITransaccion{
         return null;
     }
 
+    //0. METODOS AUXILIARES PARA OPERACIONES ---------------------------------------------------------------------------
+
     public void agregarOperacion(Operacion operacion){ //metodo de la interfaz Itransacciones
         operacionesPendientes.add(operacion);
     }
@@ -70,10 +72,6 @@ public class Banco implements ITransaccion{
     public void aprobarOperacion(Operacion operacion){ //metodo propio
         operacion.aprobar();
     }
-
-
-
-    //no se si esta bueno porque tengo que vaciar todo el queue para que se pueda aprobar una operacion
 
     public void procesarOperacion(Empleado empleado){
         while (!operacionesPendientes.isEmpty()){
@@ -94,7 +92,9 @@ public class Banco implements ITransaccion{
         return (!operacionesPendientes.isEmpty());
     }
 
-    public boolean solicitudTransferencia(Cliente sender, Cliente recipient, float amount) {
+    //1. TRANSFERENCIAS-------------------------------------------------------------------------------------------------
+
+    public boolean solicitudTransferencia(Cliente sender, Cliente recipient, float amount, String motivo) {
         //le llega la solicitud al banco de transferir dinero
 
         //1. el bco se asegura que los datos sean correctos
@@ -102,7 +102,7 @@ public class Banco implements ITransaccion{
             return false;
 
         //2. el bco crea la operacion
-        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount);
+        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount, motivo);
 
         //3. Verifica si el monto permite transferencia inmediata - transeferencias comunes
         if (amount <= 1000000) {
@@ -143,6 +143,7 @@ public class Banco implements ITransaccion{
 
     }
 
+    //2. DEPOSITOS -----------------------------------------------------------------------------------------------------
 
     public boolean depositFunds(Cliente client, float amount) {
         if (amount < 0)
@@ -159,12 +160,5 @@ public class Banco implements ITransaccion{
         return reservas;
     }
 
-//    public void crearMapaOperaciones(){
-//        mapaOperaciones.put(Transferencia.class, new ArrayList<>());
-//        mapaOperaciones.put(Deposito.class, new ArrayList<>());
-//        mapaOperaciones.put(Retiro.class, new ArrayList<>());
-//        mapaOperaciones.put(Prestamo.class, new ArrayList<>());
-//
-//
-//    }
+
 }

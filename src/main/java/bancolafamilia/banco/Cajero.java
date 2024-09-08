@@ -1,6 +1,6 @@
 package bancolafamilia.banco;
 
-public class Cajero extends Empleado {
+public class Cajero extends Empleado implements IOpBcoEmpleado{
     public Cajero(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
     }
@@ -11,4 +11,8 @@ public class Cajero extends Empleado {
     }
 
 
+    @Override
+    public void aprobarOperacion(Operacion operacion) {
+
+    }
 }

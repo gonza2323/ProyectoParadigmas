@@ -54,12 +54,14 @@ public abstract class Operacion {
 class Transferencia extends Operacion{
 
     private Cliente recipient;
+    private String motivo;
     public static final float montoMax = 10000000; //uso static para la ctte pertenzeca a la clase transferencia (que solo haya una copia de la constante en la memoria) en lugar de que pertenezaca a cada instancia individual de la clase
 
 
-    public Transferencia(Date fecha, Cliente client, Cliente recipient, float monto) {
+    public Transferencia(Date fecha, Cliente client, Cliente recipient, float monto, String motivo) {
         super(fecha, client, monto);
         this.recipient = recipient;
+        this.motivo = motivo;
 
     }
 

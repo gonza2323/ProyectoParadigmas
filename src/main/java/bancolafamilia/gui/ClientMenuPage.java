@@ -48,6 +48,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
+        String motivo = view.requestMotivo();
+
         float amount;
         try {
             amount = Float.parseFloat(view.requestAmount());
@@ -63,7 +65,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         }
 
 
-        boolean success = banco.solicitudTransferencia(client, recipient, amount);
+        boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
         if (success) {
             view.updateBalance(client.getBalance());
@@ -152,6 +154,15 @@ class ClientMenuView extends PageView {
             .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
             .build()
             .showDialog(gui);
+    }
+
+    public String requestMotivo() {
+        return new TextInputDialogBuilder()
+                .setTitle("Descripcion Transferencia")
+                .setDescription("Ingrese una breve descripción")
+                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
+                .build()
+                .showDialog(gui);
     }
 
     public void showNonExistantAliasError() {
