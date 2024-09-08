@@ -1,11 +1,12 @@
 package bancolafamilia;
 
-import java.io.IOException;
-
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
 import bancolafamilia.banco.Gerente;
+import bancolafamilia.banco.AgenteEspecial;
 import bancolafamilia.gui.Interfaz;
+
+import java.io.IOException;
 
 public class App {
     public static void main( String[] args ) throws IOException {
@@ -15,21 +16,34 @@ public class App {
         Cliente cliente2 = new Cliente("Jorge", 1235, "jorge", "1234");
         Cliente cliente3 = new Cliente("Pedro", 1236, "pedro", "1234");
         Cliente cliente4 = new Cliente("Armando", 1237, "armando", "1234");
+
         
         banco.addUser(cliente1);
         banco.addUser(cliente2);
         banco.addUser(cliente3);
         banco.addUser(cliente4);
+
         
         cliente1.setAlias("hola.como.estas");
         cliente2.setAlias("muy.bien.tu");
         cliente3.setAlias("muchas.gracias.chau");
         cliente4.setAlias("que.es.eso");
 
+
         banco.depositFunds(cliente1, 10000);
         banco.depositFunds(cliente2, 2000);
-        banco.depositFunds(cliente3, 5000);
+        banco.depositFunds(cliente3, 50000000);
         banco.depositFunds(cliente4, 7500);
+
+        //PRUEBA AGENTE ESPECIAL------------------------------------
+        //1. lo agregamos como cliente
+        Cliente cliente5 = new Cliente("Carlos", 1238, "carlos", "1234");
+        banco.addUser(cliente5);
+        cliente5.setAlias("mapa.fia.oro"); //alias agente especial
+        //lo agregamos como empleado - para que puedan llegar las solicitudes de los mafiosos
+        banco.addUser(new AgenteEspecial("carlos", 1238, "especial", "hunter3"));
+
+
 
         banco.addUser(new Gerente("admin", 1237, "admin", "hunter2"));
 

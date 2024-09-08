@@ -1,26 +1,15 @@
 package bancolafamilia.gui;
 
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.regex.Pattern;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.LayoutData;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import bancolafamilia.banco.Banco;
+import bancolafamilia.banco.Cliente;
+import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
-import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
     private Cliente client;
@@ -33,7 +22,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         this.client = client;
 
         view.updateBalance(client.getBalance());
-
+        //PageController recibe la genericidad V que hereda de PageView y ahí se define la variable "view" del tipo V
+        //por lo tanto todos los metodos que usa view estan en la ClientMenuView que hereda de Pageview
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
         view.bindLoanButton(() -> handleLoanButton());
@@ -59,6 +49,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
+        String motivo = view.requestMotivo();
+
         float amount;
         try {
             amount = Float.parseFloat(view.requestAmount());
@@ -73,7 +65,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.transferMoney(client, recipient, amount);
+        boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
         if (success) {
             view.updateBalance(client.getBalance());
@@ -152,6 +144,15 @@ class ClientMenuView extends PageView {
             .showDialog(gui);
     }
 
+    public String requestMotivo() {
+        return new TextInputDialogBuilder()
+                .setTitle("Descripcion Transferencia")
+                .setDescription("Ingrese una breve descripción")
+                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
+                .build()
+                .showDialog(gui);
+    }
+
     public void showNonExistantAliasError() {
         new MessageDialogBuilder()
             .setTitle("ERROR")
@@ -185,7 +186,7 @@ class ClientMenuView extends PageView {
         // TODO Auto-generated method stub
         new MessageDialogBuilder()
             .setTitle("ERROR")
-            .setText("Se produjo un error desconocido")
+            .setText("Transferencia Denegada")
             .build()
             .showDialog(gui);
     }
