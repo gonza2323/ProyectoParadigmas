@@ -6,7 +6,7 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
     }
 
     @Override
-    public void receptSolicitud(Operacion operacion) {
+    public void recieveSolicitud(Operacion operacion) {
 
     }
 
@@ -15,4 +15,6 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
     public void aprobarOperacion(Operacion operacion) {
 
     }
+
+
 }

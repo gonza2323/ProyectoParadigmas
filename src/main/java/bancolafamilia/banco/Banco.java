@@ -1,8 +1,11 @@
 package bancolafamilia.banco;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
-import java.util.Date;
 
 
 public class Banco implements IOpBcoCliente {
@@ -77,7 +80,7 @@ public class Banco implements IOpBcoCliente {
         int longitud = operacionesPendientes.size();
         while (longitud > 0){
             Operacion operacion = operacionesPendientes.poll();
-            empleado.receptSolicitud(operacion);
+            empleado.recieveSolicitud(operacion);
             longitud -= 1;
             if (operacion.isAprobada() == null){
                 operacionesPendientes.add(operacion); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
@@ -93,6 +96,8 @@ public class Banco implements IOpBcoCliente {
         return (!operacionesPendientes.isEmpty());
     }
 
+
+
     //1. TRANSFERENCIAS-------------------------------------------------------------------------------------------------
 
     public boolean solicitudTransferencia(Cliente sender, Cliente recipient, float amount, String motivo) {
@@ -103,10 +108,10 @@ public class Banco implements IOpBcoCliente {
             return false;
 
         //2. el bco crea la operacion
-        Transferencia transferencia = new Transferencia(new Date(), sender, recipient, amount, motivo);
+        Transferencia transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
 
         //3. Verifica si el monto permite transferencia inmediata - transeferencias comunes
-        if (amount <= 1000000) {
+        if (amount <= Transferencia.montoInmediata && !isTransferenciaEspecial(recipient)) {
             aprobarOperacion(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
             this.transferMoney(sender, recipient, amount, transferencia);
             return true;
@@ -134,6 +139,15 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
+    private boolean isTransferenciaEspecial(Cliente recipient){
+        String aliasTransEspecial = "mapa.fiar.oro";
+        if (recipient.getAlias().equals(aliasTransEspecial)){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
 
     public void transferMoney(Cliente sender, Cliente recipient, float amount, Operacion transferencia){
         //3.3.1 se hace la transferencia
@@ -160,6 +174,7 @@ public class Banco implements IOpBcoCliente {
     public float getReservas() {
         return reservas;
     }
+
 
 
 }

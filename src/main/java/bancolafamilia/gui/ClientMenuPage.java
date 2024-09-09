@@ -2,13 +2,16 @@ package bancolafamilia.gui;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
+import bancolafamilia.banco.Operacion;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
+import com.googlecode.lanterna.gui2.table.Table;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.regex.Pattern;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
@@ -77,6 +80,9 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
     private void handleHistoryButton() {
         // TODO Auto-generated method stub
+
+        view.showHistory(client.getOperaciones());
+
         MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar MOVIMIENTOS");
     }
 
@@ -95,11 +101,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         CambiarPagina(new LoginPage(banco, gui));;
     }
 
-    /*private void handleChangePasswordButton() {
-        //PageController<?> nextPage;
-        CambiarPagina(new ChangePasswordPage(banco, gui, client));
 
-    }*/
 }
 
 //cuando la clase no tiene modificador de acceso, el acceso por defecto es el "acceso por paquete" o package private lo que quiere decir que la clase solo sera accesible dentro del mismo paquete. O sea, solo puede acceder a ella la clase clientMenuPage
@@ -180,6 +182,7 @@ class ClientMenuView extends PageView {
             .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
             .build()
             .showDialog(gui);
+
     }
 
 
@@ -202,6 +205,50 @@ class ClientMenuView extends PageView {
             .setText("Transferencia denegada") //antes: "Se produjo un error desconocido"
             .build()
             .showDialog(gui);
+    }
+
+    public void showHistory(LinkedList<Operacion> operaciones){
+
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(3));
+        Table<Object> table = new Table<>("Fecha", "Monto", "Tipo");
+
+        int longitud = operaciones.size();
+
+        for(int i = 0; i < longitud; i++){
+
+            String clase = operaciones.get(i).getClass().getSimpleName();
+            String fecha = operaciones.get(i).getFecha().toString();
+            float monto = operaciones.get(i).getMonto();
+
+            table.getTableModel().addRow(new Object[]{fecha,monto, clase});
+
+        }
+
+
+        panel.addComponent(table);
+//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
+//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
+//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
+
+
+        BasicWindow window = new BasicWindow("Historial de Operaciones");
+        window.setComponent(panel);
+//
+        Button closeButton = new Button("Cerrar", new Runnable() {
+            @Override
+            public void run() {
+//
+//                // Cerrar la ventana al hacer clic en el botón
+                window.close();
+            }
+        });
+//
+//
+        panel.addComponent(closeButton);
+
+        gui.addWindowAndWait(window);
+
     }
 
     public void startUI() {

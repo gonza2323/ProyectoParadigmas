@@ -2,13 +2,12 @@ package bancolafamilia.banco;
 
 
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class Cliente extends User implements IOpBcoCliente {
 
     public float balance;
     private String alias;
-    private Queue<Operacion> operaciones;
+    private LinkedList<Operacion> operaciones;
 
     public Cliente(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
@@ -30,5 +29,9 @@ public class Cliente extends User implements IOpBcoCliente {
     public void agregarOperacion(Operacion operacion){
         operaciones.add(operacion);
 
+    }
+
+    public LinkedList<Operacion> getOperaciones() {
+        return operaciones;
     }
 }

@@ -35,10 +35,15 @@ public class App {
         banco.depositFunds(cliente3, 50000000);
 
         //Gerente gerente = new Gerente("admin", 1237, "admin", "hunter2");
-        banco.addUser(new Gerente("admin", 1237, "admin", "hunter2"));
         //banco.addUser(gerente);
-        //banco.addEmpleado(gerente);
-        banco.addUser(new AgenteEspecial("carlos", 1238, "especial", "hunter3"));
+        AgenteEspecial asistente = new AgenteEspecial("carlos", 1238, "especial", "hunter3");
+        banco.addUser(asistente);
+        banco.addUser(new Gerente("admin", 1237, "admin", "hunter2",asistente));
+
+
+
+
+        //banco.addUser(new AgenteEspecial("carlos", 1238, "especial", "hunter3"));
 
         Interfaz interfaz = new Interfaz(banco);
         interfaz.start();

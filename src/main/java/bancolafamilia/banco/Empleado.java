@@ -5,7 +5,8 @@ public abstract class Empleado extends User {
         super(nombre, dni, username, password);
     }
 
-    public abstract void receptSolicitud(Operacion operacion);
+    public abstract void recieveSolicitud(Operacion operacion);
+
     //cajero recibe solicitudes de deposito y retiro - implementa IOpBcoEmpleado
     //gerente recibe solicitudes de transferencias grandes - implementa IOpBcoCliente
     //asesor financiero recibe solicitudes para brindar consejo

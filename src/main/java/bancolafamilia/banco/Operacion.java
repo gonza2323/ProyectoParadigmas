@@ -1,16 +1,17 @@
 package bancolafamilia.banco;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 public abstract class Operacion {
 
-    private Date fecha;
+    private LocalDateTime fecha;
     private Cliente client; //solo los clientes realizan estas operaciones
     private float monto;
     private Boolean aprobada; //es un tipo de objeto envuelto para boolean (tipo de referencia que me permite asignarle como valor inicial null a isAprobada) porque necesito saber cuando la operacion es aprobada, denegada o no se ha visto todavia la solicitud
 
-    public Operacion(Date fecha, Cliente client, float monto) {
+
+    public Operacion(LocalDateTime fecha, Cliente client, float monto) {
         this.fecha = fecha;
         this.client = client;
         this.monto = monto;
@@ -24,6 +25,10 @@ public abstract class Operacion {
 
     public Cliente getCliente() {
         return client;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
     }
 
     public Boolean isAprobada(){
@@ -53,12 +58,13 @@ public abstract class Operacion {
 
 class Transferencia extends Operacion{
 
-    private Cliente recipient;
-    private String motivo;
+    public Cliente recipient;
+    public String motivo;
+    public static final float montoInmediata = 1000000; //monto minimo para transf inmediatas
     public static final float montoMax = 10000000; //uso static para la ctte pertenzeca a la clase transferencia (que solo haya una copia de la constante en la memoria) en lugar de que pertenezaca a cada instancia individual de la clase
 
 
-    public Transferencia(Date fecha, Cliente client, Cliente recipient, float monto, String motivo) {
+    public Transferencia(LocalDateTime fecha, Cliente client, Cliente recipient, float monto, String motivo) {
         super(fecha, client, monto);
         this.recipient = recipient;
         this.motivo = motivo;
@@ -80,7 +86,7 @@ class Transferencia extends Operacion{
 
 class Prestamo extends Operacion{
 
-    public Prestamo(Date fecha, Cliente client, float monto, String estado) {
+    public Prestamo(LocalDateTime fecha, Cliente client, float monto, String estado) {
         super(fecha, client, monto);
     }
 
@@ -97,7 +103,7 @@ class Prestamo extends Operacion{
 
 class Deposito extends Operacion{
 
-    public Deposito(Date fecha, Cliente client, float monto, String estado) {
+    public Deposito(LocalDateTime fecha, Cliente client, float monto, String estado) {
         super(fecha, client, monto);
     }
 
@@ -114,7 +120,7 @@ class Deposito extends Operacion{
 
 class Retiro extends Operacion{
 
-    public Retiro(Date fecha, Cliente client, float monto, String estado) {
+    public Retiro(LocalDateTime fecha, Cliente client, float monto, String estado) {
         super(fecha, client, monto);
     }
 

@@ -6,7 +6,9 @@ public class AsesorFinanciero extends Empleado {
     }
 
     @Override
-    public void receptSolicitud(Operacion operacion) {
+    public void recieveSolicitud(Operacion operacion) {
 
     }
+
+
 }
