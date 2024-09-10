@@ -58,8 +58,7 @@ public class Interfaz {
         
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
-        // this.paginaActual = new LoginPage(banco, gui);
-        this.paginaActual = new LoginPage(banco, gui);
+        this.paginaActual = new StartMenuPage(banco, gui);
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz
