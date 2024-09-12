@@ -103,7 +103,7 @@ class LoginPage extends PageController<LoginView>{
 
     // Método para manejar cuando el usuario aprieta Cerrar
     public void handleCloseButton() {
-        CambiarPagina(null); // Cambiamos de página a null (termina el programa)
+        CambiarPagina(new StartMenuPage(banco, gui)); // Cambiamos de página a null (termina el programa)
     }
 }
 
