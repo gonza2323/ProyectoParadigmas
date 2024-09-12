@@ -82,7 +82,7 @@ class ManagerMenuView extends PageView {
         this.exitButton = new Button("Salir");
     }
 
-    public void startUI() {
+    public void setupUI() {
         // Crea una ventana y le dice que se centre
         BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
         window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,

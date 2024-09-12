@@ -15,8 +15,6 @@ public abstract class Operacion {
         this.fecha = fecha;
         this.client = client;
         this.monto = monto;
-
-
     }
 
     public float getMonto() {

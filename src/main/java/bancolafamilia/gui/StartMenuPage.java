@@ -64,12 +64,11 @@ class StartMenuView extends PageView {
         this.exitButton = new Button("Salir");
     }
 
-    public void startUI() {
-        BasicWindow window = new BasicWindow();
-        window.setHints(Arrays.asList(Window.Hint.CENTERED));
+    public void setupUI() {
+        mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED));
 
         Panel panel = new Panel();
-        window.setComponent(panel);
+        mainWindow.setComponent(panel);
         
         int horizontalMargin = 3;
         panel.setLayoutManager(
@@ -95,8 +94,6 @@ class StartMenuView extends PageView {
         simulateOpsButton.setLayoutData(fill).addTo(panel);
         panel.addComponent(new EmptySpace());
         exitButton.setLayoutData(fill).addTo(panel);
-        
-        gui.addWindowAndWait(window);
     }
 
     public void bindBankLoginButton(Runnable action) {

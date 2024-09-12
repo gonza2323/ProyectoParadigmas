@@ -36,7 +36,7 @@ class CajeroMenuView extends PageView {
         this.name = name;
     }
 
-    public void startUI() {
+    public void setupUI() {
         
     }
 }

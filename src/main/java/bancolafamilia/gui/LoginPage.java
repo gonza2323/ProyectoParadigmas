@@ -150,18 +150,17 @@ class LoginView extends PageView {
     }
 
     // Implementación de setupUI() para LoginView
-    public void startUI() {
+    public void setupUI() {
 
         // Crea una ventana y le dice que se centre
         // Siempre hace falta una ventana (preferentemente solo 1)
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
+        mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
 
         // La ventana solo puede contener un elemento, entonces
         // creamos un "panel", que puede tener muchos objectos organizados de distintas formas
         // En este caso, que organice todo en 2 columnas
         Panel contentPanel = new Panel(new GridLayout(2));
-        window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // Configuramos la separación entre columnas y filas pa que quede lindo
         GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
@@ -219,13 +218,5 @@ class LoginView extends PageView {
                 .setLayoutData(
                     GridLayout.createHorizontallyEndAlignedLayoutData(1)));
 
-        // LO MÁS IMPROTANTE. Finalmente se añade la ventana a la pantalla y espera el input
-        // del usuario. Si no el programa continua y se cierra, ya que la página siguiente
-        // es "null" por defecto.
-        gui.addWindowAndWait(window);
-
-        // La ejecución no continúa hasta que se cierre la ventana, que ocurrirá en la lógica
-        // del controlador cuando este llame a cambiarPagina(PageController). Mientras tanto,
-        // seguirá renderizando la página actual.
     }
 }

@@ -10,8 +10,10 @@ import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 import com.googlecode.lanterna.gui2.table.Table;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
@@ -187,7 +189,9 @@ class ClientMenuView extends PageView {
     }
 
     public void updateBalance(float balance) {
-        balanceIndicator.setText("$ " + new DecimalFormat("#.##").format(balance));
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        String formattedAmount = currencyFormat.format(balance);
+        balanceIndicator.setText("Saldo: " + formattedAmount);
     }
 
     public void showTransferError() {
@@ -202,7 +206,7 @@ class ClientMenuView extends PageView {
     public void showHistory(LinkedList<Operacion> operaciones){
 
         Panel panel = new Panel();
-        panel.setLayoutManager(new GridLayout(3));
+        panel.setLayoutManager(new GridLayout(2));
         Table<Object> table = new Table<>("Fecha", "Monto", "Tipo");
 
         int longitud = operaciones.size();
@@ -233,45 +237,39 @@ class ClientMenuView extends PageView {
         gui.addWindowAndWait(window);
     }
 
-    public void startUI() {
+    public void setupUI() {
         // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
-                                      Window.Hint.FIT_TERMINAL_WINDOW,
-                                      Window.Hint.NO_DECORATIONS));
+        mainWindow.setHints(Arrays.asList(Window.Hint.FIT_TERMINAL_WINDOW,
+                                      Window.Hint.NO_DECORATIONS,
+                                      Window.Hint.FULL_SCREEN));
 
         // Panel
-        Panel contentPanel = new Panel(new GridLayout(2));
-        window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        Panel panel = new Panel();
+        mainWindow.setComponent(panel);
         
         // Configuramos la separación entre columnas y filas pa que quede lindo
-        GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
-        gridLayout.setHorizontalSpacing(1);
-        gridLayout.setVerticalSpacing(1);
+        panel.setLayoutManager(new GridLayout(2)
+            .setHorizontalSpacing(1)
+            .setVerticalSpacing(1)
+            .setTopMarginSize(1)
+            .setLeftMarginSize(2)
+            .setRightMarginSize(2));
+        
+        LayoutData horizontalFill2columns = GridLayout.createHorizontallyFilledLayoutData(2);
+        
         
         // Mensaje de bienvenida
-        Label welcomeMsg = new Label("Bienvenido: " + name);
-        welcomeMsg.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(welcomeMsg);           // Añadir el componente al panel
+        panel.addComponent(
+            new Label("Bienvenido: " + name)
+            .setLayoutData(horizontalFill2columns));
 
         // Balance
-        balanceIndicator.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(balanceIndicator);           // Añadir el componente al panel
+        panel.addComponent(
+            balanceIndicator
+            .setLayoutData(horizontalFill2columns));
 
         // Añadimos linea separadora horizontal
-        contentPanel.addComponent(
+        panel.addComponent(
             new Separator(Direction.HORIZONTAL)
                 .setLayoutData(
                     GridLayout.createHorizontallyFilledLayoutData(2)));
@@ -285,24 +283,21 @@ class ClientMenuView extends PageView {
             1);
 
         // Añadimos los botones creados en el constructor
-        contentPanel.addComponent(
+        panel.addComponent(
             transferButton
                 .setLayoutData(leftJustify));
-        contentPanel.addComponent(
+        panel.addComponent(
             historyButton
                 .setLayoutData(leftJustify));
-        contentPanel.addComponent(
+        panel.addComponent(
             loanButton
                 .setLayoutData(leftJustify));
-        contentPanel.addComponent(
+        panel.addComponent(
             adviceButton
                 .setLayoutData(leftJustify));
-        contentPanel.addComponent(
+        panel.addComponent(
             exitButton
                 .setLayoutData(leftJustify));
-
-        // Agregar ventana a la gui
-        gui.addWindowAndWait(window);
     }
 
     public void bindTransferButton(Runnable action) {

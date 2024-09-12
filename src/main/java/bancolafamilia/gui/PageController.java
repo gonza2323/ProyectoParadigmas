@@ -1,6 +1,7 @@
 package bancolafamilia.gui;
 
 import java.lang.ModuleLayer.Controller;
+import java.time.LocalDateTime;
 
 import javax.swing.text.View;
 
@@ -42,10 +43,16 @@ public abstract class PageController<V extends PageView> {
         this.nextPage = null;
     }
 
-    // Método que se llama desde la clase Interfaz para rendeirzar la página
+    // Método que se llama desde la clase Interfaz para renderizar la página
     public final PageController<?> run() {
         
-        view.startUI();  // Renderizar la view
+        view.setup();  // Inicializar la view
+        view.updateTimeBar(LocalDateTime.now());
+        
+        setupController();
+
+        view.mainloop();
+
         view.closeView();// Cerrar la página actual
         return nextPage; // Retornamos la siguiente página
     };
@@ -56,4 +63,6 @@ public abstract class PageController<V extends PageView> {
         this.nextPage = nextPage;
         view.closeView(); // Cierra la página actual
     }
+
+    protected void setupController() { }
 }
