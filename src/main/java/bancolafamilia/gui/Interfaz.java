@@ -3,6 +3,15 @@ package bancolafamilia.gui;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
 import com.googlecode.lanterna.TextColor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
+
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.bundle.LanternaThemes;
+import com.googlecode.lanterna.graphics.ThemeDefinition;
 import com.googlecode.lanterna.gui2.DefaultWindowManager;
 import com.googlecode.lanterna.gui2.EmptySpace;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
@@ -13,6 +22,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import bancolafamilia.banco.Banco;
 
 
 /*
@@ -31,25 +41,21 @@ public class Interfaz {
     public Interfaz(Banco banco) throws IOException {
         
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
-        Terminal terminal;
+        
+        // Si estamos en Windows, cambiamos algunas configuraciones
+        if (isOperatingSystemWindows()) {
+            System.setProperty("sun.java2d.uiScale", "1"); // Corrige texto borroso en pantallas hdpi
+            terminalFactory.setPreferTerminalEmulator(true); // Usar emulador de terminal
+        }
 
-        if (isOperatingSystemWindows())
-            terminal = terminalFactory.createTerminalEmulator();
-        else
-            terminal = terminalFactory.createTerminal();
-
+        Terminal terminal = terminalFactory.createTerminal();
         this.screen = new TerminalScreen(terminal);
         this.gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLACK));
-        
+        gui.setTheme(LanternaThemes.getRegisteredTheme("defrost"));
+
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
-        // this.paginaActual = new LoginPage(banco, gui);
-
-        Cliente prueba = new Cliente("Armando", 54213856, "armando", "1234");
-        banco.addUser(prueba);
-        prueba.setAlias("que.es.eso");
-        banco.depositFunds(prueba, 30000000);
-        this.paginaActual = new ClientMenuPage(banco, gui, prueba);
+        this.paginaActual = new StartMenuPage(banco, gui);
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz

@@ -20,17 +20,16 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
     public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Cliente client) {
-        super(banco, new ClientMenuView(gui, client.getNombre(), client.getBalance()), gui);
+        super(banco, new ClientMenuView(gui, client.getNombre()), gui);
 
         this.client = client;
-        //PageController recibe la genericidad V que hereda de PageView y ahí se define la variable "view" del tipo V
-        //por lo tanto todos los metodos que usa view estan en la ClientMenuView que hereda de Pageview
-        view.bindTransferButton(() -> handleTransferButton()); //handleTransferButton() es el action.run() de la linea 266
+
+        view.updateBalance(client.getBalance());
+        view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
         view.bindLoanButton(() -> handleLoanButton());
         view.bindAdviceButton(() -> handleAdviceButton());
         view.bindExitButton(() -> handleExitButton());
-        //view.bindChangePasswordButton(() -> handleChangePasswordButton());
     }
 
     private void handleTransferButton() {
@@ -79,11 +78,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleHistoryButton() {
-        // TODO Auto-generated method stub
-
         view.showHistory(client.getOperaciones());
-
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar MOVIMIENTOS");
     }
 
     private void handleLoanButton() {
@@ -97,7 +92,6 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleExitButton() {
-        // TODO Auto-generated method stub
         CambiarPagina(new LoginPage(banco, gui));;
     }
 
@@ -118,12 +112,10 @@ class ClientMenuView extends PageView {
     //private final Button changePasswordButton;
     
 
-    public ClientMenuView(WindowBasedTextGUI gui, String name, float balance) {
+    public ClientMenuView(WindowBasedTextGUI gui, String name) {
         super(gui);
         this.name = name;
         this.balanceIndicator = new Label("");
-        
-        updateBalance(balance);
         
         transferButton = new Button("Transferencia");
         historyButton = new Button("Movimientos");
@@ -222,33 +214,23 @@ class ClientMenuView extends PageView {
             float monto = operaciones.get(i).getMonto();
 
             table.getTableModel().addRow(new Object[]{fecha,monto, clase});
-
         }
 
 
         panel.addComponent(table);
-//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
-//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
-//        table.getTableModel().addRow("2024-09-01", "$1000", "Juan Pérez");
 
 
         BasicWindow window = new BasicWindow("Historial de Operaciones");
         window.setComponent(panel);
-//
         Button closeButton = new Button("Cerrar", new Runnable() {
             @Override
             public void run() {
-//
-//                // Cerrar la ventana al hacer clic en el botón
                 window.close();
             }
         });
-//
-//
+
         panel.addComponent(closeButton);
-
         gui.addWindowAndWait(window);
-
     }
 
     public void startUI() {
@@ -318,9 +300,6 @@ class ClientMenuView extends PageView {
         contentPanel.addComponent(
             exitButton
                 .setLayoutData(leftJustify));
-//        contentPanel.addComponent(
-//                changePasswordButton.setLayoutData(leftJustify)
-//        );
 
         // Agregar ventana a la gui
         gui.addWindowAndWait(window);
@@ -345,6 +324,4 @@ class ClientMenuView extends PageView {
     public void bindExitButton(Runnable action) {
         exitButton.addListener(closeButton -> action.run());
     }
-
-//    public void bindChangePasswordButton(Runnable action) { changePasswordButton.addListener(changePasswordButton -> action.run());}
 }
