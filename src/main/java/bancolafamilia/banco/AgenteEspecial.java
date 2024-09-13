@@ -29,6 +29,8 @@ public class AgenteEspecial extends Empleado {
 
     protected void recieveTarea(Cliente cliente){
         clientesPendientes.add(cliente);
+        cliente.setFlagSolicitud(true); //activamos el flag para que en la ventana de mensajes del cliente se encuentre la notifcaion pidiendo el monto que desea lavar -> es como que el agente especial le envia un mensaje al cliente al activar su flag
+
         //el agente se comunica con el cliente y genera un documento en el que se encuentra el cliente y el monto que quiere lavar
 
     }

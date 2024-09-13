@@ -50,9 +50,16 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
         //3.1 revisa si el cliente que quiere hacer el deposito que excede el monto maximo es el mafioso que el espera
         DocumentoClienteEspecial document = findDocument(operacion);
 
-        if (document == null && operacion.getMonto() <= Deposito.montoMax){
+        if (document == null){
+
             //3.2 Si no encuentra el docuemnto asociado, aprueba la operacion solo si no el excede el monto max permitido
-            operacion.aprobar();
+            if (operacion.getMonto() <= Deposito.montoMax){
+                operacion.aprobar();
+            } else {
+                operacion.denegar();
+            }
+
+
         } else {
 
             //3.3 si lo encuentra, lo saca de su lista de documentos porque ya sabe que el cliente fue a hacer el deposito
@@ -65,7 +72,7 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
             }
             operacion.aprobar(); //aprueba la operacion
         }
-        operacion.denegar(); //deniga en caso de que la operacion supere el monto max y el cliente no se mafioso
+
     }
 
 
