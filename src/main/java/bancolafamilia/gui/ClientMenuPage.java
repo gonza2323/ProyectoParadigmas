@@ -32,7 +32,9 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         view.updateBalance(client.getBalance());
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
+        view.bindAliasButton(() -> handleAliasButton());
         view.bindLoanButton(() -> handleLoanButton());
+        view.bindBrokerButton(() -> handleBrokerButton());
         view.bindAdviceButton(() -> handleAdviceButton());
         view.bindExitButton(() -> handleExitButton());
     }
@@ -88,9 +90,19 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
     }
 
+    private void handleAliasButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar CONSULTA ALIAS");
+    }
+
     private void handleLoanButton() {
         // TODO Auto-generated method stub
         MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar PRESTAMOS");
+    }
+
+    private void handleBrokerButton() {
+        // TODO Auto-generated method stub
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar BOLSA");
     }
 
     private void handleAdviceButton() {
@@ -113,7 +125,9 @@ class ClientMenuView extends PageView {
 
     private final Button transferButton;
     private final Button historyButton;
+    private final Button aliasButton;
     private final Button loanButton;
+    private final Button brokerButton;
     private final Button adviceButton;
     private final Button exitButton;
     //private final Button changePasswordButton;
@@ -126,84 +140,79 @@ class ClientMenuView extends PageView {
         
         transferButton = new Button("Transferencia");
         historyButton = new Button("Movimientos");
+        aliasButton = new Button("Consultar alias");
         loanButton = new Button("Préstamos");
+        brokerButton = new Button("Operar en bolsa");
         adviceButton = new Button("Asesoramiento");
         //changePasswordButton = new Button("Cambiar contraseña");
         exitButton = new Button("Salir");
     }
 
-    public void showCantTransferToSelfError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("No puede transferirse a sí mismo")
-            .build()
-            .showDialog(gui);
-    }
+    public void startUI() {
+        // Crea una ventana y le dice que se centre
+        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
+        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+                                      Window.Hint.FIT_TERMINAL_WINDOW,
+                                      Window.Hint.NO_DECORATIONS));
 
-    public void showInsufficientFundsError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Fondos insuficientes")
-            .build()
-            .showDialog(gui);
-    }
+        // Panel
+        Panel panel = new Panel(
+            new GridLayout(2)
+                .setHorizontalSpacing(1)
+                .setVerticalSpacing(1));
+        window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        
+        // configuración layout
+        LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
+        
+        // Mensaje de bienvenida
+        Label welcomeMsg = new Label("Bienvenido: " + name);
+        welcomeMsg.setLayoutData(horizontalFill);
+        panel.addComponent(welcomeMsg);
 
-    public String requestAlias() {
-        return new TextInputDialogBuilder()
-            .setTitle("TRANSFERENCIA")
-            .setDescription("Ingrese el alias del destinatario")
-            .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
-            .build()
-            .showDialog(gui);
-    }
+        // Balance
+        balanceIndicator.setLayoutData(horizontalFill);
+        panel.addComponent(balanceIndicator);
 
-    public String requestMotivo() {
-        return new TextInputDialogBuilder()
-                .setTitle("Descripcion Transferencia")
-                .setDescription("Ingrese una breve descripción")
-                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
-                .build()
-                .showDialog(gui);
-    }
+        // Añadimos linea separadora horizontal
+        panel.addComponent(
+            new Separator(Direction.HORIZONTAL)
+                .setLayoutData(horizontalFill));
+        
+        // layout botones
+        LayoutData leftJustify = GridLayout.createLayoutData(
+            GridLayout.Alignment.BEGINNING,
+            GridLayout.Alignment.BEGINNING,
+            true,
+            false,
+            2,
+            1);
 
-    public void showNonExistantAliasError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Alias inexistente")
-            .build()
-            .showDialog(gui);
-    }
+        // Añadimos los botones creados en el constructor
+        panel.addComponent(
+            transferButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            historyButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            aliasButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            loanButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            brokerButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            adviceButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            exitButton
+                .setLayoutData(leftJustify));
 
-    public String requestAmount() {
-        return new TextInputDialogBuilder()
-            .setTitle("TRANSFERENCIA")
-            .setDescription("Ingrese el monto a transferir")
-            .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
-            .build()
-            .showDialog(gui);
-
-    }
-
-
-    public void showSuccessMsg() {
-        new MessageDialogBuilder()
-            .setTitle("")
-            .setText("Transferencia exitosa")
-            .build()
-            .showDialog(gui);
-    }
-
-    public void updateBalance(float balance) {
-        balanceIndicator.setText("$ " + new DecimalFormat("#.##").format(balance));
-    }
-
-    public void showTransferError() {
-        // TODO Auto-generated method stub
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Transferencia denegada") //antes: "Se produjo un error desconocido"
-            .build()
-            .showDialog(gui);
+        // Agregar ventana a la gui
+        gui.addWindowAndWait(window);
     }
 
     public void showHistory(LinkedList<Operacion> operaciones){
@@ -250,76 +259,68 @@ class ClientMenuView extends PageView {
         gui.addWindowAndWait(window);
     }
 
-    public void startUI() {
-        // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
-                                      Window.Hint.FIT_TERMINAL_WINDOW,
-                                      Window.Hint.NO_DECORATIONS));
+    public void updateBalance(float balance) {
+        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        balanceIndicator.setText(decimalFormat.format(balance));
+    }
 
-        // Panel
-        Panel contentPanel = new Panel(new GridLayout(2));
-        window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
-        
-        // Configuramos la separación entre columnas y filas pa que quede lindo
-        GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
-        gridLayout.setHorizontalSpacing(1);
-        gridLayout.setVerticalSpacing(1);
-        
-        // Mensaje de bienvenida
-        Label welcomeMsg = new Label("Bienvenido: " + name);
-        welcomeMsg.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(welcomeMsg);           // Añadir el componente al panel
+    public String requestAlias() {
+        return new TextInputDialogBuilder()
+            .setTitle("TRANSFERENCIA")
+            .setDescription("Ingrese el alias del destinatario")
+            .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
+            .build()
+            .showDialog(gui);
+    }
 
-        // Balance
-        balanceIndicator.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(balanceIndicator);           // Añadir el componente al panel
+    public String requestMotivo() {
+        return new TextInputDialogBuilder()
+                .setTitle("Descripcion Transferencia")
+                .setDescription("Ingrese una breve descripción")
+                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
+                .build()
+                .showDialog(gui);
+    }    
 
-        // Añadimos linea separadora horizontal
-        contentPanel.addComponent(
-            new Separator(Direction.HORIZONTAL)
-                .setLayoutData(
-                    GridLayout.createHorizontallyFilledLayoutData(2)));
-        
-        LayoutData leftJustify = GridLayout.createLayoutData(
-            GridLayout.Alignment.BEGINNING,
-            GridLayout.Alignment.BEGINNING,
-            true,
-            false,
-            2,
-            1);
+    public String requestAmount() {
+        return new TextInputDialogBuilder()
+            .setTitle("TRANSFERENCIA")
+            .setDescription("Ingrese el monto a transferir")
+            .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
+            .build()
+            .showDialog(gui);
+    }
 
-        // Añadimos los botones creados en el constructor
-        contentPanel.addComponent(
-            transferButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            historyButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            loanButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            adviceButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            exitButton
-                .setLayoutData(leftJustify));
+    public void showNonExistantAliasError() {
+        showError("Alias inexistente");
+    }
 
-        // Agregar ventana a la gui
-        gui.addWindowAndWait(window);
+    public void showCantTransferToSelfError() {
+        showError("No puede transferirse a sí mismo");
+    }
+
+    public void showInsufficientFundsError() {
+        showError("Fondos insuficientes");
+    }
+
+    public void showTransferError() {
+        showError("Transferencia denegada");
+    }
+
+    public void showSuccessMsg() {
+        new MessageDialogBuilder()
+            .setTitle("")
+            .setText("Transferencia exitosa")
+            .build()
+            .showDialog(gui);
+    }
+    
+    private void showError(String errorMsg) {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText(errorMsg) //antes: "Se produjo un error desconocido"
+            .build()
+            .showDialog(gui);
     }
 
     public void bindTransferButton(Runnable action) {
@@ -330,8 +331,16 @@ class ClientMenuView extends PageView {
         historyButton.addListener(historyButton -> action.run());
     }
 
+    public void bindAliasButton(Runnable action) {
+        aliasButton.addListener(aliasButton -> action.run());
+    }
+
     public void bindLoanButton(Runnable action) {
         loanButton.addListener(loanButton -> action.run());
+    }
+
+    public void bindBrokerButton(Runnable action) {
+        brokerButton.addListener(brokerButton -> action.run());
     }
 
     public void bindAdviceButton(Runnable action) {
