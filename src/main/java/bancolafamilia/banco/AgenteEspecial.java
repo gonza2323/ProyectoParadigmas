@@ -6,11 +6,15 @@ import java.util.Random;
 
 public class AgenteEspecial extends Empleado {
 
-    public static final float montoMaxOpEspecial = 600000000;
+    //montoMaxEspecial: monto maximo que se puede aceptar para lavar plata
+    public static final float montoMaxOpEspecial = 700000000;
 
+    //clientesPendientes: aqui se almacenan los clienetes que hicieron la transferencia especial pero aun no han avisado el monto que quiere lavar - no se si es necesaria pero la dejo por las dudas!
     private LinkedList<Cliente> clientesPendientes;
-    private LinkedList<DocumentoCliente> activosEnProceso;
-    //clientes en proceso - creo que esta lista y la anterior deberian ir en bco
+
+    //activosEnProceso: es una lista con dcoumentos creados por el agente especial para mandarselos al cajero y para que el gerente pueda llevar el control de lo que se esta haciendo
+    private LinkedList<DocumentoClienteEspecial> activosEnProceso;
+
 
 
     public AgenteEspecial(String nombre, int dni, String username, String password) {
@@ -21,84 +25,55 @@ public class AgenteEspecial extends Empleado {
     }
 
     @Override
-    public void recieveSolicitud(Operacion operacion) { //este metodo es solo para cuando se necesite que el agente especial apruebe una operacion
-    }
+    public void recieveSolicitud(Operacion operacion) {}
 
     protected void recieveTarea(Cliente cliente){
-        //hay que manejar el caso para el cual el cliente ya esta en la lista
-        clientesPendientes.add(cliente); //en esta lista se van almacenando los clientes que quieren lavar
-        //1. el cliente va recibir un mensaje del agente especial en el que le pide el monto que quiere lavar
-
-
-
-         //el agente se comunica con el cliente y genera un documento en el que se encuentra el cliente y el monto que quiere lavar
+        clientesPendientes.add(cliente);
+        //el agente se comunica con el cliente y genera un documento en el que se encuentra el cliente y el monto que quiere lavar
 
     }
 
-    public void registarDatosTransaccion(Cliente client, float amount){
 
-        DocumentoCliente document = new DocumentoCliente(client, amount);
+    //Se sabe que el agente proceso la transaccion cuando devuelve la caja a la que tiene que ir el cliente
+    public Cajero procesarTransaccionEspecial(Cliente client, float amount, ArrayList<Cajero> cajerosDisponibles){
+        //1. cuando el bco llama a este metodo es porque ya ha aprobado el monto a lavar que solicito el cliente
+
+        //2. El agente manipula al cajero
+        Cajero cajero = manipularCajero(cajerosDisponibles);
+
+        //3. crea el documento en el registra: cliente, monto y la caja a la que va a ir.
+        DocumentoClienteEspecial especialDocument = new DocumentoClienteEspecial(client, amount, cajero.getCaja());
+
+        //4. le envia el documento al cajero para que sepa que cliente va a ir y el monto que va a depositar
+        sendDocumentCajero(cajero,especialDocument);
+
+        //5. saca al cliente de la lista de pendientes porque se comunicaron
         clientesPendientes.remove(client);
-        activosEnProceso.add(document); //esta linkedlist sirve para que el gerente sepa que tiene que supervisar
+
+        //6. registra el documento en la lista de los activos que esta lavando - esta lista tambien sirve para que el gerente sepa los movimientos que tiene que supervisar
+        activosEnProceso.add(especialDocument);
+        return cajero;
     }
 
-    public void operar(ArrayList<Empleado> listaEmpleados){
-
-    }
-
-
-
-    private int manipularCajero(LinkedList<Cajero> cajeros){
-        //selecciona aleatoriamente el cajero manipulado
+    public Cajero manipularCajero(ArrayList<Cajero> cajerosDisponibles){ //aleatoriamente se selcciona un cajero de la lista de cajerosdisponibles
         Random random = new Random();
-        int randomIndex = random.nextInt();
-        int randomElement = cajeros.get(randomIndex).getCaja();
-        return randomElement;
+        int randomIndex = random.nextInt(cajerosDisponibles.size());
+        Cajero cajero = cajerosDisponibles.get(randomIndex);
+        return cajero;
     }
 
+    public void sendDocumentCajero(Cajero cajero, DocumentoClienteEspecial document){
+        cajero.recieveDocument(document);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-    public LinkedList<DocumentoCliente> getActivosEnProceso() {
+    public LinkedList<DocumentoClienteEspecial> getActivosEnProceso() {
         return activosEnProceso;
     }
 }
 
 
 
-    class DocumentoCliente {
-        private Cliente client;
-        private float amount;
 
-        public DocumentoCliente(Cliente client, float amount) {
-            this.client = client;
-            this.amount = amount;
-
-        }
-
-        public float getAmount() {
-            return amount;
-        }
-
-        public Cliente getClient() {
-            return client;
-        }
-
-
-
-
-
-
-    }
 
 
 
