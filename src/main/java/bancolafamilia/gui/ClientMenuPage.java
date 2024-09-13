@@ -30,6 +30,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         this.client = client;
 
         view.updateBalance(client.getBalance());
+        view.updateDeuda(client.getDeuda());
+
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
         view.bindAliasButton(() -> handleAliasButton());
@@ -85,14 +87,11 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleHistoryButton() {
-        //view.showHistory(client.getOperaciones());
         view.showHistory(banco.getOperacionesCliente(client));
-
     }
 
     private void handleAliasButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar CONSULTA ALIAS");
+        view.showUserAlias(client.getAlias());
     }
 
     private void handleLoanButton() {
@@ -122,6 +121,7 @@ class ClientMenuView extends PageView {
     
     private final String name;
     private final Label balanceIndicator;
+    private final Label deudaIndicator;
 
     private final Button transferButton;
     private final Button historyButton;
@@ -137,6 +137,7 @@ class ClientMenuView extends PageView {
         super(gui);
         this.name = name;
         this.balanceIndicator = new Label("");
+        this.deudaIndicator = new Label("");
         
         transferButton = new Button("Transferencia");
         historyButton = new Button("Movimientos");
@@ -144,18 +145,17 @@ class ClientMenuView extends PageView {
         loanButton = new Button("Préstamos");
         brokerButton = new Button("Operar en bolsa");
         adviceButton = new Button("Asesoramiento");
-        //changePasswordButton = new Button("Cambiar contraseña");
         exitButton = new Button("Salir");
     }
 
     public void startUI() {
-        // Crea una ventana y le dice que se centre
+        // crea una ventana y le dice que se centre
         BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
         window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
                                       Window.Hint.FIT_TERMINAL_WINDOW,
                                       Window.Hint.NO_DECORATIONS));
 
-        // Panel
+        // panel
         Panel panel = new Panel(
             new GridLayout(2)
                 .setHorizontalSpacing(1)
@@ -170,9 +170,12 @@ class ClientMenuView extends PageView {
         welcomeMsg.setLayoutData(horizontalFill);
         panel.addComponent(welcomeMsg);
 
-        // Balance
+        // Balance y deuda
         balanceIndicator.setLayoutData(horizontalFill);
         panel.addComponent(balanceIndicator);
+
+        deudaIndicator.setLayoutData(horizontalFill);
+        panel.addComponent(deudaIndicator);
 
         // Añadimos linea separadora horizontal
         panel.addComponent(
@@ -261,7 +264,12 @@ class ClientMenuView extends PageView {
 
     public void updateBalance(float balance) {
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        balanceIndicator.setText(decimalFormat.format(balance));
+        balanceIndicator.setText("Saldo: " + decimalFormat.format(balance));
+    }
+
+    public void updateDeuda(float deuda) {
+        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        deudaIndicator.setText("Deuda: " + decimalFormat.format(deuda));
     }
 
     public String requestAlias() {
@@ -291,6 +299,22 @@ class ClientMenuView extends PageView {
             .showDialog(gui);
     }
 
+    public void showSuccessMsg() {
+        new MessageDialogBuilder()
+            .setTitle("")
+            .setText("Transferencia exitosa")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showUserAlias(String alias) {
+        new MessageDialogBuilder()
+            .setTitle("")
+            .setText("Su alias es:\n" + alias)
+            .build()
+            .showDialog(gui);
+    }
+
     public void showNonExistantAliasError() {
         showError("Alias inexistente");
     }
@@ -307,18 +331,10 @@ class ClientMenuView extends PageView {
         showError("Transferencia denegada");
     }
 
-    public void showSuccessMsg() {
-        new MessageDialogBuilder()
-            .setTitle("")
-            .setText("Transferencia exitosa")
-            .build()
-            .showDialog(gui);
-    }
-    
     private void showError(String errorMsg) {
         new MessageDialogBuilder()
             .setTitle("ERROR")
-            .setText(errorMsg) //antes: "Se produjo un error desconocido"
+            .setText(errorMsg)
             .build()
             .showDialog(gui);
     }

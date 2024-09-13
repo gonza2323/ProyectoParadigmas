@@ -257,18 +257,12 @@ public class Banco implements IOpBcoCliente {
     }
 
     public void depositFunds(Cliente client, float amount, Operacion deposito) {
-        deposito.realizarOperacion(client,amount);
+        deposito.realizarOperacion(client, amount);
         this.reservas += amount;
         this.depositos += amount;
     }
-    //hay que actualizar el app.java porque esta usando depositFunds
-
-
 
     public float getReservas() {
         return reservas;
     }
-
-
-
 }
