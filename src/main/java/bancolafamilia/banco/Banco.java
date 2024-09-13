@@ -210,8 +210,6 @@ public class Banco implements IOpBcoCliente {
         if (amount <= 0 || amount > AgenteEspecial.montoMaxOpEspecial) {
             return false;
         }
-
-        client.setFlagSolicitud(false); //desactivamos el flag para que en la ventana de mensajes del cliente no haya ninguna notificacion
         return true;
 
     }
@@ -238,7 +236,7 @@ public class Banco implements IOpBcoCliente {
             this.aprobarOperacion(deposito);
             agregarOperacion(deposito, operacionesAprobadas);
             this.depositFunds(client, amount, deposito);
-            return false;
+            return true;
         } else {
             agregarOperacion(deposito, operacionesPendientes);
             if (this.hayOpEnCola(operacionesPendientes)) {
