@@ -49,12 +49,7 @@ public abstract class Operacion {
 
 }
 
-/*class Transferencia extends Operacion{
-
-    public Transferencia(Date fecha, Cliente client, float monto, String estado) {
-        super(fecha, client, monto, estado);
-    }
-}*/
+//la constante montoMax se usa en todas las subclases pero no se define en la clase abstracta porque su valor varia para cada una de las subclases
 
 class Transferencia extends Operacion{
 
@@ -86,7 +81,7 @@ class Transferencia extends Operacion{
 
 class Prestamo extends Operacion{
 
-    public Prestamo(LocalDateTime fecha, Cliente client, float monto, String estado) {
+    public Prestamo(LocalDateTime fecha, Cliente client, float monto) {
         super(fecha, client, monto);
     }
 
@@ -103,7 +98,9 @@ class Prestamo extends Operacion{
 
 class Deposito extends Operacion{
 
-    public Deposito(LocalDateTime fecha, Cliente client, float monto, String estado) {
+    public static final float montoMax = 17000000;
+
+    public Deposito(LocalDateTime fecha, Cliente client, float monto) {
         super(fecha, client, monto);
     }
 
@@ -120,13 +117,15 @@ class Deposito extends Operacion{
 
 class Retiro extends Operacion{
 
-    public Retiro(LocalDateTime fecha, Cliente client, float monto, String estado) {
+    public static final float montoMax = 1000000;
+
+    public Retiro(LocalDateTime fecha, Cliente client, float monto) {
         super(fecha, client, monto);
     }
 
     @Override
     public void realizarOperacion(Cliente cliente, float amount) {
-
+        cliente.balance -= amount;
     }
 
     @Override

@@ -78,7 +78,9 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleHistoryButton() {
-        view.showHistory(client.getOperaciones());
+        //view.showHistory(client.getOperaciones());
+        view.showHistory(banco.getOperacionesCliente(client));
+
     }
 
     private void handleLoanButton() {

@@ -1,17 +1,17 @@
 package bancolafamilia.banco;
 
 
-import java.util.LinkedList;
-
-public class Cliente extends User implements IOpBcoCliente {
+public class Cliente extends User { //implements IOpBcoCliente
 
     public float balance;
     private String alias;
-    private LinkedList<Operacion> operaciones;
+    public boolean flagSolicitud  = false; //esta variable me va a permitir saber que en el client menu page el agente especial le tiene que preguntar al cliente el monto que quiere lavar
+     //en esta variable vamos a almacenar el monto que el cliente podria estar lavando
+    public AgenteEspecial agenteEspecial; //el agente especial es intermediario entre cliente y banco
 
     public Cliente(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
-        this.operaciones = new LinkedList<>();
+
     }
 
     public float getBalance() {
@@ -26,12 +26,15 @@ public class Cliente extends User implements IOpBcoCliente {
         this.alias = alias;
     }
 
-    public void agregarOperacion(Operacion operacion){
-        operaciones.add(operacion);
+    public void setFlagSolicitud(boolean flagSolicitud) {
+        this.flagSolicitud = flagSolicitud;
+        //cuando cambia a false, el cliente ya ha indicado el monto que quiere lavar
 
     }
 
-    public LinkedList<Operacion> getOperaciones() {
-        return operaciones;
+    public void setAgenteEspecial(Empleado agenteEspecial) {
+        this.agenteEspecial = (AgenteEspecial) agenteEspecial;
     }
 }
+
+

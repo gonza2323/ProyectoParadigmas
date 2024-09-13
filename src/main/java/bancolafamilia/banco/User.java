@@ -19,12 +19,7 @@ public abstract class User {
     public int dni() { return dni; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
-//    public boolean setPassword(String newPassword){ //falta implementarlo en la gui
-//        if (newPassword.equals(this.password)){
-//            return false;
-//        }else{
-//            this.password = newPassword;
-//            return true;
-//        }
-//    }
+
+    public int getDni() { return dni;
+    }
 }
