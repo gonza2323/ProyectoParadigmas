@@ -3,7 +3,7 @@ package bancolafamilia.banco;
 public class Gerente extends Empleado implements IOpBcoEmpleado {
 
     public static final String motivoEspecial = "honorarios";
-    public static final int montoEspecial = 20;
+    public static final int montoEspecial = 20; //monto maximo que debe transferir el mafioso al agente especial
     private static AgenteEspecial asistente; //tiene un "asistente ejecutivo que es el que hace las tareas de lavado "
 
 
@@ -44,7 +44,9 @@ public class Gerente extends Empleado implements IOpBcoEmpleado {
 
 
     private void delegarTarea(AgenteEspecial asistente, Cliente cliente){
-        asistente.recieveTarea(cliente);
+        cliente.setFlagSolicitud(true); //el gerente setea esta variable para que saber que el cliente esta a la espera de que se comuniquen con el
+        cliente.setAgenteEspecial(asistente); //le asigna al cliente el agente especial que lo va a atender
+        asistente.recieveTarea(cliente); //le envia la solicitud al agente especial
     }
 
 

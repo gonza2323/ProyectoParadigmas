@@ -3,7 +3,7 @@ package bancolafamilia.banco;
 public interface IOpBcoCliente {
     //esta interfaz la implementan el cliente y el banco
 
-    void agregarOperacion(Operacion operacion);
+    //void agregarOperacion(Operacion operacion, Queue<Operacion> list);
 
     //NOTAS:
 

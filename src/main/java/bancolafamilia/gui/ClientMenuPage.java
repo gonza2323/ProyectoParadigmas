@@ -1,5 +1,6 @@
 package bancolafamilia.gui;
 
+
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cliente;
 import bancolafamilia.banco.Operacion;
@@ -82,7 +83,9 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleHistoryButton() {
-        view.showHistory(client.getOperaciones());
+        //view.showHistory(client.getOperaciones());
+        view.showHistory(banco.getOperacionesCliente(client));
+
     }
 
     private void handleLoanButton() {
