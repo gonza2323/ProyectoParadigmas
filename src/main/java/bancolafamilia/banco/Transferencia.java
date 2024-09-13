@@ -23,8 +23,14 @@ public class Transferencia extends Operacion{
 
     @Override
     public void realizarOperacion(Cliente client, float amount) {
-        client.balance -= amount; //se hace la transferencia
-        recipient.balance += amount;
+        if (client == null){ //si client es null la transferencia es no rastreable y se descuenta el dinero de la cuenta del agente especial
+            recipient.balance += amount;
+            recipient.getAgenteEspecial().getCtaCliente().balance -= amount;
+        } else {
+            client.balance -= amount; //se hace la transferencia
+            recipient.balance += amount;
+        }
+
     }
 
     @Override

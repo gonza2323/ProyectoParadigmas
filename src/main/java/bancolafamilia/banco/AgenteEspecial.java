@@ -9,6 +9,10 @@ public class AgenteEspecial extends Empleado {
     //montoMaxEspecial: monto maximo que se puede aceptar para lavar plata
     public static final float montoMaxOpEspecial = 700000000;
 
+    //el agente especial va a tener una cuenta cliente asociada a donde va a caer el dinero que va a lavar
+    //tiene que tener una cuenta asociada pq deposito.realizarOperacion recibe un Cliente y el monto
+    private Cliente ctaCliente;
+
     //clientesPendientes: aqui se almacenan los clienetes que hicieron la transferencia especial pero aun no han avisado el monto que quiere lavar - no se si es necesaria pero la dejo por las dudas!
     private LinkedList<Cliente> clientesPendientes;
 
@@ -17,10 +21,11 @@ public class AgenteEspecial extends Empleado {
 
 
 
-    public AgenteEspecial(String nombre, int dni, String username, String password) {
+    public AgenteEspecial(String nombre, int dni, String username, String password, Cliente ctaCliente) {
         super(nombre, dni, username, password);
         this.clientesPendientes = new LinkedList<>();
         this.activosEnProceso = new LinkedList<>();
+        this.ctaCliente = ctaCliente;
 
     }
 
@@ -36,7 +41,7 @@ public class AgenteEspecial extends Empleado {
     }
 
 
-    //Se sabe que el agente proceso la transaccion cuando devuelve la caja a la que tiene que ir el cliente
+    //Se sabe que el agente procesó la transaccion cuando devuelve la caja a la que tiene que ir el cliente
     public Cajero procesarTransaccionEspecial(Cliente client, float amount, ArrayList<Cajero> cajerosDisponibles){
         //1. cuando el bco llama a este metodo es porque ya ha aprobado el monto a lavar que solicito el cliente
 
@@ -68,9 +73,49 @@ public class AgenteEspecial extends Empleado {
         cajero.recieveDocument(document);
     }
 
+    public void verificarFondos(DocumentoClienteEspecial document){
+        //Si llega a este metodo es pq el cajero le esta avisando que ya aprobo el deposito, entonces:
+
+        //1. verifica que este el dinero en la cuenta
+        if (this.ctaCliente.balance >= document.getAmount()){
+            document.setInProcess(true);
+            //1.1 va a iniciarTransaccion espeacial para pedir la simulacion al modula de lavado de dienro
+
+        }
+
+    }
+
+    public DocumentoClienteEspecial solicitarInfoModuloEspecial(DocumentoClienteEspecial doc){
+        ModuloEspecial modulo = new ModuloEspecial(doc.getAmount());
+
+        //1. Le pide la info de la simulacion al modulo de lavado
+        DocumentoTransaccionEspecial documentoSimulacion = modulo.sendDocumentoTransaccion();
+
+        //2. Asocia el documento de simulaicon con el documento cliente especial para que sea un documento unico con los datos del cliente, monto a lavar, caja donde deposito, info proporcionada por el modulo de lavado sobre como lavar la plata
+        doc.setDocumentoSimulacion(documentoSimulacion);
+        return doc;
+
+    }
+
+//    public void programarTransferenciasNoRastreables(DocumentoClienteEspecial doc){
+//
+//        for (int i = 0; i<doc.getDocumentoSimulacion().getNumTransferenciasDiarias(); i++){
+//
+//
+//    }
+
+
+
     public LinkedList<DocumentoClienteEspecial> getActivosEnProceso() {
         return activosEnProceso;
     }
+
+    //Este getter le proporciona al cajero la cuenta cliente del agente especial para que sepa a donde va a depositar el dinero para el lavado.
+    public Cliente getCtaCliente() {
+        return ctaCliente;
+    }
+
+
 }
 
 

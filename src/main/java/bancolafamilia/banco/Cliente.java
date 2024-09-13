@@ -35,6 +35,10 @@ public class Cliente extends User { //implements IOpBcoCliente
     public void setAgenteEspecial(Empleado agenteEspecial) {
         this.agenteEspecial = (AgenteEspecial) agenteEspecial;
     }
+
+    public AgenteEspecial getAgenteEspecial() {
+        return agenteEspecial;
+    }
 }
 
 

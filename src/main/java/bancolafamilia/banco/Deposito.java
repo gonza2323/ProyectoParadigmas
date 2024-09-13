@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 public class Deposito extends Operacion{
     public int caja;
+    //Esta flag le permite al bco saber si la op es ilegal
+    public boolean flag = false;
+    //public Cliente client;
     public static final float montoInmediato = 170000000;
     public static final float montoMax = 300000000;
 
@@ -11,6 +14,8 @@ public class Deposito extends Operacion{
 
         super(fecha, client, monto);
         this.caja = caja;
+
+
     }
 
     @Override
@@ -31,4 +36,16 @@ public class Deposito extends Operacion{
     public boolean isAprobadaPor(Empleado employee) {
         return employee instanceof Cajero;
     }
+
+
+
+    public void setFlag(boolean flag) {
+        this.flag = flag;
+    }
+
+    public void setClient(Cliente client) {
+        this.client = client;
+    }
 }
+
+

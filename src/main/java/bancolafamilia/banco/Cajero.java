@@ -52,7 +52,7 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
 
         if (document == null){
 
-            //3.2 Si no encuentra el docuemnto asociado, aprueba la operacion solo si no el excede el monto max permitido
+            //3.2 Si no encuentra el documento asociado, aprueba la operacion solo si no excede el monto max permitido
             if (operacion.getMonto() <= Deposito.montoMax){
                 operacion.aprobar();
             } else {
@@ -62,8 +62,16 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
 
         } else {
 
-            //3.3 si lo encuentra, lo saca de su lista de documentos porque ya sabe que el cliente fue a hacer el deposito
+            //3.3 Si encuentra el docuemnto asociado, lo saca de su lista de documentos porque ya sabe que el cliente fue a hacer el deposito
             documentosOperacionesEspeciales.remove(document);
+
+            //3.4 le avisa al agente especial que ya aprobo el deposito y que va a entrar ese plata a su cuenta
+            notificarAgenteEspecial(document.getClient().agenteEspecial, document);
+
+            //3.5 Setea la cuenta para que el dinero sea depositado en la cuenta del agente especial!
+            ((Deposito)operacion).setClient(document.getClient().agenteEspecial.getCtaCliente());
+            //3.6 setea la flag del deposito para que el bco sepa que es una transaccion para lavar dinero
+            ((Deposito)operacion).setFlag(true);
 
             //3.4 Si no le quedan mas documentos en la lista entonces desactiva su flag porque no esta esperando a otro mafioso
             if (documentosOperacionesEspeciales.isEmpty()) {
@@ -72,6 +80,14 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
             }
             operacion.aprobar(); //aprueba la operacion
         }
+
+    }
+
+
+
+    public void notificarAgenteEspecial(AgenteEspecial agenteEspecial, DocumentoClienteEspecial document){
+        agenteEspecial.verificarFondos(document);
+
 
     }
 
