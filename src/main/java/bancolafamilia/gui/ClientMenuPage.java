@@ -14,6 +14,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
+import java.time.format.DateTimeFormatter;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class ClientMenuPage extends PageController<ClientMenuView>{
     private Cliente client;
     
@@ -201,35 +205,45 @@ class ClientMenuView extends PageView {
 
     public void showHistory(LinkedList<Operacion> operaciones){
 
+        BasicWindow window = new BasicWindow("Historial de Operaciones");
+        window.setHints(
+            Arrays.asList(
+                Window.Hint.CENTERED,
+                Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+        
         Panel panel = new Panel();
-        panel.setLayoutManager(new GridLayout(3));
-        Table<Object> table = new Table<>("Fecha", "Monto", "Tipo");
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+        
+        Table<Object> table = new Table<>("Fecha", "Tipo", "Monto", "Detalle");
+        panel.addComponent(table);
 
-        int longitud = operaciones.size();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
-        for(int i = 0; i < longitud; i++){
+        for (Operacion op : operaciones) {
+            String clase = op.getClass().getSimpleName();
+            String fecha = op.getFecha().format(formatter);
+            String description = op.getDescription();
+            String monto = decimalFormat.format(op.getMonto());
 
-            String clase = operaciones.get(i).getClass().getSimpleName();
-            String fecha = operaciones.get(i).getFecha().toString();
-            float monto = operaciones.get(i).getMonto();
-
-            table.getTableModel().addRow(new Object[]{fecha,monto, clase});
+            table.getTableModel().addRow(fecha, clase, monto, description);
         }
 
 
-        panel.addComponent(table);
+        panel.addComponent(new Button("Cerrar",
+            new Runnable() {
+                @Override
+                public void run() {
+                    window.close();
+                }
+        }).setLayoutData(
+            GridLayout.createLayoutData(
+                GridLayout.Alignment.END,
+                GridLayout.Alignment.CENTER))
+        );
 
-
-        BasicWindow window = new BasicWindow("Historial de Operaciones");
-        window.setComponent(panel);
-        Button closeButton = new Button("Cerrar", new Runnable() {
-            @Override
-            public void run() {
-                window.close();
-            }
-        });
-
-        panel.addComponent(closeButton);
         gui.addWindowAndWait(window);
     }
 

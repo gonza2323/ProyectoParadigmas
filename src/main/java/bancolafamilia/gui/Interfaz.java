@@ -55,7 +55,10 @@ public class Interfaz {
 
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
-        this.paginaActual = new StartMenuPage(banco, gui);
+        Cliente cliente = new Cliente("Armando", 54213856, "armando", "1234");
+        cliente.setAlias("que.es.eso");
+        banco.depositFunds(cliente, 30000000);
+        this.paginaActual = new ClientMenuPage(banco, gui, cliente);
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz

@@ -32,7 +32,7 @@ public class Gerente extends Empleado implements IOpBcoEmpleado {
             //el gerente verifica que el monto no supere el monto diario
             if (operacion.getMonto() > Transferencia.montoMax) {
                 operacion.denegar();
-            } else if (operacion.getMonto() < Gerente.montoEspecial && ((Transferencia) operacion).motivo.equalsIgnoreCase(Gerente.motivoEspecial)) {
+            } else if (operacion.getMonto() < Gerente.montoEspecial && ((Transferencia) operacion).getMotive().equalsIgnoreCase(Gerente.motivoEspecial)) {
                 delegarTarea(asistente,operacion.getCliente());
                 operacion.aprobar();
             } else {

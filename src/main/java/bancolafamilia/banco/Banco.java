@@ -12,6 +12,7 @@ public class Banco implements IOpBcoCliente {
 
     private float reservas;
     private float depositos;
+    private float prestamos;
     private final ArrayList<User> users;
     private ArrayList<Empleado> empleados;
     private final Queue<Operacion> operacionesPendientes;
@@ -25,10 +26,6 @@ public class Banco implements IOpBcoCliente {
         this.empleados = new ArrayList<>();
         this.operacionesPendientes = new LinkedList<>();
         this.operacionesAprobadas = new LinkedList<>();
-
-
-
-
     }
 
 
