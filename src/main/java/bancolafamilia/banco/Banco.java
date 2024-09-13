@@ -268,9 +268,9 @@ public class Banco implements IOpBcoCliente {
 
 
 
-//    public float getReservas() {
-//        return reservas;
-//    }
+    public float getReservas() {
+        return reservas;
+    }
 
 
 
