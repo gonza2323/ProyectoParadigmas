@@ -27,6 +27,7 @@ public class Banco implements IOpBcoCliente {
 
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
 
+    
     public Banco() {
         reserves = 0.0f;
         deposits = 0.0f;
@@ -237,7 +238,7 @@ public class Banco implements IOpBcoCliente {
         if (amount <= Deposito.montoInmediato) {
             this.approveOperation(deposito);
             addOperation(deposito);
-            this.depositFunds(client, amount, deposito);
+            this.depositFunds(deposito);
             return true;
         } else {
             //2. Si supera el limite, se lo manda al cajero para que lo apruebe
@@ -253,17 +254,17 @@ public class Banco implements IOpBcoCliente {
                 //3.1 Si el deposito lo hace un mafioso:
                 //client es el mafioso
                 //la cuenta a donde cae el dinero es deposito.getCliente() porque cuando el cajero aprueba la op del deposito de dinero ilegitimo, este setea el cliente en la op para que le caiga el dinero al agente y no al mafioso
-                this.depositFunds(client, amount, deposito);
+                this.depositFunds(deposito);
                 return true;
             }
             return false;
         }
     }
 
-    public void depositFunds(Client client, float amount, Operacion deposito) {
+    public void depositFunds(Operacion deposito) {
         deposito.realizarOperacion();
-        this.reserves += amount;
-        this.deposits += amount;
+        this.reserves += deposito.getAmount();
+        this.deposits += deposito.getAmount();
     }
 
     //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
@@ -376,3 +377,5 @@ public class Banco implements IOpBcoCliente {
     public float getReserves() { return reserves; }
     public float getBalance() { return reserves + prestamos - deposits; }
 }
+
+    //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
