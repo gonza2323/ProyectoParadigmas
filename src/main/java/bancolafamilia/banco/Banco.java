@@ -15,26 +15,31 @@ public class Banco implements IOpBcoCliente {
     private float depositos;
     private float prestamos;
     
+    private float tasaDeInteresAnual;
+    private float coeficienteDeEncaje;
+
     private final ArrayList<User> users;
     private ArrayList<Empleado> empleados;
 
     private final Queue<Operacion> operacionesPendientes;
     private final Queue<Operacion> operacionesAprobadas;
+    private final Queue<Operacion> operacionesProgramadas;
 
-    private float coeficienteDeEncaje;
-    private float tasaDeInteresAnual;
+    private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
 
     public Banco() {
         reservas = 0.0f;
         depositos = 0.0f;
+        prestamos = 0.0f;
+        this.tasaDeInteresAnual = 0.08f;
+        this.coeficienteDeEncaje = 0.10f;
         this.users = new ArrayList<User>();
         this.empleados = new ArrayList<>();
         this.operacionesPendientes = new LinkedList<>();
         this.operacionesAprobadas = new LinkedList<>();
-        this.coeficienteDeEncaje = 0.10f;
-        this.tasaDeInteresAnual = 0.08f;
+        this.operacionesProgramadas = new LinkedList<>();
+        this.listaDocEspecial = new ArrayList<>();
     }
-
 
     public User findUserByUsername(String username) {
         for (User user : users)
@@ -139,7 +144,7 @@ public class Banco implements IOpBcoCliente {
         if (amount <= Transferencia.montoInmediata && !isTransferenciaEspecial(recipient)) {
             aprobarOperacion(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
             agregarOperacion(transferencia, operacionesAprobadas);
-            this.transferMoney(sender, recipient, amount, transferencia);
+            this.transferMoney(transferencia);
             return true;
         } else {
             //3.1 agrega la operacion a la cola de op. pendientes de solicitud
@@ -153,7 +158,7 @@ public class Banco implements IOpBcoCliente {
             }
             //3.3 verifica si el gerente ha aprobado la operacion y hace lo necesario
             if (transferencia.isAprobada()) {
-                this.transferMoney(sender, recipient, amount, transferencia);
+                this.transferMoney(transferencia);
                 agregarOperacion(transferencia, operacionesAprobadas);
                 return true;
             } else {
@@ -171,19 +176,19 @@ public class Banco implements IOpBcoCliente {
         return recipient.getAlias().equals(aliasTransEspecial);
     }
 
-    public void transferMoney(Cliente sender, Cliente recipient, float amount, Operacion transferencia){
+//    public void transferMoney(Cliente sender, Cliente recipient, float amount, Operacion transferencia){
+    public void transferMoney(Operacion transferencia){
         //3.3.1 se hace la transferencia
-        transferencia.realizarOperacion(sender, amount);
-        //se regista en los movimientos de los dos clientes (sender y recipient)
-//        sender.agregarOperacion(transferencia);
-//        recipient.agregarOperacion(transferencia);
+        transferencia.realizarOperacion(transferencia.getCliente(), transferencia.getMonto());
 
     }
 
     //2 RETIROS --------------------------------------------------------------------------------------------------------
+    //Este metodo es llamado desde la pag de retiros -------------------------------------------------------------------
 
     public boolean withdrawFunds(Cliente client, float amount){
-        //1. verifica que el cliente tenga saldo +
+
+        //1. verifica que el cliente tenga saldo positivo
         if (amount < 0 || client.getBalance() < amount)
             return false;
 
@@ -202,7 +207,10 @@ public class Banco implements IOpBcoCliente {
 
     //3. DEPOSITOS -----------------------------------------------------------------------------------------------------
 
-    //3.1 METODOS AUXILIARES PARA DEPÓSITOS ILEGITIMOS ----------------------------------------------------------------
+    //3.1 METODOS AUXILIARES PARA DEPÓSITOS ILEGITIMOS -----------------------------------------------------------------
+
+    //3.1.2 METODOS PARA EL INTERCAMBIO DE INFO CLIENTE-AGENTE ESPECIAL-------------------------------------------------
+    //Estos metodos son llamados desde la AgenteEspecialMenuPage--------------------------------------------------------
 
     public boolean aprobarTransaccionEspecial(Cliente client, float amount){
         if (amount <= 0 || amount > AgenteEspecial.montoMaxOpEspecial) {
@@ -219,8 +227,8 @@ public class Banco implements IOpBcoCliente {
 
     }
 
-    //3.2 METODOS PARA DEPOSITOS LEGALES -------------------------------------------------------------------------------
-
+    //3.2 METODOS PARA DEPOSITOS EN GRAL -------------------------------------------------------------------------------
+    //Este metodo es llamado desde la pagina despositos-----------------------------------------------------------------
 
     public boolean solicitudDeposito(Cliente client, float amount, int caja) {
 
@@ -230,21 +238,26 @@ public class Banco implements IOpBcoCliente {
 
         Deposito deposito = new Deposito(LocalDateTime.now(), client, amount, caja);
 
+        //1. Si el deposito no supera el límite entonces es aprobado
         if (amount <= Deposito.montoInmediato) {
             this.aprobarOperacion(deposito);
             agregarOperacion(deposito, operacionesAprobadas);
             this.depositFunds(client, amount, deposito);
             return true;
         } else {
+            //2. Si supera el limite, se lo manda al cajero para que lo apruebe
             agregarOperacion(deposito, operacionesPendientes);
             if (this.hayOpEnCola(operacionesPendientes)) {
                 for (Empleado empleado : empleados) {
                     procesarOperacion(empleado); //en este paso el estado de la transferencia cambia
                 }
             }
-
+            //3. Si es aprobado por el cajero entonces se realiza el deposito
             if (deposito.isAprobada()){
                 agregarOperacion(deposito, operacionesAprobadas);
+                //3.1 Si el deposito lo hace un mafioso:
+                //client es el mafioso
+                //la cuenta a donde cae el dinero es deposito.getCliente() porque cuando el cajero aprueba la op del deposito de dinero ilegitimo, este setea el cliente en la op para que le caiga el dinero al agente y no al mafioso
                 this.depositFunds(client, amount, deposito);
                 return true;
             }
@@ -252,11 +265,12 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
-    private void depositFunds(Cliente client, float amount, Operacion deposito) {
-        deposito.realizarOperacion(client, amount);
+    public void depositFunds(Cliente client, float amount, Operacion deposito) {
+        deposito.realizarOperacion(deposito.getCliente(),amount);
         this.reservas += amount;
         this.depositos += amount;
     }
+
 
     public float getReservas() {
         return reservas;
@@ -264,6 +278,50 @@ public class Banco implements IOpBcoCliente {
 
     public float getBalance() {
         return reservas + prestamos - depositos;
+    }
+
+    //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
+    //Estos metodos son llamados desde la AgenteEspecialMenuPage -------------------------------------------------------
+
+    //el agente especial tiene una pestaña de notificaciones en la que se le informa los clientes que ya han depositado para que revise su cuenta e inicie el proceso de lavado
+
+    public ArrayList<DocumentoClienteEspecial> notificacionFondosAgenteE(AgenteEspecial agente){
+        ArrayList<DocumentoClienteEspecial> listaDocumentos = new ArrayList<>();
+        for (DocumentoClienteEspecial doc: agente.getActivosEnProceso()){
+            if (doc.inProcess){
+                listaDocumentos.add(doc);
+            }
+        }
+        return listaDocumentos;
+        //con esta lista le muestra al agente el cliente y el monto que deposito el cliente
+    }
+
+    public DocumentoTransaccionEspecial simularTransaccionEspecial(AgenteEspecial agente, DocumentoClienteEspecial documentoCliente){
+        //este DocumentoClienteEspecial ya tiene la parte dela simulacion asociada
+        DocumentoClienteEspecial doc = agente.solicitarInfoModuloEspecial(documentoCliente);
+        listaDocEspecial.add(doc); //el banco agrega el docuemnto a su lista cuando ya esta completo, es decir que tiene los datos de docuemntoCliente  y los datos de documentoTransaccionEspecial
+        return doc.getDocumentoSimulacion();
+        //devuelve el documento donde esta la info de la simulacion que debe hacer el agente especial
+
+    }
+
+    public void programarOpEspecial(DocumentoClienteEspecial doc){
+        int dias = doc.getDocumentoSimulacion().getTiempoDias();
+        int cantTransfDiarias = doc.getDocumentoSimulacion().getNumTransferenciasDiarias();
+        float monto = doc.getDocumentoSimulacion().getMontoMaxDiario();
+        Cliente client = doc.getClient();
+        LocalDateTime fechaActual = LocalDateTime.now();
+
+
+        for (int i = 0; i< dias; i++){
+            for (int j = 0; j < cantTransfDiarias; j++){
+                //le puse que el cliente sea null porque como es una transferencia no rastreable no sabemos de que cuenta llega el dinero pero si sabemos a que cuenta entra el dinero!
+                Transferencia transNoRastreable = new Transferencia(fechaActual.plusDays(1), null, client, monto, "no rastreable");
+                operacionesProgramadas.add(transNoRastreable);
+            }
+            //DESPUES LAS OPERACIONES VAN DE LA COLA DE OPERACIONES PROGRAMADAS DIRECTAMEMTE AL METODO transferMoney(transferencia)
+
+        }
     }
 
     public float getAnualInterestRate() {

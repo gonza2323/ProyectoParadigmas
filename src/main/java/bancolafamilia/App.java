@@ -37,7 +37,8 @@ public class App {
         Cajero cajero1 = new Cajero("jorge", 1239, "caja1", "1234", 1);
         Cajero cajero2 = new Cajero("jose", 1240, "caja2", "1234", 2);
 
-        AgenteEspecial asistente = new AgenteEspecial("carlos", 1238, "especial", "hunter3");
+        //verificar que los datos del cliente y del agente especial coincidan
+        AgenteEspecial asistente = new AgenteEspecial("armando", 54213856, "especial", "hunter3", cliente5);
         banco.addUser(asistente);
         banco.addUser(new Gerente("admin", 1237, "admin", "hunter2", asistente));
 

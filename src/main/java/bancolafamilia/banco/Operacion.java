@@ -1,13 +1,13 @@
 package bancolafamilia.banco;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 
 public abstract class Operacion {
 
     private final LocalDateTime fecha;
-    private final Cliente client; //solo los clientes realizan estas operaciones
+    //este metodo es protetced porque necesitamos un setter para el tributo cleinte de deposito
+    protected Cliente client; //solo los clientes realizan estas operaciones
     private final float monto;
     private Boolean aprobada; //es un tipo de objeto envuelto para boolean (tipo de referencia que me permite asignarle como valor inicial null a isAprobada) porque necesito saber cuando la operacion es aprobada, denegada o no se ha visto todavia la solicitud
 
@@ -47,5 +47,7 @@ public abstract class Operacion {
     public abstract void realizarOperacion(Cliente cliente, float amount);
 
     public abstract boolean isAprobadaPor(Empleado employee);
+
+
 
 }
