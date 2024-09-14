@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class Cajero extends Empleado implements IOpBcoEmpleado{
 
+    private static int nextNumCaja = 1;
+    
     //cada cajero va a tener asignado un numero de caja fijo
     public final int numCaja;
 
@@ -14,11 +16,10 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
     public ArrayList<DocumentoClienteEspecial> documentosOperacionesEspeciales;
 
 
-    public Cajero(String nombre, int dni, String username, String password, int numCaja) {
+    public Cajero(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
-        this.numCaja = numCaja;
         this.documentosOperacionesEspeciales = new ArrayList<>();
-
+        this.numCaja = nextNumCaja++;
     }
 
     //1. El cajero recibe las solicitud de las operaciones que estan pendientes de aprobacion
@@ -53,7 +54,7 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
         if (document == null){
 
             //3.2 Si no encuentra el documento asociado, aprueba la operacion solo si no excede el monto max permitido
-            if (operacion.getMonto() <= Deposito.montoMax){
+            if (operacion.getAmount() <= Deposito.montoMax){
                 operacion.aprobar();
             } else {
                 operacion.denegar();
@@ -83,16 +84,9 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
 
     }
 
-
-
     public void notificarAgenteEspecial(AgenteEspecial agenteEspecial, DocumentoClienteEspecial document){
         agenteEspecial.verificarFondos(document);
-
-
     }
-
-
-
 
     public DocumentoClienteEspecial findDocument(Operacion operacion){
         for (DocumentoClienteEspecial document: documentosOperacionesEspeciales) {
@@ -111,5 +105,4 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
     public int getCaja() {
         return numCaja;
     }
-
 }

@@ -2,37 +2,28 @@ package bancolafamilia.gui;
 
 
 import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
-import bancolafamilia.banco.Operacion;
+import bancolafamilia.banco.Client;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
-import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
-import com.googlecode.lanterna.gui2.table.Table;
-
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.regex.Pattern;
-
-import java.time.format.DateTimeFormatter;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
-    private Cliente client;
+    private Client client;
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Cliente client) {
+    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
         super(banco, new ClientMenuView(gui, client.getNombre()), gui);
 
         this.client = client;
 
         view.updateBalance(client.getBalance());
+        view.updateDeuda(client.getDebt());
+
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
+        view.bindAliasButton(() -> handleAliasButton());
         view.bindLoanButton(() -> handleLoanButton());
+        view.bindBrokerButton(() -> handleBrokerButton());
         view.bindAdviceButton(() -> handleAdviceButton());
         view.bindExitButton(() -> handleExitButton());
     }
@@ -43,7 +34,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         if (alias == null)
             return;
 
-        Cliente recipient = banco.findClientByAlias(alias);
+        Client recipient = banco.findClientByAlias(alias);
 
         if (recipient == null) {
             view.showNonExistantAliasError();
@@ -57,40 +48,100 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
         String motivo = view.requestMotivo();
 
+        if (motivo == null)
+            return;
+
         float amount;
         try {
-            amount = Float.parseFloat(view.requestAmount());
+            amount = Float.parseFloat(view.requestTransferAmount());
         } catch (NumberFormatException e) {
+            view.showTransferError();
             return;
         } catch (NullPointerException e) {
             return;
         }
 
+        if (amount == 0) {
+            view.showTransferError();
+            return;
+        }
         if (client.getBalance() < amount) {
             view.showInsufficientFundsError();
             return;
         }
 
-
         boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
         if (success) {
             view.updateBalance(client.getBalance());
-            view.showSuccessMsg();
+            view.showTransferSuccessMsg();
         } else {
             view.showTransferError();
         }
     }
 
     private void handleHistoryButton() {
-        //view.showHistory(client.getOperaciones());
         view.showHistory(banco.getOperacionesCliente(client));
+    }
 
+    private void handleAliasButton() {
+        view.showUserAlias(client.getAlias());
     }
 
     private void handleLoanButton() {
+
+        float minimumLoanAmount = 1000;
+        float maxLoanAmount = banco.getMaxClientLoan(client);
+        String loanAmountStr = view.requestLoanAmount(maxLoanAmount, banco.getAnualInterestRate());
+
+        if (loanAmountStr == null)
+            return;
+
+        float loanAmount;
+        try {
+            loanAmount = Float.parseFloat(loanAmountStr);
+        } catch (NumberFormatException e) {
+            view.showLoanError();
+            return;
+        }
+        
+        if (loanAmount > maxLoanAmount) {
+            view.showNotEnoughCreditError();
+            return;
+        }
+
+        if (loanAmount < minimumLoanAmount) {
+            view.showLoanTooSmallError();
+            return;
+        }
+
+        String loanLengthInMonthsStr = view.requestLoanMonths();
+
+        if (loanLengthInMonthsStr == null)
+            return;
+
+        int loanLengthInMonths;
+        try {
+            loanLengthInMonths = Integer.parseInt(loanLengthInMonthsStr);
+        } catch (NumberFormatException e) {
+            view.showLoanError();
+            return;
+        }
+
+        boolean success = banco.requestLoan(client, loanAmount, loanLengthInMonths);
+        
+        if (success) {
+            view.updateBalance(client.getBalance());
+            view.updateDeuda(client.getDebt());
+            view.showLoanSuccessMsg();
+        } else {
+            view.showLoanError();
+        }
+    }
+
+    private void handleBrokerButton() {
         // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar PRESTAMOS");
+        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar BOLSA");
     }
 
     private void handleAdviceButton() {
@@ -100,245 +151,5 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
     private void handleExitButton() {
         CambiarPagina(new LoginPage(banco, gui));;
-    }
-
-
-}
-
-//cuando la clase no tiene modificador de acceso, el acceso por defecto es el "acceso por paquete" o package private lo que quiere decir que la clase solo sera accesible dentro del mismo paquete. O sea, solo puede acceder a ella la clase clientMenuPage
-class ClientMenuView extends PageView {
-    
-    private final String name;
-    private final Label balanceIndicator;
-
-    private final Button transferButton;
-    private final Button historyButton;
-    private final Button loanButton;
-    private final Button adviceButton;
-    private final Button exitButton;
-    //private final Button changePasswordButton;
-    
-
-    public ClientMenuView(WindowBasedTextGUI gui, String name) {
-        super(gui);
-        this.name = name;
-        this.balanceIndicator = new Label("");
-        
-        transferButton = new Button("Transferencia");
-        historyButton = new Button("Movimientos");
-        loanButton = new Button("Préstamos");
-        adviceButton = new Button("Asesoramiento");
-        //changePasswordButton = new Button("Cambiar contraseña");
-        exitButton = new Button("Salir");
-    }
-
-    public void showCantTransferToSelfError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("No puede transferirse a sí mismo")
-            .build()
-            .showDialog(gui);
-    }
-
-    public void showInsufficientFundsError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Fondos insuficientes")
-            .build()
-            .showDialog(gui);
-    }
-
-    public String requestAlias() {
-        return new TextInputDialogBuilder()
-            .setTitle("TRANSFERENCIA")
-            .setDescription("Ingrese el alias del destinatario")
-            .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
-            .build()
-            .showDialog(gui);
-    }
-
-    public String requestMotivo() {
-        return new TextInputDialogBuilder()
-                .setTitle("Descripcion Transferencia")
-                .setDescription("Ingrese una breve descripción")
-                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
-                .build()
-                .showDialog(gui);
-    }
-
-    public void showNonExistantAliasError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Alias inexistente")
-            .build()
-            .showDialog(gui);
-    }
-
-    public String requestAmount() {
-        return new TextInputDialogBuilder()
-            .setTitle("TRANSFERENCIA")
-            .setDescription("Ingrese el monto a transferir")
-            .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
-            .build()
-            .showDialog(gui);
-
-    }
-
-
-    public void showSuccessMsg() {
-        new MessageDialogBuilder()
-            .setTitle("")
-            .setText("Transferencia exitosa")
-            .build()
-            .showDialog(gui);
-    }
-
-    public void updateBalance(float balance) {
-        balanceIndicator.setText("$ " + new DecimalFormat("#.##").format(balance));
-    }
-
-    public void showTransferError() {
-        // TODO Auto-generated method stub
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Transferencia denegada") //antes: "Se produjo un error desconocido"
-            .build()
-            .showDialog(gui);
-    }
-
-    public void showHistory(LinkedList<Operacion> operaciones){
-
-        BasicWindow window = new BasicWindow("Historial de Operaciones");
-        window.setHints(
-            Arrays.asList(
-                Window.Hint.CENTERED,
-                Window.Hint.FIT_TERMINAL_WINDOW));
-        window.setCloseWindowWithEscape(true);
-        
-        Panel panel = new Panel();
-        panel.setLayoutManager(new GridLayout(1));
-        window.setComponent(panel);
-        
-        Table<Object> table = new Table<>("Fecha", "Tipo", "Monto", "Detalle");
-        panel.addComponent(table);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
-
-        for (Operacion op : operaciones) {
-            String clase = op.getClass().getSimpleName();
-            String fecha = op.getFecha().format(formatter);
-            String description = op.getDescription();
-            String monto = decimalFormat.format(op.getMonto());
-
-            table.getTableModel().addRow(fecha, clase, monto, description);
-        }
-
-
-        panel.addComponent(new Button("Cerrar",
-            new Runnable() {
-                @Override
-                public void run() {
-                    window.close();
-                }
-        }).setLayoutData(
-            GridLayout.createLayoutData(
-                GridLayout.Alignment.END,
-                GridLayout.Alignment.CENTER))
-        );
-
-        gui.addWindowAndWait(window);
-    }
-
-    public void startUI() {
-        // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
-                                      Window.Hint.FIT_TERMINAL_WINDOW,
-                                      Window.Hint.NO_DECORATIONS));
-
-        // Panel
-        Panel contentPanel = new Panel(new GridLayout(2));
-        window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
-        
-        // Configuramos la separación entre columnas y filas pa que quede lindo
-        GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
-        gridLayout.setHorizontalSpacing(1);
-        gridLayout.setVerticalSpacing(1);
-        
-        // Mensaje de bienvenida
-        Label welcomeMsg = new Label("Bienvenido: " + name);
-        welcomeMsg.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(welcomeMsg);           // Añadir el componente al panel
-
-        // Balance
-        balanceIndicator.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,     // Alinear izquierda
-                GridLayout.Alignment.BEGINNING,     // Alinear arriba
-                true,      // Expandirse lo que pueda horizontalmente
-                false,       // Expandirse lo que pueda verticalmente
-                2,                   // Ocupar 2 columnas
-                1));                   // Ocupar 1 fila
-        contentPanel.addComponent(balanceIndicator);           // Añadir el componente al panel
-
-        // Añadimos linea separadora horizontal
-        contentPanel.addComponent(
-            new Separator(Direction.HORIZONTAL)
-                .setLayoutData(
-                    GridLayout.createHorizontallyFilledLayoutData(2)));
-        
-        LayoutData leftJustify = GridLayout.createLayoutData(
-            GridLayout.Alignment.BEGINNING,
-            GridLayout.Alignment.BEGINNING,
-            true,
-            false,
-            2,
-            1);
-
-        // Añadimos los botones creados en el constructor
-        contentPanel.addComponent(
-            transferButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            historyButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            loanButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            adviceButton
-                .setLayoutData(leftJustify));
-        contentPanel.addComponent(
-            exitButton
-                .setLayoutData(leftJustify));
-
-        // Agregar ventana a la gui
-        gui.addWindowAndWait(window);
-    }
-
-    public void bindTransferButton(Runnable action) {
-        transferButton.addListener(transferButton -> action.run());
-    }
-
-    public void bindHistoryButton(Runnable action) {
-        historyButton.addListener(historyButton -> action.run());
-    }
-
-    public void bindLoanButton(Runnable action) {
-        loanButton.addListener(loanButton -> action.run());
-    }
-
-    public void bindAdviceButton(Runnable action) {
-        adviceButton.addListener(adviceButton -> action.run());
-    }
-
-    public void bindExitButton(Runnable action) {
-        exitButton.addListener(closeButton -> action.run());
     }
 }

@@ -1,21 +1,22 @@
 package bancolafamilia.banco;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Arrays;
 
 public class Deposito extends Operacion{
-    public int caja;
-    //Esta flag le permite al bco saber si la op es ilegal
-    public boolean flag = false;
-    //public Cliente client;
-    public static final float montoInmediato = 170000000;
+    
     public static final float montoMax = 300000000;
+    public static final float montoInmediato = 170000000;
+    
+    private final Cajero cajeroResponsable;
+    public int caja;
+    public boolean flag = false;
 
-    public Deposito(LocalDateTime fecha, Cliente client, float monto, int caja) {
-
-        super(fecha, client, monto);
+    public Deposito(LocalDateTime date, Client client, float amount, int caja, Cajero cajero) {
+        super(date, client, amount);
         this.caja = caja;
-
-
+        this.cajeroResponsable = cajero;
     }
 
     @Override
@@ -24,7 +25,7 @@ public class Deposito extends Operacion{
     }
     
     @Override
-    public void realizarOperacion(Cliente client, float amount) {
+    public void realizarOperacion() {
         client.balance += amount;
     }
 
@@ -37,14 +38,17 @@ public class Deposito extends Operacion{
         return employee instanceof Cajero;
     }
 
-
-
     public void setFlag(boolean flag) {
         this.flag = flag;
     }
 
-    public void setClient(Cliente client) {
+    public void setClient(Client client) {
         this.client = client;
+    }
+
+    @Override
+    public List<User> getParticipants() {
+        return Arrays.asList(client, cajeroResponsable);
     }
 }
 

@@ -2,9 +2,10 @@ package bancolafamilia.gui;
 
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 
 
-/*
+/**
  * Clase asbtracta que representa la vista de una página
  * Todas las vistas deben heredar de ella
  * Las subclases deben implementar el método startUI(), que
@@ -30,5 +31,17 @@ public abstract class PageView {
     public final void closeView() {
         for (Window window : gui.getWindows())
             window.close();
+    }
+
+    protected void showMessageDialog(String title, String msg) {
+        new MessageDialogBuilder()
+            .setTitle(title)
+            .setText(msg)
+            .build()
+            .showDialog(gui);
+    }
+    
+    protected void showErrorDialog(String errorMsg) {
+        showMessageDialog("ERROR", errorMsg);
     }
 }

@@ -13,7 +13,6 @@ public class ModuloEspecial {
 
     public ModuloEspecial(float montoAOperar) {
         this.montoAOperar = montoAOperar;
-
     }
 
     //1. Calucla el tiempo minimo en dias en que se puede lavar la plata
@@ -29,9 +28,6 @@ public class ModuloEspecial {
         //math.floor redondea hacia abajo el resultado de plazoOp
         //redondea hacia abajo para que la suma de todas las op pequeñas no rastreables diarias no supere el montoMAxPArcial
         return (int) Math.floor(partesDiarias);
-
-
-
     }
 
     public DocumentoTransaccionEspecial sendDocumentoTransaccion(){

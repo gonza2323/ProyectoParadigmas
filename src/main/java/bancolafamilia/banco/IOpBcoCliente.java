@@ -15,7 +15,4 @@ public interface IOpBcoCliente {
     //2. BANCO Y EMPLEADO:
     //aprobar operacion
 
-
-
-
 }

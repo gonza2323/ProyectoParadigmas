@@ -16,23 +16,19 @@ public class Gerente extends Empleado implements IOpBcoEmpleado {
         return asistente;
     }
 
-
-
     @Override
     public void recieveSolicitud(Operacion operacion) {
         if (operacion.isAprobadaPor(this)){
             this.aprobarOperacion(operacion);
         }
-
     }
-
 
     public void aprobarOperacion(Operacion operacion) {
         if (operacion instanceof Transferencia) { //si llego esta solicitud es porque la transferencia supera el monto de una transaferias común
             //el gerente verifica que el monto no supere el monto diario
-            if (operacion.getMonto() > Transferencia.montoMax) {
+            if (operacion.getAmount() > Transferencia.montoMax) {
                 operacion.denegar();
-            } else if (operacion.getMonto() < Gerente.montoEspecial && ((Transferencia) operacion).getMotive().equalsIgnoreCase(Gerente.motivoEspecial)) {
+            } else if (operacion.getAmount() < Gerente.montoEspecial && ((Transferencia) operacion).getMotive().equalsIgnoreCase(Gerente.motivoEspecial)) {
                 delegarTarea(asistente,operacion.getCliente());
                 operacion.aprobar();
             } else {
@@ -43,7 +39,7 @@ public class Gerente extends Empleado implements IOpBcoEmpleado {
 
 
 
-    private void delegarTarea(AgenteEspecial asistente, Cliente cliente){
+    private void delegarTarea(AgenteEspecial asistente, Client cliente){
         cliente.setFlagSolicitud(true); //el gerente setea esta variable para que saber que el cliente esta a la espera de que se comuniquen con el
         cliente.setAgenteEspecial(asistente); //le asigna al cliente el agente especial que lo va a atender
         asistente.recieveTarea(cliente); //le envia la solicitud al agente especial
