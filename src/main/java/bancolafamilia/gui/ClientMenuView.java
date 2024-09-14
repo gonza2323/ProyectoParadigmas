@@ -251,6 +251,14 @@ public class ClientMenuView extends PageView {
             .showDialog(gui);
     }
 
+    public void showLoanTooSmallError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("El préstamo debe ser de al menos $1,000")
+            .build()
+            .showDialog(gui);
+    }
+
     public void showLoanError() {
         new MessageDialogBuilder()
             .setTitle("ERROR")

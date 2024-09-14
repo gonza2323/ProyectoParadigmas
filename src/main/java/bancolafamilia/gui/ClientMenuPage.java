@@ -2,22 +2,22 @@ package bancolafamilia.gui;
 
 
 import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
+import bancolafamilia.banco.Client;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
-    private Cliente client;
+    private Client client;
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Cliente client) {
+    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
         super(banco, new ClientMenuView(gui, client.getNombre()), gui);
 
         this.client = client;
 
         view.updateBalance(client.getBalance());
-        view.updateDeuda(client.getDeuda());
+        view.updateDeuda(client.getDebt());
 
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
@@ -34,7 +34,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         if (alias == null)
             return;
 
-        Cliente recipient = banco.findClientByAlias(alias);
+        Client recipient = banco.findClientByAlias(alias);
 
         if (recipient == null) {
             view.showNonExistantAliasError();
@@ -90,7 +90,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
     private void handleLoanButton() {
 
-        float maxLoanAmount = banco.getMontoMaximoPrestamo(client);
+        float minimumLoanAmount = 1000;
+        float maxLoanAmount = banco.getMaxClientLoan(client);
         String loanAmountStr = view.requestLoanAmount(maxLoanAmount, banco.getAnualInterestRate());
 
         if (loanAmountStr == null)
@@ -109,6 +110,11 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
+        if (loanAmount < minimumLoanAmount) {
+            view.showLoanTooSmallError();
+            return;
+        }
+
         String loanLengthInMonthsStr = view.requestLoanMonths();
 
         if (loanLengthInMonthsStr == null)
@@ -122,11 +128,11 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.solicitarPrestamo(client, loanAmount, loanLengthInMonths);
+        boolean success = banco.requestLoan(client, loanAmount, loanLengthInMonths);
         
         if (success) {
             view.updateBalance(client.getBalance());
-            view.updateDeuda(client.getDeuda());
+            view.updateDeuda(client.getDebt());
             view.showLoanSuccessMsg();
         } else {
             view.showLoanError();

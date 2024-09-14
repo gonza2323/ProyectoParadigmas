@@ -1,13 +1,13 @@
 package bancolafamilia.banco;
 
 public class DocumentoClienteEspecial {
-    private Cliente client;
+    private Client client;
     private float amount;
     private int caja;
     private DocumentoTransaccionEspecial documentoSimulacion;
     public boolean inProcess = false;
 
-    public DocumentoClienteEspecial(Cliente client, float amount, int caja) {
+    public DocumentoClienteEspecial(Client client, float amount, int caja) {
         this.client = client;
         this.amount = amount;
         this.caja = caja;
@@ -18,7 +18,7 @@ public class DocumentoClienteEspecial {
         return amount;
     }
 
-    public Cliente getClient() {
+    public Client getClient() {
         return client;
     }
 

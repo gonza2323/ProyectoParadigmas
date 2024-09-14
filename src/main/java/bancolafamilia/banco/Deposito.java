@@ -10,7 +10,7 @@ public class Deposito extends Operacion{
     public static final float montoInmediato = 170000000;
     public static final float montoMax = 300000000;
 
-    public Deposito(LocalDateTime fecha, Cliente client, float monto, int caja) {
+    public Deposito(LocalDateTime fecha, Client client, float monto, int caja) {
 
         super(fecha, client, monto);
         this.caja = caja;
@@ -24,7 +24,7 @@ public class Deposito extends Operacion{
     }
     
     @Override
-    public void realizarOperacion(Cliente client, float amount) {
+    public void realizarOperacion(Client client, float amount) {
         client.balance += amount;
     }
 
@@ -43,7 +43,7 @@ public class Deposito extends Operacion{
         this.flag = flag;
     }
 
-    public void setClient(Cliente client) {
+    public void setClient(Client client) {
         this.client = client;
     }
 }

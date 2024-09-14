@@ -1,7 +1,7 @@
 package bancolafamilia.banco;
 
 
-public class Cliente extends User { //implements IOpBcoCliente
+public class Client extends User { //implements IOpBcoCliente
 
     public float balance;
     public float deuda;
@@ -10,7 +10,7 @@ public class Cliente extends User { //implements IOpBcoCliente
      //en esta variable vamos a almacenar el monto que el cliente podria estar lavando
     public AgenteEspecial agenteEspecial; //el agente especial es intermediario entre cliente y banco
 
-    public Cliente(String nombre, int dni, String username, String password) {
+    public Client(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
 
         this.balance = 0;
@@ -21,7 +21,7 @@ public class Cliente extends User { //implements IOpBcoCliente
         return balance;
     }
 
-    public float getDeuda() {
+    public float getDebt() {
         return deuda;
     }
 
@@ -44,6 +44,10 @@ public class Cliente extends User { //implements IOpBcoCliente
 
     public AgenteEspecial getAgenteEspecial() {
         return agenteEspecial;
+    }
+
+    public void addDebt(float additionalDebt) {
+        deuda += additionalDebt;
     }
 }
 

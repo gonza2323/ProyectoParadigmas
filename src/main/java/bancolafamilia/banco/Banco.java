@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 public class Banco implements IOpBcoCliente {
 
     private float reservas;
-    private float depositos;
+    private float deposits;
     private float prestamos;
     
-    private float tasaDeInteresAnual;
+    private float anualInterestRate;
     private float coeficienteDeEncaje;
 
     private final ArrayList<User> users;
@@ -29,9 +29,9 @@ public class Banco implements IOpBcoCliente {
 
     public Banco() {
         reservas = 0.0f;
-        depositos = 0.0f;
+        deposits = 0.0f;
         prestamos = 0.0f;
-        this.tasaDeInteresAnual = 0.08f;
+        this.anualInterestRate = 0.08f;
         this.coeficienteDeEncaje = 0.10f;
         this.users = new ArrayList<User>();
         this.empleados = new ArrayList<>();
@@ -51,13 +51,13 @@ public class Banco implements IOpBcoCliente {
     public void addUser(User user) {
         // TODO: Revisar que no exista ya un cliente con
         // mismo dni o mismo usuario
-        List<Cliente> clientes = users.stream()
-            .filter(u -> u instanceof Cliente)
-            .map(u -> (Cliente)u)
+        List<Client> clientes = users.stream()
+            .filter(u -> u instanceof Client)
+            .map(u -> (Client)u)
             .collect(Collectors.toList());
 
-        if (user instanceof Cliente)
-            ((Cliente)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
+        if (user instanceof Client)
+            ((Client)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
 
         if (user instanceof Empleado){ //agregue esto para que se haga la lista de empleados y despues iterar sobre ella en la linea 118
             empleados.add((Empleado) user);
@@ -66,11 +66,11 @@ public class Banco implements IOpBcoCliente {
         users.add(user);
     }
 
-    public Cliente findClientByAlias(String alias) {
+    public Client findClientByAlias(String alias) {
         for (User user : users)
-            if (user instanceof Cliente)
-                if (((Cliente)user).getAlias().equals(alias.toLowerCase()))
-                    return (Cliente)user;
+            if (user instanceof Client)
+                if (((Client)user).getAlias().equals(alias.toLowerCase()))
+                    return (Client)user;
         
         return null;
     }
@@ -92,7 +92,7 @@ public class Banco implements IOpBcoCliente {
 
     // INFORMACION A CLIENTES EN LA CLIENT MENU PAGE -----------------------------------------------------------------
 
-    public LinkedList<Operacion> getOperacionesCliente(Cliente client){ //agregamos este metodo para sacar la lista de operaciones de cliente
+    public LinkedList<Operacion> getOperacionesCliente(Client client){ //agregamos este metodo para sacar la lista de operaciones de cliente
 
         return operacionesAprobadas.stream()
                 .filter(op -> op.getCliente().getNombre().equals(client.getNombre()))
@@ -101,11 +101,11 @@ public class Banco implements IOpBcoCliente {
 
     //0. METODOS AUXILIARES PARA OPERACIONES ---------------------------------------------------------------------------
 
-    public void agregarOperacion(Operacion operacion, Queue<Operacion> list){ //metodo de la interfaz Itransacciones
+    public void addOperation(Operacion operacion, Queue<Operacion> list){ //metodo de la interfaz Itransacciones
         list.add(operacion);
     }
 
-    public void aprobarOperacion(Operacion operacion){ //metodo propio
+    public void approveOperation(Operacion operacion){ //metodo propio
         operacion.aprobar();
     }
 
@@ -116,9 +116,9 @@ public class Banco implements IOpBcoCliente {
             empleado.recieveSolicitud(operacion);
             longitud -= 1;
             if (operacion.isAprobada() == null){
-                agregarOperacion(operacion, operacionesPendientes); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
+                addOperation(operacion, operacionesPendientes); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
             } else if (operacion.isAprobada()) {
-                agregarOperacion(operacion, operacionesAprobadas); //se agrega a la lista de op. aprobadas
+                addOperation(operacion, operacionesAprobadas); //se agrega a la lista de op. aprobadas
                 operacionesPendientes.remove(operacion);
             }
         }
@@ -130,7 +130,7 @@ public class Banco implements IOpBcoCliente {
 
     //1. TRANSFERENCIAS-------------------------------------------------------------------------------------------------
 
-    public boolean solicitudTransferencia(Cliente sender, Cliente recipient, float amount, String motivo) {
+    public boolean solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
         //le llega la solicitud al banco de transferir dinero
 
         //1. el bco se asegura que los datos sean correctos
@@ -142,13 +142,13 @@ public class Banco implements IOpBcoCliente {
 
         //3. Verifica si el monto permite transferencia inmediata - transeferencias comunes
         if (amount <= Transferencia.montoInmediata && !isTransferenciaEspecial(recipient)) {
-            aprobarOperacion(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
-            agregarOperacion(transferencia, operacionesAprobadas);
+            approveOperation(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
+            addOperation(transferencia, operacionesAprobadas);
             this.transferMoney(transferencia);
             return true;
         } else {
             //3.1 agrega la operacion a la cola de op. pendientes de solicitud
-            agregarOperacion(transferencia, operacionesPendientes);
+            addOperation(transferencia, operacionesPendientes);
 
             //3.2 verfica si hay operaciones en la cola y si hay se las delega a cada empleado - esto no se si va acá
             if (this.hayOpEnCola(operacionesPendientes)) {
@@ -159,7 +159,7 @@ public class Banco implements IOpBcoCliente {
             //3.3 verifica si el gerente ha aprobado la operacion y hace lo necesario
             if (transferencia.isAprobada()) {
                 this.transferMoney(transferencia);
-                agregarOperacion(transferencia, operacionesAprobadas);
+                addOperation(transferencia, operacionesAprobadas);
                 return true;
             } else {
                 return false;
@@ -171,7 +171,7 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
-    private boolean isTransferenciaEspecial(Cliente recipient){
+    private boolean isTransferenciaEspecial(Client recipient){
         String aliasTransEspecial = "mapa.fiar.oro";
         return recipient.getAlias().equals(aliasTransEspecial);
     }
@@ -186,7 +186,7 @@ public class Banco implements IOpBcoCliente {
     //2 RETIROS --------------------------------------------------------------------------------------------------------
     //Este metodo es llamado desde la pag de retiros -------------------------------------------------------------------
 
-    public boolean withdrawFunds(Cliente client, float amount){
+    public boolean withdrawFunds(Client client, float amount){
 
         //1. verifica que el cliente tenga saldo positivo
         if (amount < 0 || client.getBalance() < amount)
@@ -197,8 +197,8 @@ public class Banco implements IOpBcoCliente {
 
         //3. Se aprueban los retiros menores al monto diario establecido por el bco
         if (retiro.getMonto() < Retiro.montoMax) {
-            aprobarOperacion(retiro);
-            agregarOperacion(retiro, operacionesAprobadas);
+            approveOperation(retiro);
+            addOperation(retiro, operacionesAprobadas);
             retiro.realizarOperacion(client, amount);
             return true;
         }
@@ -212,7 +212,7 @@ public class Banco implements IOpBcoCliente {
     //3.1.2 METODOS PARA EL INTERCAMBIO DE INFO CLIENTE-AGENTE ESPECIAL-------------------------------------------------
     //Estos metodos son llamados desde la AgenteEspecialMenuPage--------------------------------------------------------
 
-    public boolean aprobarTransaccionEspecial(Cliente client, float amount){
+    public boolean aprobarTransaccionEspecial(Client client, float amount){
         if (amount <= 0 || amount > AgenteEspecial.montoMaxOpEspecial) {
             return false;
         }
@@ -220,7 +220,7 @@ public class Banco implements IOpBcoCliente {
 
     }
 
-    public int cajaTransaccionEspecial(Cliente client, float amount) {
+    public int cajaTransaccionEspecial(Client client, float amount) {
 
         Cajero cajero = client.agenteEspecial.procesarTransaccionEspecial(client, amount, cajerosOperativos(empleados)); //le envia al agente especial: el cliente, el monto que quiere lavar y la lista de cajero para que se lo envie al cliente
         return cajero.getCaja();
@@ -230,7 +230,7 @@ public class Banco implements IOpBcoCliente {
     //3.2 METODOS PARA DEPOSITOS EN GRAL -------------------------------------------------------------------------------
     //Este metodo es llamado desde la pagina despositos-----------------------------------------------------------------
 
-    public boolean solicitudDeposito(Cliente client, float amount, int caja) {
+    public boolean solicitudDeposito(Client client, float amount, int caja) {
 
         if (amount <= 0) {
             return false;
@@ -240,13 +240,13 @@ public class Banco implements IOpBcoCliente {
 
         //1. Si el deposito no supera el límite entonces es aprobado
         if (amount <= Deposito.montoInmediato) {
-            this.aprobarOperacion(deposito);
-            agregarOperacion(deposito, operacionesAprobadas);
+            this.approveOperation(deposito);
+            addOperation(deposito, operacionesAprobadas);
             this.depositFunds(client, amount, deposito);
             return true;
         } else {
             //2. Si supera el limite, se lo manda al cajero para que lo apruebe
-            agregarOperacion(deposito, operacionesPendientes);
+            addOperation(deposito, operacionesPendientes);
             if (this.hayOpEnCola(operacionesPendientes)) {
                 for (Empleado empleado : empleados) {
                     procesarOperacion(empleado); //en este paso el estado de la transferencia cambia
@@ -254,7 +254,7 @@ public class Banco implements IOpBcoCliente {
             }
             //3. Si es aprobado por el cajero entonces se realiza el deposito
             if (deposito.isAprobada()){
-                agregarOperacion(deposito, operacionesAprobadas);
+                addOperation(deposito, operacionesAprobadas);
                 //3.1 Si el deposito lo hace un mafioso:
                 //client es el mafioso
                 //la cuenta a donde cae el dinero es deposito.getCliente() porque cuando el cajero aprueba la op del deposito de dinero ilegitimo, este setea el cliente en la op para que le caiga el dinero al agente y no al mafioso
@@ -265,10 +265,10 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
-    public void depositFunds(Cliente client, float amount, Operacion deposito) {
+    public void depositFunds(Client client, float amount, Operacion deposito) {
         deposito.realizarOperacion(deposito.getCliente(),amount);
         this.reservas += amount;
-        this.depositos += amount;
+        this.deposits += amount;
     }
 
 
@@ -277,7 +277,7 @@ public class Banco implements IOpBcoCliente {
     }
 
     public float getBalance() {
-        return reservas + prestamos - depositos;
+        return reservas + prestamos - deposits;
     }
 
     //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
@@ -309,7 +309,7 @@ public class Banco implements IOpBcoCliente {
         int dias = doc.getDocumentoSimulacion().getTiempoDias();
         int cantTransfDiarias = doc.getDocumentoSimulacion().getNumTransferenciasDiarias();
         float monto = doc.getDocumentoSimulacion().getMontoMaxDiario();
-        Cliente client = doc.getClient();
+        Client client = doc.getClient();
         LocalDateTime fechaActual = LocalDateTime.now();
 
 
@@ -325,33 +325,53 @@ public class Banco implements IOpBcoCliente {
     }
 
     public float getAnualInterestRate() {
-        return tasaDeInteresAnual;
+        return anualInterestRate;
     }
 
-    public float getMontoMaximoPrestamo(Cliente cliente) {
-        // Máximo dispuesto a prestar a ese cliente
-        float maxFinanciacionCliente = Math.max((cliente.getBalance() - cliente.getDeuda()) * 1.50f, 0.0f);
+    public float getMaxClientLoan(Client client) {
+        // máximo dispuesto a prestar a ese cliente
+        float clientCreditLimit = Math.max((client.getBalance() - client.getDebt()) * 1.50f, 0.0f);
         
-        // Máximo que puede prestar el banco según sus reservas
-        float reservasMinimas = depositos * coeficienteDeEncaje;
-        float maxFinanciacionBanco = Math.max(reservas - reservasMinimas, 0.0f);
+        // TODO: Error acá. Corregir cálculo
+        // máximo que puede prestar el banco según sus reservas
+        float minimumReserves = deposits * coeficienteDeEncaje;
+        float bankLoanCapacity = Math.max(reservas - minimumReserves, 0.0f);
 
-        return Math.min(maxFinanciacionCliente, maxFinanciacionBanco);
+        return Math.min(clientCreditLimit, bankLoanCapacity);
     }
 
-    public Boolean solicitarPrestamo(Cliente cliente, float monto, int meses) {
+    public Boolean requestLoan(Client client, float loanPrincipal, int months) {
+        float minimumLoanAmount = 1000;
         
-        float interes = monto * tasaDeInteresAnual * meses / 12f;
-        float total = monto + interes;
+        float interest = loanPrincipal * anualInterestRate * months / 12f;
+        float loanTotal = loanPrincipal + interest;
         
-        if (getMontoMaximoPrestamo(cliente) < monto)
+        if (getMaxClientLoan(client) < loanPrincipal
+            || loanPrincipal < minimumLoanAmount)
             return false;
         
-        // otorgarPrestamo(Cliente cliente, float monto, int meses);
+        if (loanPrincipal <= 0) {
+            return false;
+        }
+
+        Prestamo loanOperation = new Prestamo(LocalDateTime.now(), client, loanPrincipal, anualInterestRate, months);
+
+        // aprobar operación
+        approveOperation(loanOperation);
+        addOperation(loanOperation, operacionesAprobadas);
+        
+        // actualizamos finanzas del cliente
+        client.balance += loanPrincipal;
+        client.addDebt(loanTotal);
+        
+        // actualizamos finanzas del banco
+        deposits += loanPrincipal;
+        prestamos += loanTotal;
+        
         return true;
     }
 
-    private void otorgarPrestamo(Cliente cliente, float monto, int meses) {
+    private void approveLoan(Client cliente, float monto, int meses) {
         return;
     }
 }

@@ -1,7 +1,7 @@
 package bancolafamilia.gui;
 
 import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Cliente;
+import bancolafamilia.banco.Client;
 import com.googlecode.lanterna.TextColor;
 import java.io.IOException;
 import java.util.ArrayList;

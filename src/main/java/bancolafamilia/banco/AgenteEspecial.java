@@ -11,17 +11,17 @@ public class AgenteEspecial extends Empleado {
 
     //el agente especial va a tener una cuenta cliente asociada a donde va a caer el dinero que va a lavar
     //tiene que tener una cuenta asociada pq deposito.realizarOperacion recibe un Cliente y el monto
-    private Cliente ctaCliente;
+    private Client ctaCliente;
 
     //clientesPendientes: aqui se almacenan los clienetes que hicieron la transferencia especial pero aun no han avisado el monto que quiere lavar - no se si es necesaria pero la dejo por las dudas!
-    private LinkedList<Cliente> clientesPendientes;
+    private LinkedList<Client> clientesPendientes;
 
     //activosEnProceso: es una lista con dcoumentos creados por el agente especial para mandarselos al cajero y para que el gerente pueda llevar el control de lo que se esta haciendo
     private LinkedList<DocumentoClienteEspecial> activosEnProceso;
 
 
 
-    public AgenteEspecial(String nombre, int dni, String username, String password, Cliente ctaCliente) {
+    public AgenteEspecial(String nombre, int dni, String username, String password, Client ctaCliente) {
         super(nombre, dni, username, password);
         this.clientesPendientes = new LinkedList<>();
         this.activosEnProceso = new LinkedList<>();
@@ -32,7 +32,7 @@ public class AgenteEspecial extends Empleado {
     @Override
     public void recieveSolicitud(Operacion operacion) {}
 
-    protected void recieveTarea(Cliente cliente){
+    protected void recieveTarea(Client cliente){
         clientesPendientes.add(cliente);
         cliente.setFlagSolicitud(true); //activamos el flag para que en la ventana de mensajes del cliente se encuentre la notifcaion pidiendo el monto que desea lavar -> es como que el agente especial le envia un mensaje al cliente al activar su flag
 
@@ -42,7 +42,7 @@ public class AgenteEspecial extends Empleado {
 
 
     //Se sabe que el agente procesó la transaccion cuando devuelve la caja a la que tiene que ir el cliente
-    public Cajero procesarTransaccionEspecial(Cliente client, float amount, ArrayList<Cajero> cajerosDisponibles){
+    public Cajero procesarTransaccionEspecial(Client client, float amount, ArrayList<Cajero> cajerosDisponibles){
         //1. cuando el bco llama a este metodo es porque ya ha aprobado el monto a lavar que solicito el cliente
 
         //2. El agente manipula al cajero
@@ -111,7 +111,7 @@ public class AgenteEspecial extends Empleado {
     }
 
     //Este getter le proporciona al cajero la cuenta cliente del agente especial para que sepa a donde va a depositar el dinero para el lavado.
-    public Cliente getCtaCliente() {
+    public Client getCtaCliente() {
         return ctaCliente;
     }
 

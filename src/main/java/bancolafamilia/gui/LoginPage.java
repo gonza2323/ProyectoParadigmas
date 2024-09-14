@@ -64,8 +64,8 @@ class LoginPage extends PageController<LoginView>{
         // Si todo sale bien, pasamos a la siguiente página
         PageController<?> nextPage;
         
-        if (user instanceof Cliente)
-            nextPage = new ClientMenuPage(banco, gui, (Cliente)user);
+        if (user instanceof Client)
+            nextPage = new ClientMenuPage(banco, gui, (Client)user);
         else if (user instanceof Cajero)
             nextPage = new CajeroMenuPage(banco, gui, (Cajero)user);
         else if (user instanceof AsesorFinanciero)

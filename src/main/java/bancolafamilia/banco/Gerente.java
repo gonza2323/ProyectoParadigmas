@@ -43,7 +43,7 @@ public class Gerente extends Empleado implements IOpBcoEmpleado {
 
 
 
-    private void delegarTarea(AgenteEspecial asistente, Cliente cliente){
+    private void delegarTarea(AgenteEspecial asistente, Client cliente){
         cliente.setFlagSolicitud(true); //el gerente setea esta variable para que saber que el cliente esta a la espera de que se comuniquen con el
         cliente.setAgenteEspecial(asistente); //le asigna al cliente el agente especial que lo va a atender
         asistente.recieveTarea(cliente); //le envia la solicitud al agente especial

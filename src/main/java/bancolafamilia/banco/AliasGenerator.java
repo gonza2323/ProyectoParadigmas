@@ -12,7 +12,7 @@ public class AliasGenerator {
         "plato", "tijera", "galleta", "vainilla", "cable", "lapiz", "diente"
     );
 
-    public static String generateUniqueAlias(List<Cliente> clients) {
+    public static String generateUniqueAlias(List<Client> clients) {
         Random random = new Random();
         String alias;
         
@@ -32,8 +32,8 @@ public class AliasGenerator {
         return String.format("%s.%s.%s", word1, word2, word3);
     }
 
-    private static boolean aliasExists(String alias, List<Cliente> clientes) {
-        for (Cliente client : clientes) {
+    private static boolean aliasExists(String alias, List<Client> clientes) {
+        for (Client client : clientes) {
             if (client.getAlias().equals(alias)) {
                 return true;
             }

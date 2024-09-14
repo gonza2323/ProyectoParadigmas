@@ -6,7 +6,7 @@ public class Retiro extends Operacion{
 
     public static final float montoMax = 1000000;
 
-    public Retiro(LocalDateTime fecha, Cliente client, float monto) {
+    public Retiro(LocalDateTime fecha, Client client, float monto) {
         super(fecha, client, monto);
     }
 
@@ -16,7 +16,7 @@ public class Retiro extends Operacion{
     }
     
     @Override
-    public void realizarOperacion(Cliente cliente, float amount) {
+    public void realizarOperacion(Client cliente, float amount) {
         cliente.balance -= amount;
     }
 

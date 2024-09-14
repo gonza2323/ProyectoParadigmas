@@ -10,11 +10,11 @@ public class App {
         Banco banco = new Banco();
         Interfaz interfaz = new Interfaz(banco);
 
-        Cliente cliente1 = new Cliente("Martin", 1234, "martin", "1234");
-        Cliente cliente2 = new Cliente("Jorge", 1235, "jorge", "1234");
-        Cliente cliente3 = new Cliente("Pedro", 1236, "pedro", "1234");
-        Cliente cliente4 = new Cliente("Carlos", 1238, "carlos", "1234");
-        Cliente cliente5 = new Cliente("Armando", 54213856, "armando", "1234");
+        Client cliente1 = new Client("Martin", 1234, "martin", "1234");
+        Client cliente2 = new Client("Jorge", 1235, "jorge", "1234");
+        Client cliente3 = new Client("Pedro", 1236, "pedro", "1234");
+        Client cliente4 = new Client("Carlos", 1238, "carlos", "1234");
+        Client cliente5 = new Client("Armando", 54213856, "armando", "1234");
 
         banco.addUser(cliente1);
         banco.addUser(cliente2);
