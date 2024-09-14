@@ -4,7 +4,7 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
 
-/*
+/**
  * Clase asbtracta que representa la vista de una página
  * Todas las vistas deben heredar de ella
  * Las subclases deben implementar el método startUI(), que
