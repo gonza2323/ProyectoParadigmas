@@ -394,7 +394,7 @@ public class Banco implements IOpBcoCliente {
             }else{
                 client.balance += (transaccion.getAmount() - transaccion.getComision());
             }
-            return true
+            return true;
         }
 
     }

@@ -57,10 +57,6 @@ public class Client extends User { //implements IOpBcoCliente
         return portfolioActivos;
     }
 
-    public void solicitarTransaccion(AgenteBolsa broker, Activo activo, String tipo, int cantidad){
-        broker.ProcesarTransaccion(this, activo, tipo, cantidad);
-
-    }
 
     public void setFlagRiesgoInverison(boolean flagRiesgoInverison) {
         this.flagRiesgoInverison = flagRiesgoInverison;
