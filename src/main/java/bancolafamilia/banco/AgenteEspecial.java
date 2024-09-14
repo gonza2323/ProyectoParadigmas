@@ -79,7 +79,7 @@ public class AgenteEspecial extends Empleado {
         //1. verifica que este el dinero en la cuenta
         if (this.ctaCliente.balance >= document.getAmount()){
             document.setInProcess(true);
-            //1.1 va a iniciarTransaccion espeacial para pedir la simulacion al modula de lavado de dienro
+
 
         }
 
