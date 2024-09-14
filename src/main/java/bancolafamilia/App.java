@@ -28,17 +28,11 @@ public class App {
         cliente4.setAlias("mapa.fiar.oro"); //alias asistente ejecutivo
         cliente5.setAlias("que.es.eso");
 
-        Deposito deposito1= new Deposito(LocalDateTime.now(), cliente1, 10000, 1);
-        Deposito deposito2 = new Deposito(LocalDateTime.now(), cliente2, 2000, 1);
-        Deposito deposito3 = new Deposito(LocalDateTime.now(), cliente3, 50000000, 1);
-        Deposito deposito4 = new Deposito(LocalDateTime.now(), cliente5, 30000000, 1);
-
         //banco.depositFunds(cliente1, 10000, deposito1);
-        banco.depositFunds(cliente2, 2000, deposito2);
-        banco.depositFunds(cliente3, 50000000, deposito3);
-        banco.depositFunds(cliente5, 30000000, deposito4);
-
         banco.solicitudDeposito(cliente1, 70000, 1);
+        banco.solicitudDeposito(cliente2, 2000, 1);
+        banco.solicitudDeposito(cliente3, 50000000, 1);
+        banco.solicitudDeposito(cliente5, 30000000, 1);
 
         Cajero cajero1 = new Cajero("jorge", 1239, "caja1", "1234", 1);
         Cajero cajero2 = new Cajero("jose", 1240, "caja2", "1234", 2);

@@ -61,26 +61,33 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
         String motivo = view.requestMotivo();
 
+        if (motivo == null)
+            return;
+
         float amount;
         try {
-            amount = Float.parseFloat(view.requestAmount());
+            amount = Float.parseFloat(view.requestTransferAmount());
         } catch (NumberFormatException e) {
+            view.showTransferError();
             return;
         } catch (NullPointerException e) {
             return;
         }
 
+        if (amount == 0) {
+            view.showTransferError();
+            return;
+        }
         if (client.getBalance() < amount) {
             view.showInsufficientFundsError();
             return;
         }
 
-
         boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
         if (success) {
             view.updateBalance(client.getBalance());
-            view.showSuccessMsg();
+            view.showTransferSuccessMsg();
         } else {
             view.showTransferError();
         }
@@ -95,8 +102,48 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleLoanButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar PRESTAMOS");
+
+        float maxLoanAmount = banco.getMontoMaximoPrestamo(client);
+        String loanAmountStr = view.requestLoanAmount(maxLoanAmount, banco.getAnualInterestRate());
+
+        if (loanAmountStr == null)
+            return;
+
+        float loanAmount;
+        try {
+            loanAmount = Float.parseFloat(loanAmountStr);
+        } catch (NumberFormatException e) {
+            view.showLoanError();
+            return;
+        }
+        
+        if (loanAmount > maxLoanAmount) {
+            view.showNotEnoughCreditError();
+            return;
+        }
+
+        String loanLengthInMonthsStr = view.requestLoanMonths();
+
+        if (loanLengthInMonthsStr == null)
+            return;
+
+        int loanLengthInMonths;
+        try {
+            loanLengthInMonths = Integer.parseInt(loanLengthInMonthsStr);
+        } catch (NumberFormatException e) {
+            view.showLoanError();
+            return;
+        }
+
+        boolean success = banco.solicitarPrestamo(client, loanAmount, loanLengthInMonths);
+        
+        if (success) {
+            view.updateBalance(client.getBalance());
+            view.updateDeuda(client.getDeuda());
+            view.showLoanSuccessMsg();
+        } else {
+            view.showLoanError();
+        }
     }
 
     private void handleBrokerButton() {
@@ -112,8 +159,6 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     private void handleExitButton() {
         CambiarPagina(new LoginPage(banco, gui));;
     }
-
-
 }
 
 //cuando la clase no tiene modificador de acceso, el acceso por defecto es el "acceso por paquete" o package private lo que quiere decir que la clase solo sera accesible dentro del mismo paquete. O sea, solo puede acceder a ella la clase clientMenuPage
@@ -246,7 +291,6 @@ class ClientMenuView extends PageView {
             table.getTableModel().addRow(fecha, clase, monto, description);
         }
 
-
         panel.addComponent(new Button("Cerrar",
             new Runnable() {
                 @Override
@@ -276,30 +320,30 @@ class ClientMenuView extends PageView {
         return new TextInputDialogBuilder()
             .setTitle("TRANSFERENCIA")
             .setDescription("Ingrese el alias del destinatario")
-            .setValidationPattern(Pattern.compile("^[a-zA-Z]+(\\.[a-zA-Z]+)*$"), "Ingrese un alias válido")
+            .setValidationPattern(Pattern.compile("^[a-zA-Z]+\\.[a-zA-Z]+\\.[a-zA-Z]+$"), "Ingrese un alias válido")
             .build()
             .showDialog(gui);
     }
 
     public String requestMotivo() {
         return new TextInputDialogBuilder()
-                .setTitle("Descripcion Transferencia")
+                .setTitle("TRANSFERENCIA")
                 .setDescription("Ingrese una breve descripción")
-                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Maximo 5 palabras")
+                .setValidationPattern(Pattern.compile("^([a-zA-Z]+\\s?){1,5}$"), "Máximo 5 palabras")
                 .build()
                 .showDialog(gui);
     }    
 
-    public String requestAmount() {
+    public String requestTransferAmount() {
         return new TextInputDialogBuilder()
             .setTitle("TRANSFERENCIA")
             .setDescription("Ingrese el monto a transferir")
-            .setValidationPattern(Pattern.compile("^\\d+(\\.\\d+)?$"), "Ingrese un monto válido")
+            .setValidationPattern(Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$"), "Ingrese un monto válido")
             .build()
             .showDialog(gui);
     }
 
-    public void showSuccessMsg() {
+    public void showTransferSuccessMsg() {
         new MessageDialogBuilder()
             .setTitle("")
             .setText("Transferencia exitosa")
@@ -311,6 +355,52 @@ class ClientMenuView extends PageView {
         new MessageDialogBuilder()
             .setTitle("")
             .setText("Su alias es:\n" + alias)
+            .build()
+            .showDialog(gui);
+    }
+
+    public String requestLoanAmount(float maxLoanAmount, float anualInterestRate) {
+        NumberFormat currencyFormater = NumberFormat.getCurrencyInstance(Locale.US);
+        DecimalFormat percentageFormater = new DecimalFormat("0.00%");
+
+        return new TextInputDialogBuilder()
+            .setTitle("SOLICITUD DE PRÉSTAMO")
+            .setDescription("Tasa de interés anual: " + percentageFormater.format(anualInterestRate)
+                        + "\nFinanciación máxima disponible: " + currencyFormater.format(maxLoanAmount))
+            .setValidationPattern(Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$"), "Ingrese un monto válido")
+            .build()
+            .showDialog(gui);
+    }
+
+    public String requestLoanMonths() {
+        return new TextInputDialogBuilder()
+            .setTitle("SOLICITUD DE PRÉSTAMO")
+            .setDescription("Ingrese periodo del préstamo en meses (mínimo 1)")
+            .setValidationPattern(Pattern.compile("^[1-9][0-9]*$"), "Ingrese una cantidad de meses válida")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showNotEnoughCreditError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("No tiene acceso a préstamos tan grandes")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showLoanError() {
+        new MessageDialogBuilder()
+            .setTitle("ERROR")
+            .setText("Se produjo un error")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showLoanSuccessMsg() {
+        new MessageDialogBuilder()
+            .setTitle("SOLICITUD DE PRÉSTAMO")
+            .setText("Se le ha otorgado el préstamo solicitado")
             .build()
             .showDialog(gui);
     }

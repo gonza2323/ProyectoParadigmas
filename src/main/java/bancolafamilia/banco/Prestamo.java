@@ -5,19 +5,25 @@ import java.time.format.DateTimeFormatter;
 
 public class Prestamo extends Operacion{
     
-    public static final float annualInterestRate = 1.15f;
-    
-    private LocalDateTime cancellationDate;
+    private final float montoIntereses;
+    private final float tasaDeInteresAnual;
+    private final LocalDateTime cancellationDate;
 
-    public Prestamo(LocalDateTime fecha, Cliente client, float monto) {
+    public Prestamo(LocalDateTime fecha, Cliente client, float monto, float tasaDeInteresAnual, int meses) {
         super(fecha, client, monto);
+
+        this.montoIntereses = monto * tasaDeInteresAnual * meses / 12;
+        this.tasaDeInteresAnual = tasaDeInteresAnual;
+        this.cancellationDate = fecha.plusMonths(12);
     }
 
     @Override
     public String getDescription() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         String cancellationDateFormatted = cancellationDate.format(formatter);
-        return "Interés: " + annualInterestRate + "\nVencimiento: " + cancellationDateFormatted;
+        return "Intereses: " + montoIntereses
+            + "\nTasa anual: " + tasaDeInteresAnual
+            + "\nVencimiento: " + cancellationDateFormatted;
     }
 
     @Override

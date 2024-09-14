@@ -75,9 +75,6 @@ public class Cajero extends Empleado implements IOpBcoEmpleado{
 
     }
 
-
-
-
     public DocumentoClienteEspecial findDocument(Operacion operacion){
         for (DocumentoClienteEspecial document: documentosOperacionesEspeciales) {
             if (document.getClient().equals(operacion.getCliente())) {

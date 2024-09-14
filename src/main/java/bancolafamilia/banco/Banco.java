@@ -14,11 +14,15 @@ public class Banco implements IOpBcoCliente {
     private float reservas;
     private float depositos;
     private float prestamos;
+    
     private final ArrayList<User> users;
     private ArrayList<Empleado> empleados;
+
     private final Queue<Operacion> operacionesPendientes;
     private final Queue<Operacion> operacionesAprobadas;
-    //private  Queue<Operacion> operacionesDenegadas; no se si es util
+
+    private float coeficienteDeEncaje;
+    private float tasaDeInteresAnual;
 
     public Banco() {
         reservas = 0.0f;
@@ -27,6 +31,8 @@ public class Banco implements IOpBcoCliente {
         this.empleados = new ArrayList<>();
         this.operacionesPendientes = new LinkedList<>();
         this.operacionesAprobadas = new LinkedList<>();
+        this.coeficienteDeEncaje = 0.10f;
+        this.tasaDeInteresAnual = 0.08f;
     }
 
 
@@ -109,10 +115,7 @@ public class Banco implements IOpBcoCliente {
             } else if (operacion.isAprobada()) {
                 agregarOperacion(operacion, operacionesAprobadas); //se agrega a la lista de op. aprobadas
                 operacionesPendientes.remove(operacion);
-
             }
-
-
         }
     }
 
@@ -165,12 +168,7 @@ public class Banco implements IOpBcoCliente {
 
     private boolean isTransferenciaEspecial(Cliente recipient){
         String aliasTransEspecial = "mapa.fiar.oro";
-        if (recipient.getAlias().equals(aliasTransEspecial)){
-            return true;
-        }else{
-            return false;
-        }
-
+        return recipient.getAlias().equals(aliasTransEspecial);
     }
 
     public void transferMoney(Cliente sender, Cliente recipient, float amount, Operacion transferencia){
@@ -254,7 +252,7 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
-    public void depositFunds(Cliente client, float amount, Operacion deposito) {
+    private void depositFunds(Cliente client, float amount, Operacion deposito) {
         deposito.realizarOperacion(client, amount);
         this.reservas += amount;
         this.depositos += amount;
@@ -262,5 +260,40 @@ public class Banco implements IOpBcoCliente {
 
     public float getReservas() {
         return reservas;
+    }
+
+    public float getBalance() {
+        return reservas + prestamos - depositos;
+    }
+
+    public float getAnualInterestRate() {
+        return tasaDeInteresAnual;
+    }
+
+    public float getMontoMaximoPrestamo(Cliente cliente) {
+        // Máximo dispuesto a prestar a ese cliente
+        float maxFinanciacionCliente = Math.max((cliente.getBalance() - cliente.getDeuda()) * 1.50f, 0.0f);
+        
+        // Máximo que puede prestar el banco según sus reservas
+        float reservasMinimas = depositos * coeficienteDeEncaje;
+        float maxFinanciacionBanco = Math.max(reservas - reservasMinimas, 0.0f);
+
+        return Math.min(maxFinanciacionCliente, maxFinanciacionBanco);
+    }
+
+    public Boolean solicitarPrestamo(Cliente cliente, float monto, int meses) {
+        
+        float interes = monto * tasaDeInteresAnual * meses / 12f;
+        float total = monto + interes;
+        
+        if (getMontoMaximoPrestamo(cliente) < monto)
+            return false;
+        
+        // otorgarPrestamo(Cliente cliente, float monto, int meses);
+        return true;
+    }
+
+    private void otorgarPrestamo(Cliente cliente, float monto, int meses) {
+        return;
     }
 }
