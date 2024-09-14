@@ -42,39 +42,64 @@ public class AgenteBolsa {
         return montoFinal * comissionRate;
     }
 
-    public float buyActivo(Client client, Activo activo, int cantidad){
+    public TransaccionBolsa operar(Client client, Activo activo, int cantidad, String tipo){
 
-        float montoFinal = activo.getValue() * cantidad;
-        client.getPortfolioActivos().addActivo(activo,montoFinal);
-        Inversion transaccion = new Inversion(LocalDateTime.now(), client, activo, cantidad, montoFinal, "compra");
-        return calcularComision(montoFinal);
+        float amount = activo.getValue() * cantidad;
+        float comision = calcularComision(amount);
+
+        if (tipo.equalsIgnoreCase("buy")){
+            client.getPortfolioActivos().addActivo(activo,amount);
+        } else{
+            client.getPortfolioActivos().removeActivo(activo, amount);
+        }
+
+        TransaccionBolsa transaccion = new TransaccionBolsa(LocalDateTime.now(), client, activo, cantidad, amount, comision, tipo);
+        return transaccion;
+    }
+
+
 
 
 
         //devolver "se compraron 3 unidades de activos = para el cliente tal
-    }
 
-    public float sellActivo(Client client, Activo activo, int cantidad) {
-        float ganacia = activo.getValue() * cantidad;
-        client.getPortfolioActivos().removeActivo(activo, ganacia);
-        return calcularComision(ganacia);
-    }
 
-    public void ProcesarTransaccion(Client client, Activo activo, String tipo, int cantidad){
+    public DocumentoInversionBolsa simularOperacionActivos(Activo activo, int cantidad, String tipo){
+        float comision;
+        DocumentoInversionBolsa simulacion;
         if (tipo.equalsIgnoreCase("buy")){
-            buyActivo(client, activo, cantidad);
+            float montoAInvertir = activo.getValue()*cantidad;
+            comision = calcularComision(montoAInvertir);
+            simulacion = new DocumentoInversionBolsa(activo, montoAInvertir, comision, "buy");
+            return simulacion;
 
-        } else if (tipo.equalsIgnoreCase("sell")){
-            sellActivo(client, activo, cantidad);
+        } else{
+            float ganancia = activo.getValue() * cantidad;
+            comision = calcularComision(ganancia);
+            simulacion = new DocumentoInversionBolsa(activo, ganancia, comision, "sell");
+            return simulacion;
+
         }
 
     }
 
+
+
+
+
+
     public String provideAdvice(Client client){
-        Activo activoRecomendado = getActivoRecomendado();
+        Activo activoRecomendado = getActivo(activosDisponibles);
+
+
         if (client.getPortfolioActivos().getRisk() > 0.7){
-            client.setFlagRiesgoInverison(true);
-            return "Tu cartera de inversiones representa un riesgo algo. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado;
+            Activo activoRiesgo;
+            do{
+                activoRiesgo = getActivo(client.getPortfolioActivos().getList());
+
+            } while (activoRiesgo.equals(activoRecomendado));
+
+            return "Tu cartera de inversiones representa un riesgo alto. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Venta: vende acciones del activo " + activoRiesgo + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado;
 
         }else{
             return "Tu cartera de inversiones está bien equilibrada. Sigue con las buenas inversiones!" + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado;
@@ -84,10 +109,10 @@ public class AgenteBolsa {
 
     }
 
-    public Activo getActivoRecomendado(){
+    public Activo getActivo(List<Activo> lista){
         Random random = new Random();
-        int randomIndex = random.nextInt(activosDisponibles.size());
-        Activo activo = activosDisponibles.get(randomIndex);
+        int randomIndex = random.nextInt(lista.size());
+        Activo activo = lista.get(randomIndex);
         return activo;
     }
 

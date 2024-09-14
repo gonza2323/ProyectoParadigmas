@@ -1,6 +1,8 @@
 package bancolafamilia.banco;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Portfolio {
@@ -25,5 +27,12 @@ public class Portfolio {
 
     public float getRisk(){
         return (float) Math.random();
+    }
+
+    public List<Activo> getList(){
+        List<Activo> keyList = new ArrayList<>(activos.keySet());
+
+        return keyList;
+
     }
 }

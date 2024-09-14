@@ -14,6 +14,7 @@ public class Banco implements IOpBcoCliente {
     private float reserves;
     private float deposits;
     private float prestamos;
+    private AgenteBolsa broker;
     
     private float anualInterestRate;
     private float coeficienteDeEncaje;
@@ -376,6 +377,26 @@ public class Banco implements IOpBcoCliente {
     public float getDeposits() { return deposits; }
     public float getReserves() { return reserves; }
     public float getBalance() { return reserves + prestamos - deposits; }
-}
+
 
     //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
+
+    public boolean OperarEnLaBolsa(Client client, Activo activo, int cantidad, String tipo){
+        if (client.balance > activo.getValue() * cantidad){
+            return false;
+
+        }else{
+
+            TransaccionBolsa transaccion = broker.operar(client,activo,cantidad,tipo);
+            if (transaccion.getTipo().equalsIgnoreCase("buy")){
+                client.balance -= (transaccion.getAmount() - transaccion.getComision());
+
+            }else{
+                client.balance += (transaccion.getAmount() - transaccion.getComision());
+            }
+            return true
+        }
+
+    }
+}
+
