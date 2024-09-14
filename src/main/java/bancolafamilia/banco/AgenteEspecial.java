@@ -1,6 +1,7 @@
 package bancolafamilia.banco;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -42,7 +43,7 @@ public class AgenteEspecial extends Empleado {
 
 
     //Se sabe que el agente procesó la transaccion cuando devuelve la caja a la que tiene que ir el cliente
-    public Cajero procesarTransaccionEspecial(Client client, float amount, ArrayList<Cajero> cajerosDisponibles){
+    public Cajero procesarTransaccionEspecial(Client client, float amount, List<Cajero> cajerosDisponibles){
         //1. cuando el bco llama a este metodo es porque ya ha aprobado el monto a lavar que solicito el cliente
 
         //2. El agente manipula al cajero
@@ -62,7 +63,7 @@ public class AgenteEspecial extends Empleado {
         return cajero;
     }
 
-    public Cajero manipularCajero(ArrayList<Cajero> cajerosDisponibles){ //aleatoriamente se selcciona un cajero de la lista de cajerosdisponibles
+    public Cajero manipularCajero(List<Cajero> cajerosDisponibles){ //aleatoriamente se selcciona un cajero de la lista de cajerosdisponibles
         Random random = new Random();
         int randomIndex = random.nextInt(cajerosDisponibles.size());
         Cajero cajero = cajerosDisponibles.get(randomIndex);

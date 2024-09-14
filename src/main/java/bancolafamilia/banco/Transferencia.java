@@ -1,6 +1,8 @@
 package bancolafamilia.banco;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Arrays;
 
 public class Transferencia extends Operacion{
 
@@ -18,11 +20,11 @@ public class Transferencia extends Operacion{
 
     @Override
     public String getDescription() {
-        return "Ordenante: " + getCliente().getNombre() + "\nBeneficiario: " + recipient.getNombre();
+        return "Ordenante: " + getCliente().getNombre()+ "\nBeneficiario: " + recipient.getNombre();
     }
 
     @Override
-    public void realizarOperacion(Client client, float amount) {
+    public void realizarOperacion() {
         if (client == null){ //si client es null la transferencia es no rastreable y se descuenta el dinero de la cuenta del agente especial
             recipient.balance += amount;
             recipient.getAgenteEspecial().getCtaCliente().balance -= amount;
@@ -38,7 +40,10 @@ public class Transferencia extends Operacion{
         return employee instanceof Gerente;
     }
 
-    public String getMotive() {
-        return motivo;
+    public String getMotive() { return motivo; }
+
+    @Override
+    public List<User> getParticipants() {
+        return Arrays.asList(client, recipient);
     }
 }

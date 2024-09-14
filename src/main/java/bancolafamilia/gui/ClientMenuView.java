@@ -5,9 +5,11 @@ import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.Direction;
@@ -66,7 +68,9 @@ public class ClientMenuView extends PageView {
         Panel panel = new Panel(
             new GridLayout(2)
                 .setHorizontalSpacing(1)
-                .setVerticalSpacing(1));
+                .setVerticalSpacing(1)
+                .setTopMarginSize(1)
+                .setLeftMarginSize(1));
         window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // configuración layout
@@ -125,7 +129,7 @@ public class ClientMenuView extends PageView {
         gui.addWindowAndWait(window);
     }
 
-    public void showHistory(LinkedList<Operacion> operaciones){
+    public void showHistory(List<Operacion> operaciones){
 
         BasicWindow window = new BasicWindow("Historial de Operaciones");
         window.setHints(
@@ -146,9 +150,9 @@ public class ClientMenuView extends PageView {
 
         for (Operacion op : operaciones) {
             String clase = op.getClass().getSimpleName();
-            String fecha = op.getFecha().format(formatter);
+            String fecha = op.getDate().format(formatter);
             String description = op.getDescription();
-            String monto = decimalFormat.format(op.getMonto());
+            String monto = decimalFormat.format(op.getAmount());
 
             table.getTableModel().addRow(fecha, clase, monto, description);
         }
@@ -206,19 +210,11 @@ public class ClientMenuView extends PageView {
     }
 
     public void showTransferSuccessMsg() {
-        new MessageDialogBuilder()
-            .setTitle("")
-            .setText("Transferencia exitosa")
-            .build()
-            .showDialog(gui);
+        showMessageDialog("", "Transferencia exitosa");
     }
 
     public void showUserAlias(String alias) {
-        new MessageDialogBuilder()
-            .setTitle("")
-            .setText("Su alias es:\n" + alias)
-            .build()
-            .showDialog(gui);
+        showMessageDialog("", "Su alias es:\n" + alias);
     }
 
     public String requestLoanAmount(float maxLoanAmount, float anualInterestRate) {
@@ -244,59 +240,35 @@ public class ClientMenuView extends PageView {
     }
 
     public void showNotEnoughCreditError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("No tiene acceso a préstamos tan grandes")
-            .build()
-            .showDialog(gui);
+        showErrorDialog("No tiene acceso a préstamos tan grandes");
     }
 
     public void showLoanTooSmallError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("El préstamo debe ser de al menos $1,000")
-            .build()
-            .showDialog(gui);
+        showErrorDialog("El préstamo debe ser de al menos $1,000");
     }
 
     public void showLoanError() {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText("Se produjo un error")
-            .build()
-            .showDialog(gui);
+        showErrorDialog("Se produjo un error");
     }
 
     public void showLoanSuccessMsg() {
-        new MessageDialogBuilder()
-            .setTitle("SOLICITUD DE PRÉSTAMO")
-            .setText("Se le ha otorgado el préstamo solicitado")
-            .build()
-            .showDialog(gui);
+        showMessageDialog("SOLICITUD DE PRÉSTAMO", "Se le ha otorgado el préstamo solicitado");
     }
 
     public void showNonExistantAliasError() {
-        showError("Alias inexistente");
+        showErrorDialog("Alias inexistente");
     }
 
     public void showCantTransferToSelfError() {
-        showError("No puede transferirse a sí mismo");
+        showErrorDialog("No puede transferirse a sí mismo");
     }
 
     public void showInsufficientFundsError() {
-        showError("Fondos insuficientes");
+        showErrorDialog("Fondos insuficientes");
     }
 
     public void showTransferError() {
-        showError("Transferencia denegada");
-    }
-
-    private void showError(String errorMsg) {
-        new MessageDialogBuilder()
-            .setTitle("ERROR")
-            .setText(errorMsg)
-            .build()
-            .showDialog(gui);
+        showErrorDialog("Transferencia denegada");
     }
 
     public void bindTransferButton(Runnable action) {

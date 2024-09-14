@@ -37,7 +37,7 @@ public class Interfaz {
     private final Screen screen;            // pantalla
     private final WindowBasedTextGUI gui;   // gui
     
-    private PageController<?> paginaActual; // pagina actual
+    private PageController<?> currentPage; // pagina actual
 
     public Interfaz(Banco banco) throws IOException {
         
@@ -56,7 +56,7 @@ public class Interfaz {
 
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
-        this.paginaActual = new LoginPage(banco, gui);
+        this.currentPage = new StartMenuPage(banco, gui);
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz
@@ -69,9 +69,9 @@ public class Interfaz {
     // la misma retorna la siguiente página que se debe ejecutar.
     // El loop hace esto hasta que una página retorne null, y ahí termina el programa.
     private void guiLoop() throws IOException {
-        while (paginaActual != null) {
-            PageController<?> nuevaPagina = paginaActual.run();
-            this.paginaActual = nuevaPagina;
+        while (currentPage != null) {
+            PageController<?> newPage = currentPage.run();
+            this.currentPage = newPage;
         }
         stop();
     }
@@ -82,5 +82,13 @@ public class Interfaz {
 
     private static boolean isOperatingSystemWindows() {
         return System.getProperty("os.name", "").toLowerCase().startsWith("windows");
+    }
+
+    public void updateTime() {
+
+    }
+
+    public void update() {
+        
     }
 }

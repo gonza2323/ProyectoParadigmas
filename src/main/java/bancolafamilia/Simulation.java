@@ -2,78 +2,99 @@ package bancolafamilia;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.gui.Interfaz;
 
-/**
- * Simula el avance del tiempo y actualiza el estado del banco y,
- * de ser necesario, el de la interfaz gráfica
- */
 public class Simulation implements Runnable {
 
+    private final Banco banco;
+    private final Interfaz gui;
+
     private final Duration tickInterval;
-    private float timeMultiplier;
+    private final double timeMultiplier;
+    private final Object pauseLock = new Object();
+    
+    private volatile boolean isPaused;
+    private volatile boolean isStopped;
     private Instant currentTime;
-    private boolean isPaused;
 
-    private Banco bank;
-    private Interfaz gui;
-
-    public Simulation(Banco banco, Interfaz gui) {
-        this.tickInterval = Duration.ofSeconds(1);
+    public Simulation(Banco banco, Interfaz gui, Duration tickInterval, double timeMultiplier) {
+        this.banco = banco;
+        this.gui = gui;
+        this.tickInterval = tickInterval;
+        this.timeMultiplier = timeMultiplier;
         this.currentTime = Instant.now();
         this.isPaused = true;
-        this.bank = banco;
-        this.gui = gui;
+        this.isStopped = false;
     }
 
-    /**
-     * Implementación necesaria de run (por implementar Runnable)
-     * Se ejecuta en otro hilo
-     * La simulación actualiza el estado de la aplicación cada vez que pasa
-     * el tiempo indicado en tickInterval. En cada tick, se avanza
-     * la fecha simulada dentro de la aplicación, el estado del banco y, si
-     * es necesario, la interfaz gráfica.
-     */
-    @Override
     public void run() {
         Instant nextTickTime = Instant.now().plus(tickInterval);
 
-        while (true) {
+        while (!isStopped) {
+            synchronized (pauseLock) {
+                while (isPaused) {
+                    try {
+                        pauseLock.wait(); // Wait while paused
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+            
+            performTick();
+            
             Instant currentTime = Instant.now();
+            long sleepDuration = Duration.between(currentTime, nextTickTime).toMillis();
+            sleepDuration = sleepDuration < 0 ? tickInterval.toMillis() : sleepDuration;
 
-            // Actualizar estado del banco e interfaz
-            Boolean bankHasChanged = updateBank();
+            try {
+                Thread.sleep(sleepDuration);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
 
-            if (bankHasChanged)
-                updateUI();
-
-            // Calculamos el tiempo restante para completar el tick y esperamos
-            // long sleepTime = nextTickTime - currentTime;
-            // if (sleepTime > 0) {
-            //     try {
-            //         Thread.sleep(sleepTime);
-            //     } catch (InterruptedException e) {
-            //         Thread.currentThread().interrupt();
-            //         break;
-            //     }
-            // }
-
-            // nextTickTime += tickInterval;
+            nextTickTime = Instant.now().plus(tickInterval);
         }
     }
 
-    private Boolean updateBank() {
-        return true;
+    private void performTick() {
+        currentTime = currentTime.plus(tickInterval.multipliedBy((long) timeMultiplier));
+        gui.updateTime();
+
+        boolean hasChanged = banco.procesarOperacionesProgramadas(getDateTime());
+
+        if (hasChanged)
+            gui.update();
     }
 
-    private void updateUI() {
-        return;
+    public void pause() {
+        synchronized (pauseLock) {
+            isPaused = true;
+        }
     }
 
-    public void togglePause() {
-        this.isPaused = !isPaused;
+    public void resume() {
+        synchronized (pauseLock) {
+            isPaused = false;
+            pauseLock.notify();
+        }
+    }
+
+    public void stop() {
+        isStopped = true; // Set stop flag to true
+        resume(); // Ensure thread wakes up if paused and exits
+    }
+
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.ofInstant(currentTime, ZoneId.systemDefault());
     }
 }

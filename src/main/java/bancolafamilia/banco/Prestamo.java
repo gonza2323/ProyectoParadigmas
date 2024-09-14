@@ -17,7 +17,7 @@ public class Prestamo extends Operacion{
 
         this.interest = amount * anualInterestRate * months / 12;
         this.anualInterestRate = anualInterestRate;
-        this.cancellationDate = date.plusMonths(12);
+        this.cancellationDate = date.plusMonths(months);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Prestamo extends Operacion{
     }
 
     @Override
-    public void realizarOperacion(Client cliente, float amount) {
+    public void realizarOperacion() {
 
     }
 
