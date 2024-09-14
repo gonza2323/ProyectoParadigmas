@@ -59,6 +59,7 @@ public class App {
         }
 
         interfaz.start();
+        timeSim.stop();
 
         try {
             simThread.join(); // Wait for the simulation thread to finish
