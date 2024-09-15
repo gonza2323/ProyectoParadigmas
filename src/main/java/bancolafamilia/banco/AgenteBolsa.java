@@ -42,14 +42,27 @@ public class AgenteBolsa {
         return montoFinal * comissionRate;
     }
 
-    public TransaccionBolsa operar(Client client, Activo activo, int cantidad, String tipo){
+
+    public TransaccionBolsa operar(DocumentoInversionBolsa doc, Client client, Activo activo, int cantidad, String tipo){
 
         float amount = activo.getValue() * cantidad;
         float comision = calcularComision(amount);
 
         if (tipo.equalsIgnoreCase("buy")){
             client.getPortfolioActivos().addActivo(activo,amount);
+            //se actualiza el documento de inversion con la info de la compra nueva
+            if (doc != null){ //si no es null es pq el cliente ya ha comprado de esta acciones y las tiene en su cartera entonces solo se modifican los valores
+                doc.amount += amount;
+                doc.comisiones += comision;
+                doc.cantidad += cantidad;
+
+            }
+
         } else{
+            doc.amount -= amount;
+            doc.comisiones -= comision;
+            doc.cantidad -= cantidad;
+
             client.getPortfolioActivos().removeActivo(activo, amount);
         }
 
@@ -75,9 +88,13 @@ public class AgenteBolsa {
             return simulacion;
 
         } else{
-            float ganancia = activo.getValue() * cantidad;
-            comision = calcularComision(ganancia);
-            simulacion = new DocumentoInversionBolsa(client,activo, ganancia, cantidad, comision, "sell");
+
+            float ganancia = activo.getGanancias();
+
+            float monto = activo.getValue() * cantidad;
+            comision = calcularComision(monto);
+            simulacion = new DocumentoInversionBolsa(client,activo, ganancia+monto, cantidad, comision, "sell");
+            simulacion.setGanancias(ganancia);
             return simulacion;
 
         }

@@ -28,6 +28,7 @@ public class Banco implements IOpBcoCliente {
     private final ArrayList<TransaccionBolsa> transaccionesBolsa;
 
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
+    private final ArrayList<DocumentoInversionBolsa> inversionesPerClient;
 
     
     public Banco() {
@@ -43,6 +44,7 @@ public class Banco implements IOpBcoCliente {
         this.operacionesProgramadas = new PriorityQueue<>();
         this.transaccionesBolsa = new ArrayList<>();
         this.listaDocEspecial = new ArrayList<>();
+        this.inversionesPerClient = new ArrayList<>();
     }
 
     public void setBroker(AgenteBolsa broker) {
@@ -387,19 +389,26 @@ public class Banco implements IOpBcoCliente {
 
     //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
 
-    public boolean operarEnLaBolsa(Client client, Activo activo, int cantidad, String tipo){
+    public boolean operarEnLaBolsa(DocumentoInversionBolsa doc, Client client, Activo activo, int cantidad, String tipo){
         if ((client.getBalance() < (activo.getValue() * cantidad) + broker.comissionRate) && (tipo.equalsIgnoreCase("buy"))) {
             return false;
 
         }else{
 
-            TransaccionBolsa transaccion = broker.operar(client, activo, cantidad, tipo);
+            DocumentoInversionBolsa inversion = getInversionPerClient(activo, client);
+
+
+            if (inversion == null){inversionesPerClient.add(doc);}; //agregamos a la lista el documento de la simulacion pq se aprobo la compra
+
+            TransaccionBolsa transaccion = broker.operar(inversion, client, activo, cantidad, tipo);
 
             if (transaccion.getTipo().equalsIgnoreCase("buy")){
                 client.balance -= (transaccion.getAmount() + transaccion.getComision());
                 transaccionesBolsa.add(transaccion);
+
             }else{
-                client.balance += (transaccion.getAmount() + transaccion.getComision());
+
+                client.balance += (transaccion.getAmount() + doc.getGanancias() - transaccion.getComision());
 
             }
             return true;
@@ -407,14 +416,17 @@ public class Banco implements IOpBcoCliente {
 
     }
 
-    public float getMontoInversionesAsociadas(Activo activo, Client client) {
-        float monto = 0;
-        for (TransaccionBolsa transaccion : transaccionesBolsa){
-            if (transaccion.getCliente().equals(client) && transaccion.getActivo().equals(activo)){
-                monto += transaccion.getAmount();
+    public DocumentoInversionBolsa getInversionPerClient(Activo activo, Client client) {
+
+        for (DocumentoInversionBolsa inversion : inversionesPerClient){
+            if (inversion.getClient().equals(client) && inversion.getActivo().getName().equalsIgnoreCase(activo.getName())){
+                System.out.printf("se encontro el doc");
+                return inversion;
+
             }
         }
-        return monto;
+        System.out.println("no se encontro el doc");
+        return null;
     }
 
     public int getCantInversionesAsociadas(Activo activo, Client client) {

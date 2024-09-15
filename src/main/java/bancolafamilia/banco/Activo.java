@@ -35,6 +35,9 @@ public class Activo {
 
     public float getGanancias() {
         float random = (float)Math.random();
-        return this.value *= random;
+        this.ganancias = value*random;
+        return this.ganancias;
+
+
     }
 }

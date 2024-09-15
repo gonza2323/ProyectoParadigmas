@@ -161,6 +161,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         if (operationTypeBroker == OPERATION_TYPE_BROKER.ADVICE) {
             String msg = banco.broker.provideAdvice(client);
             view.showAdviceMsg(msg);
+
         } else if (operationTypeBroker == OPERATION_TYPE_BROKER.BUY){
             Activo activo = view.showActivosDisponibles(banco.broker.getActivosDisponibles());
 
@@ -172,9 +173,10 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             boolean comprar = view.showSimulationCompra(doc);
 
             if (comprar){
-                if (banco.operarEnLaBolsa(client,activo,cantidad,"buy")){
+                if (banco.operarEnLaBolsa(doc,client,activo,cantidad,"buy")){
                     view.showBuySuccessMsg(doc.getActivo().getName(), doc.getCantidad(), doc.getAmount(), doc.getComisiones());
                     view.updateBalance(client.getBalance());
+
                 } else {
                     view.showInsufficientFundsError();
                 }
@@ -184,31 +186,45 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         } else if (operationTypeBroker == OPERATION_TYPE_BROKER.SELL) {
             Activo activo = view.showPortfolioActivos(client.portfolioActivos.getList());
 
+
             if (activo == null){return;}
 
-            int cantActivosEnCartera = banco.getCantInversionesAsociadas(activo, client);
-            float monto = banco.getMontoInversionesAsociadas(activo, client);
+
+            DocumentoInversionBolsa docAsociado = banco.getInversionPerClient(activo, client);
+
+            int cantActivosEnCartera;
+
+            if (docAsociado == null){
+                cantActivosEnCartera = 0;}
+            else{
+                cantActivosEnCartera = docAsociado.getCantidad();;
+            }
+
+            //float monto = banco.getMontoInversionesAsociadas(activo, client);
             String amountStr = view.requestAmountAssetsVenta();
             int cantidad = Integer.parseInt(amountStr);
 
             if (cantidad > cantActivosEnCartera){
                 view.showValueError();
-                return;
-            }
 
+            } else{
 
-            float comisiones = banco.broker.calcularComision(activo.getValue()*cantidad);
-            boolean vender = view.showSimulationVenta(activo,monto,comisiones,cantidad);
+                //cliente, actvio, ganancia+monto, cantidad, comision
+                DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(client, activo, cantidad, "sell");
 
-            if (vender){
-                if (banco.operarEnLaBolsa(client,activo,cantidad,"sell")) {
-                    view.showBuySuccessMsg(activo.getName(), cantidad, activo.getValue() * cantidad, comisiones);
-                    view.updateBalance(client.getBalance());
+                boolean vender = view.showSimulationVenta(doc);
 
+                if (vender){
+                    if (banco.operarEnLaBolsa(doc, client,activo,cantidad,"sell")) {
+                        view.showSellSuccessMsg(activo.getName(), cantidad, activo.getValue() * cantidad, doc.getGanancias(), doc.getComisiones());
+                        view.updateBalance(client.getBalance());
+
+                    }
                 }
-            } else {
-                return;
+
             }
+
+
 
 
         }

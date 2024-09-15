@@ -409,7 +409,7 @@ public class ClientMenuView extends PageView {
         return flag[0];
     }
 
-    public boolean showSimulationVenta(Activo activo, float monto, float comisiones, int cant){
+    public boolean showSimulationVenta(DocumentoInversionBolsa doc){
         BasicWindow window = new BasicWindow("Simulacion de Venta de Activos");
         window.setHints(
                 Arrays.asList(
@@ -421,19 +421,20 @@ public class ClientMenuView extends PageView {
         panel.setLayoutManager(new GridLayout(1));
 
 
-        Table<Object> table = new Table<>("Activo", "PrecioUnitario", "Cantidad", "Comisiones", "Ganancias", "Riesgo" );
+        Table<Object> table = new Table<>("Activo", "PrecioUnitario", "Cantidad", "Ganancias", "PrecioFinal", "Comisiones", "Riesgo" );
 
         panel.addComponent(table);
 
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        String comisionesF = decimalFormat.format(comisiones);
-        String precioUnitario = decimalFormat.format(monto);
-        String ganancias = decimalFormat.format(activo.getGanancias());
+        String comisionesF = decimalFormat.format(doc.getComisiones());
+        String precioUnitario = decimalFormat.format(doc.getActivo().getValue());
+        String precioFinal = decimalFormat.format(doc.getAmount());
+        String ganancias = decimalFormat.format(doc.getGanancias());
 
 
 
 
-        table.getTableModel().addRow(new Object[]{activo.getName(), precioUnitario, cant, comisionesF, ganancias, activo.getRiesgoAsociado()});
+        table.getTableModel().addRow(new Object[]{doc.getActivo().getName(), precioUnitario, doc.getCantidad(), ganancias, precioFinal, comisionesF, doc.getActivo().getRiesgoAsociado()});
 
 
 //        panel.addComponent(new Button("Cerrar",
@@ -513,6 +514,10 @@ public class ClientMenuView extends PageView {
 
     public void showBuySuccessMsg(String name, int cantidad, float monto, float comisiones) {
         showMessageDialog("¡Compra Exitosa!", "Has adquirido " + cantidad + " activo(s) de " + name + " por un costo total de " + monto + "\nComision cobrada: $" + comisiones);
+    }
+
+    public void showSellSuccessMsg(String name, int cantidad, float monto, float ganancias, float comisiones) {
+        showMessageDialog("¡Venta Exitosa!", "Has vendido " + cantidad + " activo(s) de " + name + " por un costo total de " + monto + "\nTus ganancias han sido de $" + ganancias + "\nComision cobrada: $" + comisiones);
     }
 
     public void showValueError(){

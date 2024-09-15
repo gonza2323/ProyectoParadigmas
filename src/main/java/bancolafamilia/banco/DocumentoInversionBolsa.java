@@ -5,9 +5,10 @@ public class DocumentoInversionBolsa {
     private Client client;
     private String tipo;
     private Activo activo;
-    private float amount;
-    private float comisiones;
-    private int cantidad;
+    public float amount;
+    public float comisiones;
+    public int cantidad;
+    public float ganancias;
 
     public DocumentoInversionBolsa(Client client, Activo activo, float amount, int cantidad, float comisiones, String tipo) {
         this.client = client;
@@ -40,8 +41,20 @@ public class DocumentoInversionBolsa {
         return cantidad;
     }
 
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
     public Client getClient() {
         return client;
+    }
+
+    public void setGanancias(float ganancias) {
+        this.ganancias = ganancias;
+    }
+
+    public float getGanancias() {
+        return this.ganancias;
     }
 }
 
