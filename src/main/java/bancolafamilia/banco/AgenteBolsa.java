@@ -8,17 +8,16 @@ import java.util.Random;
 public class AgenteBolsa {
 
     private String name;
+    private int dni;
 
-    //tiene una lista de clientes
-    private List<Client> clientes;
     private List<Activo> activosDisponibles;
     public float comissionRate;
 
-    public AgenteBolsa(String name, float comissionRate) {
+    public AgenteBolsa(String name, int dni, float comissionRate) {
 
         this.name = name;
+        this.dni = dni;
         this.comissionRate = comissionRate;
-        this.clientes = new ArrayList<>();
         this.activosDisponibles = new ArrayList<>();
     }
 
@@ -29,14 +28,6 @@ public class AgenteBolsa {
     public List<Activo> getActivosDisponibles() {
         return activosDisponibles;
     }
-
-//    public void addClient(Client client){
-//        clientes.add(client);
-//    }
-//
-//    public void removeClient(Client client){
-//        clientes.remove(client);
-//    }
 
     public float calcularComision(float montoFinal){
         return montoFinal * comissionRate;
@@ -71,13 +62,6 @@ public class AgenteBolsa {
 
     }
 
-
-
-
-
-        //devolver "se compraron 3 unidades de activos = para el cliente tal
-
-
     public DocumentoInversionBolsa simularOperacionActivos(Client client,Activo activo, int cantidad, String tipo){
         float comision;
         DocumentoInversionBolsa simulacion;
@@ -100,11 +84,6 @@ public class AgenteBolsa {
         }
 
     }
-
-
-
-
-
 
     public String provideAdvice(Client client){
         Activo activoRecomendado = getActivo(activosDisponibles);
@@ -129,11 +108,9 @@ public class AgenteBolsa {
             }
 
         }
-
-
-
     }
 
+    //Con este método el broker eleige los activos que va a recomendar en el metodo provideAdvice
     public Activo getActivo(List<Activo> lista){
         Random random = new Random();
         int randomIndex = random.nextInt(lista.size());

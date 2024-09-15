@@ -263,13 +263,7 @@ public class ClientMenuView extends PageView {
             panel.addComponent(simularButton);
         }
 
-
-
-
         window.setComponent(panel);
-
-        // Mostrar la ventana
-//        gui.addWindowAndWait(window);
 
         panel.addComponent(new Button("Cerrar",
                 new Runnable() {
@@ -320,13 +314,7 @@ public class ClientMenuView extends PageView {
             panel.addComponent(simularButton);
         }
 
-
-
-
         window.setComponent(panel);
-
-//         Mostrar la ventana
-//        gui.addWindowAndWait(window);
 
         panel.addComponent(new Button("Cerrar",
                 new Runnable() {

@@ -29,10 +29,6 @@ public class DocumentoInversionBolsa {
         return amount;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
-
     public Activo getActivo() {
         return activo;
     }

@@ -26,9 +26,11 @@ public class Banco implements IOpBcoCliente {
     private final LinkedList<Operacion> operacionesAprobadas;
     private final PriorityQueue<Operacion> operacionesProgramadas;
     private final ArrayList<TransaccionBolsa> transaccionesBolsa;
+    //Con transaccionesBolsa sabemos la fecha y hora y la info de cada una de las op de compra-venta de activos
 
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
     private final ArrayList<DocumentoInversionBolsa> inversionesPerClient;
+    //Con inversionesPerClient vamos registrando la info sobre la cantidad de acciones, monto y comisiones de un mismo activo del cliente
 
     
     public Banco() {
@@ -420,24 +422,13 @@ public class Banco implements IOpBcoCliente {
 
         for (DocumentoInversionBolsa inversion : inversionesPerClient){
             if (inversion.getClient().equals(client) && inversion.getActivo().getName().equalsIgnoreCase(activo.getName())){
-                System.out.printf("se encontro el doc");
                 return inversion;
 
             }
         }
-        System.out.println("no se encontro el doc");
         return null;
     }
 
-    public int getCantInversionesAsociadas(Activo activo, Client client) {
-        int cant = 0;
-        for (TransaccionBolsa transaccion : transaccionesBolsa){
-            if (transaccion.getCliente().equals(client) && transaccion.getActivo().equals(activo)){
-                cant += transaccion.getCantidad();
-            }
-        }
-        return cant;
-    }
 
 }
 

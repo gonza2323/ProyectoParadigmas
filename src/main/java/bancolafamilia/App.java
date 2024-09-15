@@ -63,7 +63,7 @@ public class App {
         Activo activo5 = new Activo("Quantum Tech", 300000, 0.7f);
 
 
-        AgenteBolsa broker = new AgenteBolsa("Jose", 0.10f);
+        AgenteBolsa broker = new AgenteBolsa("Jose", 1241, 0.10f);
         banco.setBroker(broker);
         broker.newActivo(activo1);
         broker.newActivo(activo2);
