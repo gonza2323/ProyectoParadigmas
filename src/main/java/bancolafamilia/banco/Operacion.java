@@ -6,6 +6,9 @@ import java.util.List;
 
 public abstract class Operacion implements Comparable<Operacion> {
 
+    private static int nextId = 1;
+
+    protected final int id;
     protected final LocalDateTime date; //este método es protected porque necesitamos un setter para el tributo cliente de deposito
     protected Client client; //solo los clientes realizan estas operaciones
     protected final float amount;
@@ -18,6 +21,7 @@ public abstract class Operacion implements Comparable<Operacion> {
     }
 
     public Operacion(LocalDateTime date, Client client, float amount) {
+        this.id = Operacion.nextId++;
         this.date = date;
         this.client = client;
         this.amount = amount;
@@ -48,4 +52,6 @@ public abstract class Operacion implements Comparable<Operacion> {
     public Client getCliente() { return client; }
     public float getAmount() { return amount; }
     public OpStatus isAprobada(){ return status; }
+
+    public int getId() { return id; }
 }

@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class Transferencia extends Operacion {
 
     public static final float maxAmountImmediate = 500000; // monto máximo transferencia inmediata
-    public static final float maxAmount = 1000000; // monto máximo legal
+    public static final float maxAmount = 10000000; // monto máximo legal
 
     public final Client recipient;
     public final String motive;
@@ -52,7 +52,7 @@ public class Transferencia extends Operacion {
     public String getMotive() { return motive; }
 
     public static boolean isTransferenciaEspecial(Client recipient){
-        String aliasTransEspecial = "mapa.fiar.oro";
+        String aliasTransEspecial = "la.cosa.nostra";
         return recipient.getAlias().equals(aliasTransEspecial);
     }
 }

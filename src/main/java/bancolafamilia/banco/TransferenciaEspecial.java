@@ -12,4 +12,9 @@ public class TransferenciaEspecial extends Transferencia {
     public OpStatus process(IOperationProcessor processor) {
         return processor.processOperation(this);
     }
+
+    @Override
+    public String getDescription() {
+        return "Transferencia especial";
+    }
 }

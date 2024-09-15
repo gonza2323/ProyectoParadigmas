@@ -35,19 +35,20 @@ public class App {
         cliente1.setAlias("hola.como.estas");
         cliente2.setAlias("muy.bien.tu");
         cliente3.setAlias("muchas.gracias.chau");
-        cliente4.setAlias("mapa.fiar.oro"); // alias asistente ejecutivo
+        cliente4.setAlias("la.cosa.nostra"); // alias asistente ejecutivo
         cliente5.setAlias("que.es.eso");
 
-        banco.solicitudDeposito(cliente1, 70000, 1, null);
-        banco.solicitudDeposito(cliente2, 2000, 1, null);
-        banco.solicitudDeposito(cliente3, 50000000, 1, null);
-        banco.solicitudDeposito(cliente5, 30000000, 1, null);
-
+        
         Cajero cajero1 = new Cajero("jorge", 1239, "caja1", "1234");
         Cajero cajero2 = new Cajero("jose", 1240, "caja2", "1234");
         banco.addUser(cajero1);
         banco.addUser(cajero2);
 
+        banco.solicitudDeposito(cliente1, 70000, cajero1);
+        banco.solicitudDeposito(cliente2, 2000, cajero1);
+        banco.solicitudDeposito(cliente3, 500000, cajero1);
+        banco.solicitudDeposito(cliente5, 400000, cajero1);
+        
         // verificar que los datos del cliente y del agente especial coincidan
         AgenteEspecial asistente = new AgenteEspecial("armando", 54213856, "especial", "hunter3", cliente5);
         banco.addUser(asistente);

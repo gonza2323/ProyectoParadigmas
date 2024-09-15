@@ -62,14 +62,14 @@ public class Banco implements IOperationProcessor {
 
         while (earliestOperation != null && earliestOperation.getDate().isBefore(currenDateTime)) {
             operacionesProgramadas.remove();
-            processOperation(earliestOperation);
+            procesarOperacion(earliestOperation);
             hasProcesedOperations = true;
         }
 
         return hasProcesedOperations;
     }
 
-    private OpStatus processOperation(Operacion operation) {
+    private OpStatus procesarOperacion(Operacion operation) {
         
         if (operation.amount <= 0 || operation.status == OpStatus.DENIED) {
             operation.status = OpStatus.DENIED;
@@ -105,6 +105,19 @@ public class Banco implements IOperationProcessor {
     }
 
     @Override
+    public OpStatus processOperation(DepositoEspecial deposit) {
+        if (deposit.amount > Deposito.montoMax // 
+            && deposit.status != OpStatus.APPROVED)
+            return OpStatus.DENIED;
+        
+        this.reservesTotal += deposit.amount;
+        this.depositsTotal += deposit.amount;
+
+        deposit.client.addBalance(deposit.amount);
+        return OpStatus.DENIED;
+    }
+
+    @Override
     public OpStatus processOperation(Retiro withdrawal) {
         if (withdrawal.amount > Retiro.montoMax
             || withdrawal.amount > withdrawal.client.getBalance())
@@ -114,7 +127,7 @@ public class Banco implements IOperationProcessor {
         this.depositsTotal -= withdrawal.amount;
 
         withdrawal.client.reduceBalance(withdrawal.amount);
-        return OpStatus.APPROVED;
+        return OpStatus.DENIED;
     }
 
     @Override
@@ -122,8 +135,12 @@ public class Banco implements IOperationProcessor {
         if (transfer.amount > Transferencia.maxAmount)
             return OpStatus.DENIED;
         
-        if (transfer.status != OpStatus.APPROVED)
+        if (transfer.amount > Transferencia.maxAmountImmediate
+            && transfer.status != OpStatus.APPROVED)
             return OpStatus.MANUAL_APPROVAL_REQUIRED;
+        
+        if (transfer.amount > transfer.client.getBalance())
+            return OpStatus.DENIED;
         
         transfer.client.reduceBalance(transfer.amount);
         transfer.recipient.addBalance(transfer.amount);
@@ -134,22 +151,20 @@ public class Banco implements IOperationProcessor {
     @Override
     public OpStatus processOperation(TransferenciaEspecial transfer) {
         if (transfer.amount > Transferencia.maxAmount
-            || transfer.client.isPremiumClient == true
+            || transfer.client.isPremiumClient() == true
             || clientHasPendingSpecialTransfer(transfer.client))
             return OpStatus.DENIED;
         
         if (transfer.status != OpStatus.APPROVED)
             return OpStatus.MANUAL_APPROVAL_REQUIRED;
         
-        transfer.client.reduceBalance(transfer.amount);
+        transfer.recipient.reduceBalance(transfer.amount);
         transfer.recipient.addBalance(transfer.amount);
-        transfer.client.isPremiumClient = true;
+        transfer.client.promoteToPremiumClient();
         unattendedPremiumClients.add(transfer.client);
 
-        return OpStatus.DENIED; // esto hace que nunca se guarde una vez aceptada
+        return OpStatus.DENIED;
     }
-
-    
 
     @Override
     public OpStatus processOperation(Prestamo loan) {
@@ -172,6 +187,17 @@ public class Banco implements IOperationProcessor {
         return OpStatus.APPROVED;
     }
 
+    public void aprobarOperacionPendiente(Operacion operacion) {
+        operacion.aprobar();
+        if (operacionesPendientes.remove(operacion))
+            procesarOperacion(operacion);
+    }
+
+    public void denegarOperacion(Operacion operacion) {
+        operacion.denegar();
+        operacionesPendientes.remove(operacion);
+    }
+
     public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
         Operacion transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
 
@@ -179,22 +205,28 @@ public class Banco implements IOperationProcessor {
             transferencia = new TransferenciaEspecial(LocalDateTime.now(), sender, recipient, amount, motivo);
         }
 
-        return processOperation(transferencia);
+        return procesarOperacion(transferencia);
     }
 
     public OpStatus solicitudPrestamo(Client client, float amount, int months) {
         Operacion loan = new Prestamo(LocalDateTime.now(), client, amount, anualInterestRate, months);
-        return processOperation(loan);
+        return procesarOperacion(loan);
     }
 
-    public OpStatus solicitudDeposito(Client client, float amount, int caja, Cajero cajero) {
-        Operacion deposit = new Deposito(LocalDateTime.now(), client, amount, caja, cajero);
-        return processOperation(deposit);
+    public OpStatus solicitudDeposito(Client client, float amount, Cajero cajero) {
+        Deposito deposit = new Deposito(LocalDateTime.now(), client, amount, cajero);
+        Deposito approved = cajero.aprobarOperacion(deposit);
+        
+        if (approved.equals(deposit))
+            return procesarOperacion(approved);
+        
+        procesarOperacion(approved);
+        return OpStatus.APPROVED;
     }
 
     public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
         Operacion withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
-        return processOperation(withdrawal);
+        return procesarOperacion(withdrawal);
     }
 
     //3. DEPOSITOS -----------------------------------------------------------------------------------------------------
@@ -204,18 +236,6 @@ public class Banco implements IOperationProcessor {
     //3.1.2 METODOS PARA EL INTERCAMBIO DE INFO CLIENTE-AGENTE ESPECIAL-------------------------------------------------
     //Estos metodos son llamados desde la AgenteEspecialMenuPage--------------------------------------------------------
 
-    public boolean aprobarTransaccionEspecial(Client client, float amount){
-        if (amount <= 0 || amount > AgenteEspecial.montoMaxOpEspecial) {
-            return false;
-        }
-        return true;
-
-    }
-
-    public int cajaTransaccionEspecial(Client client, float amount) {
-        Cajero cajero = client.agenteEspecial.procesarTransaccionEspecial(client, amount, getCajeros()); //le envia al agente especial: el cliente, el monto que quiere lavar y la lista de cajero para que se lo envie al cliente
-        return cajero.getCaja();
-    }
 
     //3.2 METODOS PARA DEPOSITOS EN GRAL -------------------------------------------------------------------------------
     //Este metodo es llamado desde la pagina despositos-----------------------------------------------------------------
@@ -237,14 +257,14 @@ public class Banco implements IOperationProcessor {
         //con esta lista le muestra al agente el cliente y el monto que deposito el cliente
     }
 
-    public DocumentoTransaccionEspecial simularTransaccionEspecial(AgenteEspecial agente, DocumentoClienteEspecial documentoCliente){
-        //este DocumentoClienteEspecial ya tiene la parte dela simulacion asociada
-        DocumentoClienteEspecial doc = agente.solicitarInfoModuloEspecial(documentoCliente);
-        listaDocEspecial.add(doc); //el banco agrega el docuemnto a su lista cuando ya esta completo, es decir que tiene los datos de docuemntoCliente  y los datos de documentoTransaccionEspecial
-        return doc.getDocumentoSimulacion();
-        //devuelve el documento donde esta la info de la simulacion que debe hacer el agente especial
+    // public DocumentoTransaccionEspecial simularTransaccionEspecial(AgenteEspecial agente, DocumentoClienteEspecial documentoCliente){
+    //     //este DocumentoClienteEspecial ya tiene la parte dela simulacion asociada
+    //     DocumentoClienteEspecial doc = agente.solicitarInfoModuloEspecial(documentoCliente);
+    //     listaDocEspecial.add(doc); //el banco agrega el docuemnto a su lista cuando ya esta completo, es decir que tiene los datos de docuemntoCliente  y los datos de documentoTransaccionEspecial
+    //     return doc.getDocumentoSimulacion();
+    //     //devuelve el documento donde esta la info de la simulacion que debe hacer el agente especial
 
-    }
+    // }
 
     public void programarOpEspecial(DocumentoClienteEspecial doc){
         int dias = doc.getDocumentoSimulacion().getTiempoDias();
@@ -333,7 +353,7 @@ public class Banco implements IOperationProcessor {
     }
 
     private boolean clientHasPendingSpecialTransfer(Client client) {
-        return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client));
+        return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client) && t instanceof TransferenciaEspecial);
     }
 
     public List<Operacion> getOperaciones() { return operacionesAprobadas; }
@@ -344,6 +364,8 @@ public class Banco implements IOperationProcessor {
     public float getLoanedTotal() { return loanedTotal; }
     public float getDepositsTotal() { return depositsTotal; }
     public float getBalance() { return reservesTotal + loanedTotal - depositsTotal; }
+    public List<Empleado> getEmployees() { return empleados; }
 
     public float getAnualInterestRate() { return anualInterestRate; }
+    public Queue<Client> getPendingPremiumClients() { return unattendedPremiumClients; }
 }

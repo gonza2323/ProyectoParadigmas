@@ -82,11 +82,15 @@ class StartMenuPage extends PageController<StartMenuView>{
             return;
         }
 
+        Cajero cajero = cajeros.stream()
+                            .filter(c -> c.getCaja() == caja)
+                            .findFirst().get();
+
         Operacion.OpStatus status = null;
         if (operationType == OPERATION_TYPE.DEPOSIT)
-            status = banco.solicitudDeposito(client, amount, caja, null);
+            status = banco.solicitudDeposito(client, amount, cajero);
         else if (operationType == OPERATION_TYPE.WITHDRAWAL)
-            status = banco.solicitudRetiro(client, amount, null); // TODO arreglar esto
+            status = banco.solicitudRetiro(client, amount, cajero);
 
         if (status == OpStatus.DENIED) {
             view.showTooBigOperationError();

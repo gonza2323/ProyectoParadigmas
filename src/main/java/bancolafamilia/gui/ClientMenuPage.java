@@ -14,12 +14,14 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
     public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
-        super(banco, new ClientMenuView(gui, client.getNombre()), gui);
+        super(banco, new ClientMenuView(gui), gui);
 
         this.client = client;
 
+        view.updateName(client.getNombre());
         view.updateBalance(client.getBalance());
         view.updateDeuda(client.getDebt());
+        view.updateNotificationsButton(client.hasNewNotifications());
 
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
@@ -27,6 +29,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         view.bindLoanButton(() -> handleLoanButton());
         view.bindBrokerButton(() -> handleBrokerButton());
         view.bindAdviceButton(() -> handleAdviceButton());
+        view.bindNotificationsButton(() -> handleNotificationsButton());
         view.bindExitButton(() -> handleExitButton());
     }
 
@@ -153,14 +156,18 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         }
     }
 
+    private void handleNotificationsButton() {
+        client.markNotificationsRead();
+        view.updateNotificationsButton(client.hasNewNotifications());
+        view.showNotifications(client.getNotifications());
+    }
+
     private void handleBrokerButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar BOLSA");
+        view.showErrorDialog("Falta implementar BOLSA");
     }
 
     private void handleAdviceButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar ASESORAMIENTO");
+        view.showErrorDialog("Falta implementar ASESORAMIENTO");
     }
 
     private void handleExitButton() {

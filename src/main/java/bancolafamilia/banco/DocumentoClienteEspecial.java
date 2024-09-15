@@ -2,28 +2,21 @@ package bancolafamilia.banco;
 
 public class DocumentoClienteEspecial {
     private Client client;
-    private float amount;
-    private int caja;
+    private AgenteEspecial agent;
     private DocumentoTransaccionEspecial documentoSimulacion;
     public boolean inProcess = false;
 
-    public DocumentoClienteEspecial(Client client, float amount, int caja) {
+    public DocumentoClienteEspecial(Client client, AgenteEspecial agent) {
         this.client = client;
-        this.amount = amount;
-        this.caja = caja;
-
-    }
-
-    public float getAmount() {
-        return amount;
+        this.agent = agent;
     }
 
     public Client getClient() {
         return client;
     }
 
-    public int getCaja() {
-        return caja;
+    public AgenteEspecial getAgenteEspecial() {
+        return agent;
     }
 
     //Asociamos al documento del clienta la info de la simulacion

@@ -3,6 +3,7 @@ package bancolafamilia.gui;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.bundle.LanternaThemes;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.Direction;
@@ -28,33 +30,23 @@ import bancolafamilia.banco.Operacion;
 
 public class ClientMenuView extends PageView {
     
-    private final String name;
-    private final Label balanceIndicator;
-    private final Label deudaIndicator;
+    private final Label welcomeMessageLabel = new Label("Bienvenido [nombre]");
+    private final Label balanceIndicator = new Label("");
+    private final Label deudaIndicator = new Label("");
 
-    private final Button transferButton;
-    private final Button historyButton;
-    private final Button aliasButton;
-    private final Button loanButton;
-    private final Button brokerButton;
-    private final Button adviceButton;
-    private final Button exitButton;
+    private final Button transferButton = new Button("Transferencia");
+    private final Button historyButton = new Button("Movimientos");
+    private final Button aliasButton = new Button("Consultar alias");
+    private final Button loanButton = new Button("Préstamos");
+    private final Button brokerButton = new Button("Operar en bolsa");
+    private final Button adviceButton = new Button("Asesoramiento");
+    private final Button notificationsButton = new Button("Notificaciones");
+    private final Button exitButton = new Button("Salir");
     //private final Button changePasswordButton;
     
 
-    public ClientMenuView(WindowBasedTextGUI gui, String name) {
+    public ClientMenuView(WindowBasedTextGUI gui) {
         super(gui);
-        this.name = name;
-        this.balanceIndicator = new Label("");
-        this.deudaIndicator = new Label("");
-        
-        transferButton = new Button("Transferencia");
-        historyButton = new Button("Movimientos");
-        aliasButton = new Button("Consultar alias");
-        loanButton = new Button("Préstamos");
-        brokerButton = new Button("Operar en bolsa");
-        adviceButton = new Button("Asesoramiento");
-        exitButton = new Button("Salir");
     }
 
     public void startUI() {
@@ -70,16 +62,16 @@ public class ClientMenuView extends PageView {
                 .setHorizontalSpacing(1)
                 .setVerticalSpacing(1)
                 .setTopMarginSize(1)
-                .setLeftMarginSize(1));
+                .setLeftMarginSize(1)
+                .setRightMarginSize(1));
         window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // configuración layout
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
         
         // Mensaje de bienvenida
-        Label welcomeMsg = new Label("Bienvenido: " + name);
-        welcomeMsg.setLayoutData(horizontalFill);
-        panel.addComponent(welcomeMsg);
+        welcomeMessageLabel.setLayoutData(horizontalFill);
+        panel.addComponent(welcomeMessageLabel);
 
         // Balance y deuda
         balanceIndicator.setLayoutData(horizontalFill);
@@ -120,6 +112,9 @@ public class ClientMenuView extends PageView {
                 .setLayoutData(leftJustify));
         panel.addComponent(
             adviceButton
+                .setLayoutData(leftJustify));
+        panel.addComponent(
+            notificationsButton
                 .setLayoutData(leftJustify));
         panel.addComponent(
             exitButton
@@ -172,6 +167,10 @@ public class ClientMenuView extends PageView {
         gui.addWindowAndWait(window);
     }
 
+    public void updateName(String name) {
+        welcomeMessageLabel.setText("Bienvenido: " + name);
+    }
+
     public void updateBalance(float balance) {
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
         balanceIndicator.setText("Saldo: " + decimalFormat.format(balance));
@@ -180,6 +179,46 @@ public class ClientMenuView extends PageView {
     public void updateDeuda(float deuda) {
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
         deudaIndicator.setText("Deuda: " + decimalFormat.format(deuda));
+    }
+
+    public void updateNotificationsButton(boolean hasNewNotifications) {
+        if (hasNewNotifications) {
+            notificationsButton.setTheme(LanternaThemes.getRegisteredTheme("conqueror"));
+        } else {
+            notificationsButton.setTheme(LanternaThemes.getRegisteredTheme("defrost"));
+        }
+    }
+
+    public void showNotifications(ArrayList<String> notifications) {
+        BasicWindow window = new BasicWindow("Notificaciones");
+        window.setHints(
+            Arrays.asList(
+                Window.Hint.CENTERED,
+                Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+        
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+        
+        for (String notification : notifications) {
+            panel.addComponent(new Label(notification)
+                .setLabelWidth(40));
+        }
+
+        panel.addComponent(new Button("Cerrar",
+            new Runnable() {
+                @Override
+                public void run() {
+                    window.close();
+                }
+        }).setLayoutData(
+            GridLayout.createLayoutData(
+                GridLayout.Alignment.END,
+                GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
     }
 
     public String requestAlias() {
@@ -276,30 +315,34 @@ public class ClientMenuView extends PageView {
     }
 
     public void bindTransferButton(Runnable action) {
-        transferButton.addListener(transferButton -> action.run());
+        transferButton.addListener(b -> action.run());
     }
 
     public void bindHistoryButton(Runnable action) {
-        historyButton.addListener(historyButton -> action.run());
+        historyButton.addListener(b -> action.run());
     }
 
     public void bindAliasButton(Runnable action) {
-        aliasButton.addListener(aliasButton -> action.run());
+        aliasButton.addListener(b -> action.run());
     }
 
     public void bindLoanButton(Runnable action) {
-        loanButton.addListener(loanButton -> action.run());
+        loanButton.addListener(b -> action.run());
     }
 
     public void bindBrokerButton(Runnable action) {
-        brokerButton.addListener(brokerButton -> action.run());
+        brokerButton.addListener(b -> action.run());
     }
 
     public void bindAdviceButton(Runnable action) {
-        adviceButton.addListener(adviceButton -> action.run());
+        adviceButton.addListener(b -> action.run());
+    }
+
+    public void bindNotificationsButton(Runnable action) {
+        notificationsButton.addListener(b -> action.run());
     }
 
     public void bindExitButton(Runnable action) {
-        exitButton.addListener(closeButton -> action.run());
+        exitButton.addListener(b -> action.run());
     }
 }
