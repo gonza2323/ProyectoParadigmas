@@ -385,18 +385,19 @@ public class Banco implements IOpBcoCliente {
 
     //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
 
-    public boolean OperarEnLaBolsa(Client client, Activo activo, int cantidad, String tipo){
-        if (client.balance > activo.getValue() * cantidad){
+    public boolean operarEnLaBolsa(Client client, Activo activo, int cantidad, String tipo){
+        if (client.getBalance() < (activo.getValue() * cantidad) + broker.comissionRate) {
             return false;
 
         }else{
 
             TransaccionBolsa transaccion = broker.operar(client,activo,cantidad,tipo);
             if (transaccion.getTipo().equalsIgnoreCase("buy")){
-                client.balance -= (transaccion.getAmount() - transaccion.getComision());
+                client.balance -= (transaccion.getAmount() + transaccion.getComision());
+
 
             }else{
-                client.balance += (transaccion.getAmount() - transaccion.getComision());
+                client.balance += (transaccion.getAmount() + transaccion.getComision());
             }
             return true;
         }

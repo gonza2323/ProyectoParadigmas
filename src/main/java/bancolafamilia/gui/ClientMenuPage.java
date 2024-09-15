@@ -169,12 +169,17 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             String amountStr = view.requestAmountAssets();
             int cantidad = Integer.parseInt(amountStr);
             DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(activo, cantidad, "buy");
-            view.showSimulationActivos(doc);
+            boolean comprar = view.showSimulationActivos(doc);
 
+            if (comprar){
+                if (banco.operarEnLaBolsa(client,activo,cantidad,"buy")){
+                    view.showBuySuccessMsg(doc.getActivo().getName(), doc.getCantidad(), doc.getAmount(), doc.getComisiones());
+                    view.updateBalance(client.getBalance());
+                } else {
+                    view.showInsufficientFundsError();
+                }
 
-
-
-
+            }
 
         }
     }

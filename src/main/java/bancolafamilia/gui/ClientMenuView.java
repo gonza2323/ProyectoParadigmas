@@ -3,6 +3,7 @@ package bancolafamilia.gui;
 import bancolafamilia.banco.Activo;
 import bancolafamilia.banco.DocumentoInversionBolsa;
 import bancolafamilia.banco.Operacion;
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
@@ -234,9 +235,9 @@ public class ClientMenuView extends PageView {
         panel.setLayoutManager(new GridLayout(3));  // 3 columnas: Nombre, Precio, Botón
 
         // Agregar encabezados de la tabla
-        panel.addComponent(new Label("Nombre del Activo"));
-        panel.addComponent(new Label("Precio del Activo"));
-        panel.addComponent(new Label("Acción"));
+        panel.addComponent(new Label("Activo"));
+        panel.addComponent(new Label("Precio"));
+        panel.addComponent(new Label("Simular"));
 
         final Activo[] selectedActivo = {null};
         final String[] amountStr = {null};
@@ -286,7 +287,7 @@ public class ClientMenuView extends PageView {
         return selectedActivo[0];
     }
 
-    public void showSimulationActivos(DocumentoInversionBolsa doc){
+    public boolean showSimulationActivos(DocumentoInversionBolsa doc){
         BasicWindow window = new BasicWindow("Simulacion de Inversión de Activos");
         window.setHints(
                 Arrays.asList(
@@ -296,72 +297,61 @@ public class ClientMenuView extends PageView {
 
         Panel panel = new Panel();
         panel.setLayoutManager(new GridLayout(1));
-        window.setComponent(panel);
 
-        Table<Object> table = new Table<>("Activo", "Precio unitario", "Cantidad", "Precio Final", "Riesgo Asociado" );
+
+        Table<Object> table = new Table<>("Activo", "PrecioUnitario", "Cantidad", "Comisiones", "PrecioFinal", "Riesgo" );
+
         panel.addComponent(table);
 
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        String monto = decimalFormat.format(doc.getAmount());
-        String riesgo = decimalFormat.format(doc.getActivo().getRiesgoAsociado());
-        table.getTableModel().addRow(new Object[]{doc.getActivo().getName(), doc.getActivo().getValue(), doc.getCantidad(), monto, riesgo});
+        String comisiones = decimalFormat.format(doc.getComisiones());
+        String precioUnitario = decimalFormat.format(doc.getActivo().getValue());
+        float precio = doc.getAmount() + doc.getComisiones();
+        String precioFinal = decimalFormat.format(precio);
 
-        panel.addComponent(new Button("Cerrar",
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        window.close();
-                    }
-                }).setLayoutData(
-                GridLayout.createLayoutData(
-                        GridLayout.Alignment.END,
-                        GridLayout.Alignment.CENTER))
-        );
+
+
+        table.getTableModel().addRow(new Object[]{doc.getActivo().getName(), precioUnitario, doc.getCantidad(), comisiones, precioFinal, doc.getActivo().getRiesgoAsociado()});
+
+
+//        panel.addComponent(new Button("Cerrar",
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        window.close();
+//                    }
+//                }).setLayoutData(
+//                GridLayout.createLayoutData(
+//                        GridLayout.Alignment.END,
+//                        GridLayout.Alignment.CENTER))
+//        );
+
+        final boolean[] flag = {false};
 
         panel.addComponent(new Button("Comprar",
                 new Runnable() {
                     @Override
                     public void run() {
+                        flag[0] = true;
                         window.close();
                     }
                 }).setLayoutData(
                 GridLayout.createLayoutData(
-                        GridLayout.Alignment.END,
-                        GridLayout.Alignment.CENTER))
+                        GridLayout.Alignment.CENTER,
+                        GridLayout.Alignment.END))
         );
 
+        TerminalSize preferredSize = panel.calculatePreferredSize();
+        panel.setPreferredSize(preferredSize);
+
+
+        window.setComponent(panel);
+
+
         gui.addWindowAndWait(window);
+        return flag[0];
     }
 
-
-
-
-//        ActionListDialogBuilder builder = new ActionListDialogBuilder();
-//        builder
-//                .setTitle("Acciones Disponibles para Compra")
-//                .setDescription("")
-//                .addCustomComponent(table)
-//                .build()
-//                .showDialog(gui);
-
-
-
-//        ActionListDialogBuilder builder = new ActionListDialogBuilder();
-//
-//
-//        final Activo[] selectedAction = { null };
-//
-//        for (Activo activo : activos) {
-//            builder.addAction(activo.getName(), () -> {selectedAction[0] = activo;});
-//        }
-//
-//        builder
-//                .setTitle("Acciones Disponibles Para Compra")
-//                .build()
-//                .showDialog(gui);
-//
-//        return selectedAction[0];
-//    }
 
     public OPERATION_TYPE_BROKER requestOperationTypeBroker() {
         ActionListDialogBuilder builder = new ActionListDialogBuilder();
@@ -387,6 +377,10 @@ public class ClientMenuView extends PageView {
                 .setValidationPattern(Pattern.compile("^(10|[1-9])$"), "Puede comprar minimo una acción y máximo 10")
                 .build()
                 .showDialog(gui);
+    }
+
+    public void showBuySuccessMsg(String name, int cantidad, float monto, float comisiones) {
+        showMessageDialog("¡Compra Exitosa!", "Has adquirido " + cantidad + " activo(s) de " + name + " por un costo total de " + monto + "\nComision cobrada: $" + comisiones);
     }
 
     public void showNotEnoughCreditError() {

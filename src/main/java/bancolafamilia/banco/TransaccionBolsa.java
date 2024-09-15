@@ -58,4 +58,12 @@ public class TransaccionBolsa extends Operacion {
     public float getComision() {
         return comision;
     }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public Activo getActivo() {
+        return activo;
+    }
 }

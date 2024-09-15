@@ -12,7 +12,7 @@ public class AgenteBolsa {
     //tiene una lista de clientes
     private List<Client> clientes;
     private List<Activo> activosDisponibles;
-    private float comissionRate;
+    public float comissionRate;
 
     public AgenteBolsa(String name, float comissionRate) {
 
@@ -123,6 +123,11 @@ public class AgenteBolsa {
         return activo;
     }
 
+    public float getComissionRate() {
+        return comissionRate;
+    }
 
-
+    public void setComissionRate(float comissionRate) {
+        this.comissionRate = comissionRate;
+    }
 }
