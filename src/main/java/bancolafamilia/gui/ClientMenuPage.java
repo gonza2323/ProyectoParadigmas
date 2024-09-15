@@ -1,10 +1,7 @@
 package bancolafamilia.gui;
 
 
-import bancolafamilia.banco.Activo;
-import bancolafamilia.banco.Banco;
-import bancolafamilia.banco.Client;
-import bancolafamilia.banco.DocumentoInversionBolsa;
+import bancolafamilia.banco.*;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
@@ -166,10 +163,13 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             view.showAdviceMsg(msg);
         } else if (operationTypeBroker == OPERATION_TYPE_BROKER.BUY){
             Activo activo = view.showActivosDisponibles(banco.broker.getActivosDisponibles());
+
+            if (activo == null){return;}
+
             String amountStr = view.requestAmountAssets();
             int cantidad = Integer.parseInt(amountStr);
-            DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(activo, cantidad, "buy");
-            boolean comprar = view.showSimulationActivos(doc);
+            DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(client, activo, cantidad, "buy");
+            boolean comprar = view.showSimulationCompra(doc);
 
             if (comprar){
                 if (banco.operarEnLaBolsa(client,activo,cantidad,"buy")){
@@ -180,6 +180,36 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
                 }
 
             }
+
+        } else if (operationTypeBroker == OPERATION_TYPE_BROKER.SELL) {
+            Activo activo = view.showPortfolioActivos(client.portfolioActivos.getList());
+
+            if (activo == null){return;}
+
+            int cantActivosEnCartera = banco.getCantInversionesAsociadas(activo, client);
+            float monto = banco.getMontoInversionesAsociadas(activo, client);
+            String amountStr = view.requestAmountAssetsVenta();
+            int cantidad = Integer.parseInt(amountStr);
+
+            if (cantidad > cantActivosEnCartera){
+                view.showValueError();
+                return;
+            }
+
+
+            float comisiones = banco.broker.calcularComision(activo.getValue()*cantidad);
+            boolean vender = view.showSimulationVenta(activo,monto,comisiones,cantidad);
+
+            if (vender){
+                if (banco.operarEnLaBolsa(client,activo,cantidad,"sell")) {
+                    view.showBuySuccessMsg(activo.getName(), cantidad, activo.getValue() * cantidad, comisiones);
+                    view.updateBalance(client.getBalance());
+
+                }
+            } else {
+                return;
+            }
+
 
         }
     }

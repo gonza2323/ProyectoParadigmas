@@ -55,6 +55,7 @@ public class AgenteBolsa {
 
         TransaccionBolsa transaccion = new TransaccionBolsa(LocalDateTime.now(), client, activo, cantidad, amount, comision, tipo);
         return transaccion;
+
     }
 
 
@@ -64,19 +65,19 @@ public class AgenteBolsa {
         //devolver "se compraron 3 unidades de activos = para el cliente tal
 
 
-    public DocumentoInversionBolsa simularOperacionActivos(Activo activo, int cantidad, String tipo){
+    public DocumentoInversionBolsa simularOperacionActivos(Client client,Activo activo, int cantidad, String tipo){
         float comision;
         DocumentoInversionBolsa simulacion;
         if (tipo.equalsIgnoreCase("buy")){
             float montoAInvertir = activo.getValue()*cantidad;
             comision = calcularComision(montoAInvertir);
-            simulacion = new DocumentoInversionBolsa(activo, montoAInvertir, cantidad, comision, "buy");
+            simulacion = new DocumentoInversionBolsa(client, activo, montoAInvertir, cantidad, comision, "buy");
             return simulacion;
 
         } else{
             float ganancia = activo.getValue() * cantidad;
             comision = calcularComision(ganancia);
-            simulacion = new DocumentoInversionBolsa(activo, ganancia, cantidad, comision, "sell");
+            simulacion = new DocumentoInversionBolsa(client,activo, ganancia, cantidad, comision, "sell");
             return simulacion;
 
         }
@@ -102,7 +103,7 @@ public class AgenteBolsa {
 
                 } while (activoRiesgo.equals(activoRecomendado));
 
-                return "Tu cartera de inversiones representa un riesgo alto. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Venta: vende acciones del activo " + activoRiesgo + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado.getName();
+                return "Tu cartera de inversiones representa un riesgo alto. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Venta: vende acciones del activo " + activoRiesgo.getName()+ "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado.getName();
 
             }else{
 

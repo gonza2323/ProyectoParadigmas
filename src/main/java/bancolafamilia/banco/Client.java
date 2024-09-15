@@ -58,9 +58,6 @@ public class Client extends User { //implements IOpBcoCliente
     }
 
 
-    public void setFlagRiesgoInverison(boolean flagRiesgoInverison) {
-        this.flagRiesgoInverison = flagRiesgoInverison;
-    }
 }
 
 

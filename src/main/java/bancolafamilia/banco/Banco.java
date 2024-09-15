@@ -25,6 +25,7 @@ public class Banco implements IOpBcoCliente {
     private final Queue<Operacion> operacionesPendientes;
     private final LinkedList<Operacion> operacionesAprobadas;
     private final PriorityQueue<Operacion> operacionesProgramadas;
+    private final ArrayList<TransaccionBolsa> transaccionesBolsa;
 
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
 
@@ -40,6 +41,7 @@ public class Banco implements IOpBcoCliente {
         this.operacionesPendientes = new LinkedList<>();
         this.operacionesAprobadas = new LinkedList<>();
         this.operacionesProgramadas = new PriorityQueue<>();
+        this.transaccionesBolsa = new ArrayList<>();
         this.listaDocEspecial = new ArrayList<>();
     }
 
@@ -386,22 +388,44 @@ public class Banco implements IOpBcoCliente {
     //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
 
     public boolean operarEnLaBolsa(Client client, Activo activo, int cantidad, String tipo){
-        if (client.getBalance() < (activo.getValue() * cantidad) + broker.comissionRate) {
+        if ((client.getBalance() < (activo.getValue() * cantidad) + broker.comissionRate) && (tipo.equalsIgnoreCase("buy"))) {
             return false;
 
         }else{
 
-            TransaccionBolsa transaccion = broker.operar(client,activo,cantidad,tipo);
+            TransaccionBolsa transaccion = broker.operar(client, activo, cantidad, tipo);
+
             if (transaccion.getTipo().equalsIgnoreCase("buy")){
                 client.balance -= (transaccion.getAmount() + transaccion.getComision());
-
-
+                transaccionesBolsa.add(transaccion);
             }else{
                 client.balance += (transaccion.getAmount() + transaccion.getComision());
+
             }
             return true;
         }
 
     }
+
+    public float getMontoInversionesAsociadas(Activo activo, Client client) {
+        float monto = 0;
+        for (TransaccionBolsa transaccion : transaccionesBolsa){
+            if (transaccion.getCliente().equals(client) && transaccion.getActivo().equals(activo)){
+                monto += transaccion.getAmount();
+            }
+        }
+        return monto;
+    }
+
+    public int getCantInversionesAsociadas(Activo activo, Client client) {
+        int cant = 0;
+        for (TransaccionBolsa transaccion : transaccionesBolsa){
+            if (transaccion.getCliente().equals(client) && transaccion.getActivo().equals(activo)){
+                cant += transaccion.getCantidad();
+            }
+        }
+        return cant;
+    }
+
 }
 

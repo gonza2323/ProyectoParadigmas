@@ -6,6 +6,7 @@ public class Activo {
     private String descripcion;
     private float value;
     private float riesgoAsociado;
+    private float ganancias;
 
 
     public Activo(String name, float value, float riesgoAsociado) {
@@ -30,5 +31,10 @@ public class Activo {
 
     public float getRiesgoAsociado() {
         return (float)Math.random();
+    }
+
+    public float getGanancias() {
+        float random = (float)Math.random();
+        return this.value *= random;
     }
 }

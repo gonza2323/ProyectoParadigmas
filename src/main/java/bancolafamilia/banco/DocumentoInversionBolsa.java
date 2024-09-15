@@ -1,18 +1,22 @@
 package bancolafamilia.banco;
 
 public class DocumentoInversionBolsa {
+
+    private Client client;
     private String tipo;
     private Activo activo;
     private float amount;
     private float comisiones;
     private int cantidad;
 
-    public DocumentoInversionBolsa(Activo activo, float amount, int cantidad, float comisiones, String tipo) {
+    public DocumentoInversionBolsa(Client client, Activo activo, float amount, int cantidad, float comisiones, String tipo) {
+        this.client = client;
         this.activo = activo;
         this.tipo = tipo;
         this.amount = amount;
         this.comisiones = comisiones;
         this.cantidad = cantidad;
+
 
     }
 
@@ -34,6 +38,10 @@ public class DocumentoInversionBolsa {
 
     public int getCantidad() {
         return cantidad;
+    }
+
+    public Client getClient() {
+        return client;
     }
 }
 

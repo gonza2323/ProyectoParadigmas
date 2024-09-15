@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class TransaccionBolsa extends Operacion {
 
-    private Activo activo;
+    public Activo activo;
     private String tipo;
     private int cantidad;
     private float comision;
@@ -63,7 +63,12 @@ public class TransaccionBolsa extends Operacion {
         return cantidad;
     }
 
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
     public Activo getActivo() {
         return activo;
     }
+
 }

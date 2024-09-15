@@ -270,24 +270,81 @@ public class ClientMenuView extends PageView {
 
         // Mostrar la ventana
 //        gui.addWindowAndWait(window);
-//
-//        panel.addComponent(new Button("Cerrar",
-//                new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        window.close();
-//                    }
-//                }).setLayoutData(
-//                GridLayout.createLayoutData(
-//                        GridLayout.Alignment.END,
-//                        GridLayout.Alignment.CENTER))
-//        );
+
+        panel.addComponent(new Button("Cerrar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
 
         gui.addWindowAndWait(window);
         return selectedActivo[0];
     }
 
-    public boolean showSimulationActivos(DocumentoInversionBolsa doc){
+    public Activo showPortfolioActivos(List<Activo> activos) {
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(3));  // 3 columnas: Nombre, Precio, Botón
+
+        // Agregar encabezados de la tabla
+        panel.addComponent(new Label("Activo"));
+        panel.addComponent(new Label("Precio"));
+        panel.addComponent(new Label("Simular Venta"));
+
+        final Activo[] selectedActivo = {null};
+        final String[] amountStr = {null};
+
+        // Crear una ventana que contenga el panel
+        BasicWindow window = new BasicWindow("Resumen de Activos");
+
+        // Agregar las filas de la tabla con el botón "Simular"
+        for (Activo activo : activos) {
+            // Columna 1: Nombre del activo
+            panel.addComponent(new Label(activo.getName()));
+
+            // Columna 2: Precio del activo
+            panel.addComponent(new Label(String.valueOf(activo.getValue())));
+
+            // Columna 3: Botón "Simular"
+            Button simularButton = new Button("Simular Venta", () -> { selectedActivo[0] = activo;
+                window.close();
+
+                // Acción a realizar cuando se presiona el botón
+                //System.out.println("Simulando la compra de: " + activo.getName());
+            });
+            panel.addComponent(simularButton);
+        }
+
+
+
+
+        window.setComponent(panel);
+
+//         Mostrar la ventana
+//        gui.addWindowAndWait(window);
+
+        panel.addComponent(new Button("Cerrar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
+        return selectedActivo[0];
+    }
+
+    public boolean showSimulationCompra(DocumentoInversionBolsa doc){
         BasicWindow window = new BasicWindow("Simulacion de Inversión de Activos");
         window.setHints(
                 Arrays.asList(
@@ -352,6 +409,72 @@ public class ClientMenuView extends PageView {
         return flag[0];
     }
 
+    public boolean showSimulationVenta(Activo activo, float monto, float comisiones, int cant){
+        BasicWindow window = new BasicWindow("Simulacion de Venta de Activos");
+        window.setHints(
+                Arrays.asList(
+                        Window.Hint.CENTERED,
+                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+
+
+        Table<Object> table = new Table<>("Activo", "PrecioUnitario", "Cantidad", "Comisiones", "Ganancias", "Riesgo" );
+
+        panel.addComponent(table);
+
+        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        String comisionesF = decimalFormat.format(comisiones);
+        String precioUnitario = decimalFormat.format(monto);
+        String ganancias = decimalFormat.format(activo.getGanancias());
+
+
+
+
+        table.getTableModel().addRow(new Object[]{activo.getName(), precioUnitario, cant, comisionesF, ganancias, activo.getRiesgoAsociado()});
+
+
+//        panel.addComponent(new Button("Cerrar",
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        window.close();
+//                    }
+//                }).setLayoutData(
+//                GridLayout.createLayoutData(
+//                        GridLayout.Alignment.END,
+//                        GridLayout.Alignment.CENTER))
+//        );
+
+        final boolean[] flag = {false};
+
+        panel.addComponent(new Button("Vender",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        flag[0] = true;
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.CENTER,
+                        GridLayout.Alignment.END))
+        );
+
+        TerminalSize preferredSize = panel.calculatePreferredSize();
+        panel.setPreferredSize(preferredSize);
+
+
+        window.setComponent(panel);
+
+
+        gui.addWindowAndWait(window);
+        return flag[0];
+    }
+
+
 
     public OPERATION_TYPE_BROKER requestOperationTypeBroker() {
         ActionListDialogBuilder builder = new ActionListDialogBuilder();
@@ -372,15 +495,28 @@ public class ClientMenuView extends PageView {
 
     public String requestAmountAssets() {
         return new TextInputDialogBuilder()
-                .setTitle("Cantidad de Activos")
+                .setTitle("Compra de Activos")
                 .setDescription("Ingrese la cantidad de activos que desea comprar")
                 .setValidationPattern(Pattern.compile("^(10|[1-9])$"), "Puede comprar minimo una acción y máximo 10")
                 .build()
                 .showDialog(gui);
     }
 
+    public String requestAmountAssetsVenta() {
+        return new TextInputDialogBuilder()
+                .setTitle("Venta de Activos")
+                .setDescription("Ingrese la cantidad de activos que desea vender")
+                .setValidationPattern(Pattern.compile("^(10|[1-9])$"), "Verifique el monto ingresado")
+                .build()
+                .showDialog(gui);
+    }
+
     public void showBuySuccessMsg(String name, int cantidad, float monto, float comisiones) {
         showMessageDialog("¡Compra Exitosa!", "Has adquirido " + cantidad + " activo(s) de " + name + " por un costo total de " + monto + "\nComision cobrada: $" + comisiones);
+    }
+
+    public void showValueError(){
+        showErrorDialog("La cantidad ingresada supera la cantidad de activos en su cartera");
     }
 
     public void showNotEnoughCreditError() {
