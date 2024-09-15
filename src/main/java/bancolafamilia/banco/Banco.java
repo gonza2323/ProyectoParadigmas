@@ -8,29 +8,36 @@ import java.util.Queue;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
+import bancolafamilia.banco.Operacion.OpStatus;
 
-public class Banco implements IOpBcoCliente {
+/**
+ * Clase que mantiene el estado del banco, y los métodos para que
+ * la interfaz interactúe con él.
+ */
+public class Banco implements IOperationProcessor {
 
-    private float reserves;
-    private float deposits;
-    private float prestamos;
+    private float reservesTotal;
+    private float depositsTotal;
+    private float loanedTotal;
     
     private float anualInterestRate;
     private float coeficienteDeEncaje;
 
     private final ArrayList<User> users;
-    private ArrayList<Empleado> empleados;
+    private final ArrayList<Empleado> empleados;
 
     private final Queue<Operacion> operacionesPendientes;
     private final LinkedList<Operacion> operacionesAprobadas;
     private final PriorityQueue<Operacion> operacionesProgramadas;
 
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
+    private final Queue<Client> unattendedPremiumClients;
+
 
     public Banco() {
-        reserves = 0.0f;
-        deposits = 0.0f;
-        prestamos = 0.0f;
+        reservesTotal = 0.0f;
+        depositsTotal = 0.0f;
+        loanedTotal = 0.0f;
         this.anualInterestRate = 0.08f;
         this.coeficienteDeEncaje = 0.10f;
         this.users = new ArrayList<User>();
@@ -39,167 +46,155 @@ public class Banco implements IOpBcoCliente {
         this.operacionesAprobadas = new LinkedList<>();
         this.operacionesProgramadas = new PriorityQueue<>();
         this.listaDocEspecial = new ArrayList<>();
+        this.unattendedPremiumClients = new LinkedList<>();
     }
 
-    public User findUserByUsername(String username) {
-        for (User user : users)
-            if (user.getUsername().equals(username))
-                return user;
-        return null;
+    /**
+     * Recibe la fecha actual de la simulación y procesa todas las operaciones
+     * en la cola de "pendientes" que debería haber procesado antes de esa fecha
+     * 
+     * @param currenDateTime Tiempo actual de la simulación
+     * @return Retorna si se procesó alguna operación programada
+     */
+    public boolean procesarOperacionesProgramadas(LocalDateTime currenDateTime) {
+        Operacion earliestOperation = operacionesProgramadas.peek();
+        boolean hasProcesedOperations = false;
+
+        while (earliestOperation != null && earliestOperation.getDate().isBefore(currenDateTime)) {
+            operacionesProgramadas.remove();
+            processOperation(earliestOperation);
+            hasProcesedOperations = true;
+        }
+
+        return hasProcesedOperations;
     }
 
-    public List<Client> getClients() {
-        return users.stream()
-            .filter(u -> u instanceof Client)
-            .map(u -> (Client)u)
-            .collect(Collectors.toList());
-    }
-
-    public void addUser(User user) {
-        // TODO: Revisar que no exista ya un cliente con
-        // mismo dni o mismo usuario
-        List<Client> clientes = users.stream()
-            .filter(u -> u instanceof Client)
-            .map(u -> (Client)u)
-            .collect(Collectors.toList());
-
-        if (user instanceof Client)
-            ((Client)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
-
-        if (user instanceof Empleado){ //agregue esto para que se haga la lista de empleados y despues iterar sobre ella en la linea 118
-            empleados.add((Empleado) user);
+    private OpStatus processOperation(Operacion operation) {
+        
+        if (operation.amount <= 0 || operation.status == OpStatus.DENIED) {
+            operation.status = OpStatus.DENIED;
+            return operation.status;
         }
         
-        users.add(user);
-    }
+        operation.status = operation.process(this);
 
-    public Client findClientByAlias(String alias) {
-        for (User user : users)
-            if (user instanceof Client)
-                if (((Client)user).getAlias().equals(alias.toLowerCase()))
-                    return (Client)user;
-        
-        return null;
-    }
-
-    // INFORMACION A AGENTES ESPECIALES ------------------------------------------------------------------------------
-
-    public List<Cajero> getCajeros(){
-        return users.stream()
-            .filter(u -> u instanceof Cajero)
-            .map(u -> (Cajero)u)
-            .collect(Collectors.toList());
-    }
-
-    // INFORMACION A CLIENTES EN LA CLIENT MENU PAGE -----------------------------------------------------------------
-
-    public List<Operacion> getOperacionesCliente(Client client){ //agregamos este metodo para sacar la lista de operaciones de cliente
-        return operacionesAprobadas.stream()
-                .filter(op -> op.getParticipants().contains(client))
-                .collect(Collectors.toList());
-    }
-
-    //0. METODOS AUXILIARES PARA OPERACIONES ---------------------------------------------------------------------------
-
-    public void addOperation(Operacion operacion){ //metodo de la interfaz Itransacciones
-        operacionesAprobadas.add(operacion);
-    }
-
-    public void approveOperation(Operacion operacion){ //metodo propio
-        operacion.aprobar();
-    }
-
-    public void procesarOperacion(Empleado empleado){
-        int longitud = operacionesPendientes.size();
-        while (longitud > 0){
-            Operacion operacion = operacionesPendientes.poll();
-            empleado.recieveSolicitud(operacion);
-            longitud -= 1;
-            if (operacion.isAprobada() == null){
-                operacionesPendientes.add(operacion); // la operacion vuelve a la cola porque no le ha llegado la solicitud al empleado correspondiente
-            } else if (operacion.isAprobada()) {
-                addOperation(operacion); //se agrega a la lista de op. aprobadas
-                operacionesPendientes.remove(operacion);
-            }
+        switch (operation.status) {
+            case APPROVED:
+                operacionesAprobadas.addFirst(operation);
+                break;
+            case MANUAL_APPROVAL_REQUIRED:
+                operacionesPendientes.add(operation);
+                break;
+            default:
+                break;
         }
+        return operation.status;
     }
 
-    public boolean hayOpEnCola(Queue<Operacion> operacionesPendientes){
-        return (!operacionesPendientes.isEmpty());
-    }
-
-    //1. TRANSFERENCIAS-------------------------------------------------------------------------------------------------
-
-    public boolean solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
-        //le llega la solicitud al banco de transferir dinero
-
-        //1. el bco se asegura que los datos sean correctos
-        if (amount <= 0 || sender.getBalance() < amount)
-            return false;
-
-        //2. el bco crea la operacion
-        Transferencia transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
-
-        //3. Verifica si el monto permite transferencia inmediata - transeferencias comunes
-        if (amount <= Transferencia.montoInmediata && !isTransferenciaEspecial(recipient)) {
-            approveOperation(transferencia); //su estado cambia a aprobada inmediatamente - el bco lo permite porque es el que esta mas alto en la jerarquia
-            addOperation(transferencia);
-            this.transferMoney(transferencia);
-            return true;
-        } else {
-            //3.1 agrega la operacion a la cola de op. pendientes de solicitud
-            operacionesPendientes.add(transferencia);
-
-            //3.2 verfica si hay operaciones en la cola y si hay se las delega a cada empleado - esto no se si va acá
-            if (this.hayOpEnCola(operacionesPendientes)) {
-                for (Empleado empleado : empleados) {
-                    procesarOperacion(empleado); //en este paso el estado de la transferencia cambia
-                }
-            }
-            //3.3 verifica si el gerente ha aprobado la operacion y hace lo necesario
-            if (transferencia.isAprobada()) {
-                this.transferMoney(transferencia);
-                addOperation(transferencia);
-                return true;
-            } else {
-                return false;
-                //3.3.1 lo guarda en operaciones denegadas - no se si es necesario
-                //para el gerente el proceso se aprobacion de transferencias esta automatizado porque aprueda todas las tranasferencias especiales que son mayores al limite de transferencia del cliente y menores al monto maximo diario que establece el banco que puede transferir un cliente
-                //en operacion.isAprobada() podemos ver directamente el estado
-            }
-
-        }
-    }
-
-    private boolean isTransferenciaEspecial(Client recipient){
-        String aliasTransEspecial = "mapa.fiar.oro";
-        return recipient.getAlias().equals(aliasTransEspecial);
-    }
-
-    public void transferMoney(Operacion transferencia){
-        //3.3.1 se hace la transferencia
-        transferencia.realizarOperacion();
-
-    }
-
-    //2 RETIROS --------------------------------------------------------------------------------------------------------
-    //Este metodo es llamado desde la pag de retiros -------------------------------------------------------------------
-
-    public boolean withdrawFunds(Client client, float amount, Cajero cajero) {
-
-        if (amount <= 0 || amount > client.getBalance() || amount > Retiro.montoMax)
-            return false;
-
-        Retiro withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
-
-        approveOperation(withdrawal);
-        addOperation(withdrawal);
-        withdrawal.realizarOperacion();
-
-        reserves -= amount;
-        deposits -= amount;
+    @Override
+    public OpStatus processOperation(Deposito deposit) {
+        if (deposit.amount > Deposito.montoMax // 
+            && deposit.status != OpStatus.APPROVED)
+            return OpStatus.DENIED;
         
-        return true;
+        this.reservesTotal += deposit.amount;
+        this.depositsTotal += deposit.amount;
+
+        deposit.client.addBalance(deposit.amount);
+        return OpStatus.APPROVED;
+    }
+
+    @Override
+    public OpStatus processOperation(Retiro withdrawal) {
+        if (withdrawal.amount > Retiro.montoMax
+            || withdrawal.amount > withdrawal.client.getBalance())
+            return OpStatus.DENIED;
+        
+        this.reservesTotal -= withdrawal.amount;
+        this.depositsTotal -= withdrawal.amount;
+
+        withdrawal.client.reduceBalance(withdrawal.amount);
+        return OpStatus.APPROVED;
+    }
+
+    @Override
+    public OpStatus processOperation(Transferencia transfer) {
+        if (transfer.amount > Transferencia.maxAmount)
+            return OpStatus.DENIED;
+        
+        if (transfer.status != OpStatus.APPROVED)
+            return OpStatus.MANUAL_APPROVAL_REQUIRED;
+        
+        transfer.client.reduceBalance(transfer.amount);
+        transfer.recipient.addBalance(transfer.amount);
+
+        return OpStatus.APPROVED;
+    }
+
+    @Override
+    public OpStatus processOperation(TransferenciaEspecial transfer) {
+        if (transfer.amount > Transferencia.maxAmount
+            || transfer.client.isPremiumClient == true
+            || clientHasPendingSpecialTransfer(transfer.client))
+            return OpStatus.DENIED;
+        
+        if (transfer.status != OpStatus.APPROVED)
+            return OpStatus.MANUAL_APPROVAL_REQUIRED;
+        
+        transfer.client.reduceBalance(transfer.amount);
+        transfer.recipient.addBalance(transfer.amount);
+        transfer.client.isPremiumClient = true;
+        unattendedPremiumClients.add(transfer.client);
+
+        return OpStatus.DENIED; // esto hace que nunca se guarde una vez aceptada
+    }
+
+    
+
+    @Override
+    public OpStatus processOperation(Prestamo loan) {
+        
+        float principal = loan.amount;
+        float interest = principal * anualInterestRate * loan.getMonths() / 12f;
+        float loanTotal = principal + interest;
+
+        if (loan.amount < Prestamo.minimumLoanAmount
+            || loan.amount > Prestamo.maxAmount
+            || getMaxClientLoan(loan.client) < loan.amount)
+            return OpStatus.DENIED;
+        
+        this.depositsTotal += principal;
+        this.loanedTotal += loanTotal;
+
+        loan.client.addBalance(principal);;
+        loan.client.addDebt(loanTotal);
+        
+        return OpStatus.APPROVED;
+    }
+
+    public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
+        Operacion transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
+
+        if (Transferencia.isTransferenciaEspecial(recipient)) {
+            transferencia = new TransferenciaEspecial(LocalDateTime.now(), sender, recipient, amount, motivo);
+        }
+
+        return processOperation(transferencia);
+    }
+
+    public OpStatus solicitudPrestamo(Client client, float amount, int months) {
+        Operacion loan = new Prestamo(LocalDateTime.now(), client, amount, anualInterestRate, months);
+        return processOperation(loan);
+    }
+
+    public OpStatus solicitudDeposito(Client client, float amount, int caja, Cajero cajero) {
+        Operacion deposit = new Deposito(LocalDateTime.now(), client, amount, caja, cajero);
+        return processOperation(deposit);
+    }
+
+    public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
+        Operacion withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
+        return processOperation(withdrawal);
     }
 
     //3. DEPOSITOS -----------------------------------------------------------------------------------------------------
@@ -225,46 +220,6 @@ public class Banco implements IOpBcoCliente {
     //3.2 METODOS PARA DEPOSITOS EN GRAL -------------------------------------------------------------------------------
     //Este metodo es llamado desde la pagina despositos-----------------------------------------------------------------
 
-    public boolean solicitudDeposito(Client client, float amount, int caja, Cajero cajero) {
-
-        if (amount <= 0) {
-            return false;
-        }
-
-        Deposito deposito = new Deposito(LocalDateTime.now(), client, amount, caja, cajero);
-
-        //1. Si el deposito no supera el límite entonces es aprobado
-        if (amount <= Deposito.montoInmediato) {
-            this.approveOperation(deposito);
-            addOperation(deposito);
-            this.depositFunds(client, amount, deposito);
-            return true;
-        } else {
-            //2. Si supera el limite, se lo manda al cajero para que lo apruebe
-            operacionesPendientes.add(deposito);
-            if (this.hayOpEnCola(operacionesPendientes)) {
-                for (Empleado empleado : empleados) {
-                    procesarOperacion(empleado); //en este paso el estado de la transferencia cambia
-                }
-            }
-            //3. Si es aprobado por el cajero entonces se realiza el deposito
-            if (deposito.isAprobada()){
-                addOperation(deposito);
-                //3.1 Si el deposito lo hace un mafioso:
-                //client es el mafioso
-                //la cuenta a donde cae el dinero es deposito.getCliente() porque cuando el cajero aprueba la op del deposito de dinero ilegitimo, este setea el cliente en la op para que le caiga el dinero al agente y no al mafioso
-                this.depositFunds(client, amount, deposito);
-                return true;
-            }
-            return false;
-        }
-    }
-
-    public void depositFunds(Client client, float amount, Operacion deposito) {
-        deposito.realizarOperacion();
-        this.reserves += amount;
-        this.deposits += amount;
-    }
 
     //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
     //Estos metodos son llamados desde la AgenteEspecialMenuPage -------------------------------------------------------
@@ -310,69 +265,85 @@ public class Banco implements IOpBcoCliente {
         }
     }
 
-    public float getAnualInterestRate() {
-        return anualInterestRate;
-    }
-
     public float getMaxClientLoan(Client client) {
         // máximo dispuesto a prestar a ese cliente
-        float clientCreditLimit = Math.max((client.getBalance() - client.getDebt()) * 1.50f, 0.0f);
+        float clientCreditLimit = Math.max((client.getBalance() - 1.10f * client.getDebt()) * 2.00f, 0.0f);
         
-        // máximo que puede prestar el banco según sus reservas
-        float maxDeposits = reserves / coeficienteDeEncaje;
-        float bankLoanCapacity = Math.max(maxDeposits - deposits, 0.0f);
+        // máximo que puede prestar el banco para poder seguir
+        // cubriendo cierto porcentaje de los depósitos
+        float maxDeposits = reservesTotal / coeficienteDeEncaje;
+        float bankLoanCapacity = Math.max(maxDeposits - depositsTotal, 0.0f);
 
-        return Math.min(clientCreditLimit, bankLoanCapacity);
+        return Math.min(clientCreditLimit, bankLoanCapacity); // devolvemos el menor
     }
 
-    public boolean requestLoan(Client client, float loanPrincipal, int months) {
-        float minimumLoanAmount = 1000;
-        
-        float interest = loanPrincipal * anualInterestRate * months / 12f;
-        float loanTotal = loanPrincipal + interest;
-        
-        if (getMaxClientLoan(client) < loanPrincipal
-            || loanPrincipal < minimumLoanAmount)
-            return false;
-        
-        if (loanPrincipal <= 0) {
-            return false;
+    public void addUser(User user) {
+        // TODO: Revisar que no exista ya un cliente con
+        // mismo dni o mismo usuario
+        List<Client> clientes = users.stream()
+            .filter(u -> u instanceof Client)
+            .map(u -> (Client)u)
+            .collect(Collectors.toList());
+
+        if (user instanceof Client)
+            ((Client)user).setAlias(AliasGenerator.generateUniqueAlias(clientes));
+
+        if (user instanceof Empleado){ //agregue esto para que se haga la lista de empleados y despues iterar sobre ella en la linea 118
+            empleados.add((Empleado) user);
         }
-
-        Prestamo loanOperation = new Prestamo(LocalDateTime.now(), client, loanPrincipal, anualInterestRate, months);
-
-        // aprobar operación
-        approveOperation(loanOperation);
-        addOperation(loanOperation);
         
-        // actualizamos finanzas del cliente
-        client.balance += loanPrincipal;
-        client.addDebt(loanTotal);
-        
-        // actualizamos finanzas del banco
-        deposits += loanPrincipal;
-        prestamos += loanTotal;
-        
-        return true;
+        users.add(user);
     }
 
-    public boolean procesarOperacionesProgramadas(LocalDateTime currenDateTime) {
-        Operacion earliestTransaction = operacionesProgramadas.poll();
-        boolean hasProcesedOperations = false;
+    public List<Cajero> getCajeros(){
+        return users.stream()
+            .filter(u -> u instanceof Cajero)
+            .map(u -> (Cajero)u)
+            .collect(Collectors.toList());
+    }
 
-        while (earliestTransaction != null
-            && earliestTransaction.getDate().isBefore(currenDateTime)) {
-            earliestTransaction.realizarOperacion();
-            hasProcesedOperations = true;
-        }
+    // INFORMACION A CLIENTES EN LA CLIENT MENU PAGE -----------------------------------------------------------------
 
-        return hasProcesedOperations;
+    public List<Operacion> getOperacionesCliente(Client client) { //agregamos este metodo para sacar la lista de operaciones de cliente
+        return operacionesAprobadas.stream()
+                .filter(op -> op.getParticipants().contains(client))
+                .collect(Collectors.toList());
+    }
+
+    public Client findClientByAlias(String alias) {
+        for (User user : users)
+            if (user instanceof Client)
+                if (((Client)user).getAlias().equals(alias.toLowerCase()))
+                    return (Client)user;
+        return null;
+    }
+
+    public User findUserByUsername(String username) {
+        for (User user : users)
+            if (user.getUsername().equals(username))
+                return user;
+        return null;
+    }
+
+    public List<Client> getClients() {
+        return users.stream()
+            .filter(u -> u instanceof Client)
+            .map(u -> (Client)u)
+            .collect(Collectors.toList());
+    }
+
+    private boolean clientHasPendingSpecialTransfer(Client client) {
+        return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client));
     }
 
     public List<Operacion> getOperaciones() { return operacionesAprobadas; }
+    public Queue<Operacion> getOperacionesPendientes() { return operacionesPendientes; }
+    public PriorityQueue<Operacion> getOperacionesProgramadas() {return operacionesProgramadas; }
     
-    public float getLoans() { return prestamos; }
-    public float getDeposits() { return deposits; }
-    public float getReserves() { return reserves; }
-    public float getBalance() { return reserves + prestamos - deposits; }
+    public float getReservesTotal() { return reservesTotal; }
+    public float getLoanedTotal() { return loanedTotal; }
+    public float getDepositsTotal() { return depositsTotal; }
+    public float getBalance() { return reservesTotal + loanedTotal - depositsTotal; }
+
+    public float getAnualInterestRate() { return anualInterestRate; }
 }

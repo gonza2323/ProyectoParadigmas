@@ -8,8 +8,12 @@ import java.time.format.DateTimeFormatter;
 
 public class Prestamo extends Operacion{
     
+    public static float minimumLoanAmount = 1000;
+    public static float maxAmount = 15000000;
+    
     private final float interest;
     private final float anualInterestRate;
+    private final int months;
     private final LocalDateTime cancellationDate;
 
     public Prestamo(LocalDateTime date, Client client, float amount, float anualInterestRate, int months) {
@@ -17,6 +21,7 @@ public class Prestamo extends Operacion{
 
         this.interest = amount * anualInterestRate * months / 12;
         this.anualInterestRate = anualInterestRate;
+        this.months = months;
         this.cancellationDate = date.plusMonths(months);
     }
 
@@ -32,12 +37,14 @@ public class Prestamo extends Operacion{
     }
 
     @Override
-    public void realizarOperacion() {
-
+    public OpStatus process(IOperationProcessor processor) {
+        return processor.processOperation(this);
     }
 
     @Override
     public boolean isAprobadaPor(Empleado employee) {
         return employee instanceof Gerente;
     }
+
+    public int getMonths() { return months; }
 }

@@ -15,6 +15,7 @@ import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
 import java.util.regex.Pattern;
 import bancolafamilia.banco.*;
+import bancolafamilia.banco.Operacion.OpStatus;
 
 
 class StartMenuPage extends PageController<StartMenuView>{
@@ -81,14 +82,14 @@ class StartMenuPage extends PageController<StartMenuView>{
             return;
         }
 
-        Boolean success = false;
+        Operacion.OpStatus status = null;
         if (operationType == OPERATION_TYPE.DEPOSIT)
-            success =banco.solicitudDeposito(client, amount, caja, null);
+            status = banco.solicitudDeposito(client, amount, caja, null);
         else if (operationType == OPERATION_TYPE.WITHDRAWAL)
-            success = banco.withdrawFunds(client, amount, null); // TODO arreglar esto
+            status = banco.solicitudRetiro(client, amount, null); // TODO arreglar esto
 
-        if (!success) {
-            view.showError();
+        if (status == OpStatus.DENIED) {
+            view.showTooBigOperationError();
             return;
         }
         
@@ -239,8 +240,11 @@ class StartMenuView extends PageView {
         showErrorDialog("Monto inválido");
     }
 
-    public void showError() {
-        showErrorDialog("Se produjo un error");
+    public void showTooBigOperationError() {
+        showErrorDialog("El cajero dice:"
+                    +"\nNo le conviene depositar/retirar tanto dinero."
+                    +"\nLas autoridades sospecharán de usted!"
+                    +"\nConsulte con el asesor financiero para evitar sospechas.");
     }
 
     public void showSuccessMsg() {

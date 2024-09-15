@@ -3,10 +3,10 @@ package bancolafamilia.banco;
 
 public class Client extends User { //implements IOpBcoCliente
 
-    public float balance;
-    public float deuda;
+    private float balance;
+    private float deuda;
     private String alias;
-    public boolean flagSolicitud  = false; //esta variable me va a permitir saber que en el client menu page el agente especial le tiene que preguntar al cliente el monto que quiere lavar
+    public boolean isPremiumClient  = false; //esta variable me va a permitir saber que en el client menu page el agente especial le tiene que preguntar al cliente el monto que quiere lavar
      //en esta variable vamos a almacenar el monto que el cliente podria estar lavando
     public AgenteEspecial agenteEspecial; //el agente especial es intermediario entre cliente y banco
 
@@ -17,24 +17,12 @@ public class Client extends User { //implements IOpBcoCliente
         this.deuda = 0;
     }
 
-    public float getBalance() {
-        return balance;
-    }
-
-    public float getDebt() {
-        return deuda;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
-    public void setFlagSolicitud(boolean flagSolicitud) {
-        this.flagSolicitud = flagSolicitud;
+    public void setPremiumClient(boolean flagSolicitud) {
+        this.isPremiumClient = flagSolicitud;
         //cuando cambia a false, el cliente ya ha indicado el monto que quiere lavar
     }
 
@@ -46,9 +34,21 @@ public class Client extends User { //implements IOpBcoCliente
         return agenteEspecial;
     }
 
+    public void addBalance(float amount) {
+        balance += amount;
+    }
+
+    public void reduceBalance(float amount) {
+        balance -= amount;
+    }
+
     public void addDebt(float additionalDebt) {
         deuda += additionalDebt;
     }
+
+    public float getBalance() { return balance; }
+    public float getDebt() { return deuda; }
+    public String getAlias() { return alias; }
 }
 
 

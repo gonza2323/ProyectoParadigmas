@@ -255,6 +255,10 @@ public class ClientMenuView extends PageView {
         showMessageDialog("SOLICITUD DE PRÉSTAMO", "Se le ha otorgado el préstamo solicitado");
     }
 
+    public void showPendingApprovalMsg() {
+        showMessageDialog("TRANSFERENCIA", "Su transferencia quedó a la espera de ser aprobada por el banco");
+    }
+
     public void showNonExistantAliasError() {
         showErrorDialog("Alias inexistente");
     }

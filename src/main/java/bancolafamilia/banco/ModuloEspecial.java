@@ -7,7 +7,7 @@ public class ModuloEspecial {
 
     //montoMaxParcial es monto maximo que pueden tener cada una de las pequeñas transferencias no restreables
     //podria utilizar direcatmente Transferencia.montoInmediata pero lo coloco en un atributo pq el bco podria decidir despues cambiar el limite
-    public final float montoMaxParcial = Transferencia.montoInmediata;
+    public final float montoMaxParcial = Transferencia.maxAmountImmediate;
     public float montoAOperar;
     public DocumentoTransaccionEspecial documento;
 

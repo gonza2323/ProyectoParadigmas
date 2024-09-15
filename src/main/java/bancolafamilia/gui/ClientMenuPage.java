@@ -3,6 +3,8 @@ package bancolafamilia.gui;
 
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
+import bancolafamilia.banco.Operacion;
+
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
@@ -70,13 +72,21 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
+        Operacion.OpStatus status = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
-        if (success) {
-            view.updateBalance(client.getBalance());
-            view.showTransferSuccessMsg();
-        } else {
-            view.showTransferError();
+        switch (status) {
+            case APPROVED:
+                view.updateBalance(client.getBalance());
+                view.showTransferSuccessMsg();    
+                break;
+            case MANUAL_APPROVAL_REQUIRED:
+                view.showPendingApprovalMsg();
+                break;
+            case DENIED:
+                view.showTransferError();
+                break;
+            default:
+                break;
         }
     }
 
@@ -128,14 +138,18 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.requestLoan(client, loanAmount, loanLengthInMonths);
-        
-        if (success) {
-            view.updateBalance(client.getBalance());
-            view.updateDeuda(client.getDebt());
-            view.showLoanSuccessMsg();
-        } else {
-            view.showLoanError();
+        Operacion.OpStatus status = banco.solicitudPrestamo(client, loanAmount, loanLengthInMonths);
+
+        switch (status) {
+            case APPROVED:
+                view.updateBalance(client.getBalance());
+                view.updateDeuda(client.getDebt());    
+                view.showLoanSuccessMsg();
+                break;
+            case DENIED:
+                view.showLoanError();
+            default:
+                break;
         }
     }
 

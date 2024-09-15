@@ -37,9 +37,9 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
         this.manager = manager;
         
         view.updateName(manager.getNombre());
-        view.updateReserves(banco.getReserves());
-        view.updateDeposits(banco.getDeposits());
-        view.updateLoans(banco.getLoans());
+        view.updateReserves(banco.getReservesTotal());
+        view.updateDeposits(banco.getDepositsTotal());
+        view.updateLoans(banco.getLoanedTotal());
         view.updateBalance(banco.getBalance());
 
         view.bindHistoryButton(() -> handleHistoryButton());

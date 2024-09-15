@@ -38,7 +38,6 @@ public class App {
         cliente4.setAlias("mapa.fiar.oro"); // alias asistente ejecutivo
         cliente5.setAlias("que.es.eso");
 
-        // banco.depositFunds(cliente1, 10000, deposito1);
         banco.solicitudDeposito(cliente1, 70000, 1, null);
         banco.solicitudDeposito(cliente2, 2000, 1, null);
         banco.solicitudDeposito(cliente3, 50000000, 1, null);
@@ -62,7 +61,7 @@ public class App {
         timeSim.stop();
 
         try {
-            simThread.join(); // Wait for the simulation thread to finish
+            simThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -8,7 +8,7 @@ import java.util.Random;
 public class AgenteEspecial extends Empleado {
 
     //montoMaxEspecial: monto maximo que se puede aceptar para lavar plata
-    public static final float montoMaxOpEspecial = 700000000;
+    public static final float montoMaxOpEspecial = 300000000;
 
     //el agente especial va a tener una cuenta cliente asociada a donde va a caer el dinero que va a lavar
     //tiene que tener una cuenta asociada pq deposito.realizarOperacion recibe un Cliente y el monto
@@ -35,7 +35,7 @@ public class AgenteEspecial extends Empleado {
 
     protected void recieveTarea(Client cliente){
         clientesPendientes.add(cliente);
-        cliente.setFlagSolicitud(true); //activamos el flag para que en la ventana de mensajes del cliente se encuentre la notifcaion pidiendo el monto que desea lavar -> es como que el agente especial le envia un mensaje al cliente al activar su flag
+        cliente.setPremiumClient(true); //activamos el flag para que en la ventana de mensajes del cliente se encuentre la notifcaion pidiendo el monto que desea lavar -> es como que el agente especial le envia un mensaje al cliente al activar su flag
 
         //el agente se comunica con el cliente y genera un documento en el que se encuentra el cliente y el monto que quiere lavar
 
@@ -78,7 +78,7 @@ public class AgenteEspecial extends Empleado {
         //Si llega a este metodo es pq el cajero le esta avisando que ya aprobo el deposito, entonces:
 
         //1. verifica que este el dinero en la cuenta
-        if (this.ctaCliente.balance >= document.getAmount()){
+        if (this.ctaCliente.getBalance() >= document.getAmount()){
             document.setInProcess(true);
             //1.1 va a iniciarTransaccion espeacial para pedir la simulacion al modula de lavado de dienro
 

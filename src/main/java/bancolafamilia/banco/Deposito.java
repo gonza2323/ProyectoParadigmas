@@ -4,10 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Arrays;
 
-public class Deposito extends Operacion{
+public class Deposito extends Operacion {
     
-    public static final float montoMax = 300000000;
-    public static final float montoInmediato = 170000000;
+    public static final float montoMax = 500000;
     
     private final Cajero cajeroResponsable;
     public int caja;
@@ -22,11 +21,6 @@ public class Deposito extends Operacion{
     @Override
     public String getDescription() {
         return "Realizado en sucursal";
-    }
-    
-    @Override
-    public void realizarOperacion() {
-        client.balance += amount;
     }
 
     public int getCaja() {
@@ -44,6 +38,11 @@ public class Deposito extends Operacion{
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    @Override
+    public OpStatus process(IOperationProcessor processor) {
+        return processor.processOperation(this);
     }
 
     @Override
