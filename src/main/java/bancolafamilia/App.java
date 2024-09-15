@@ -3,10 +3,8 @@ package bancolafamilia;
 import bancolafamilia.banco.*;
 import bancolafamilia.gui.Interfaz;
 
-import java.time.Duration;
-import java.util.Scanner;
-
 import java.io.IOException;
+import java.time.Duration;
 
 public class App {
     public static void main(String[] args) throws IOException {
@@ -57,6 +55,22 @@ public class App {
         for (int i = 0; i < 16; i++) {
             banco.solicitudTransferencia(cliente3, cliente2, 1204037.99f, "prueba\nprueba");
         }
+
+        Activo activo1 = new Activo("EcoEnergy", 180000, 0.8f);
+        Activo activo2 = new Activo("HealthPlus", 320000, 0.2f);
+        Activo activo3 = new Activo("GreenTech", 210000, 0.5f);
+        Activo activo4 = new Activo("DataNet", 260000, 0.6f);
+        Activo activo5 = new Activo("Quantum Tech", 300000, 0.7f);
+
+
+        AgenteBolsa broker = new AgenteBolsa("Jose", 0.10f);
+        banco.setBroker(broker);
+        broker.newActivo(activo1);
+        broker.newActivo(activo2);
+        broker.newActivo(activo3);
+        broker.newActivo(activo4);
+        broker.newActivo(activo5);
+
 
         interfaz.start();
         timeSim.stop();

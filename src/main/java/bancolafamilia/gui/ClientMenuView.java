@@ -1,30 +1,20 @@
 package bancolafamilia.gui;
 
+import bancolafamilia.banco.Activo;
+import bancolafamilia.banco.DocumentoInversionBolsa;
+import bancolafamilia.banco.Operacion;
+import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
+import com.googlecode.lanterna.gui2.table.Table;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.LayoutData;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
-import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
-import com.googlecode.lanterna.gui2.table.Table;
-
-import bancolafamilia.banco.Operacion;
 
 public class ClientMenuView extends PageView {
     
@@ -239,6 +229,166 @@ public class ClientMenuView extends PageView {
             .showDialog(gui);
     }
 
+    public Activo showActivosDisponibles(List<Activo> activos) {
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(3));  // 3 columnas: Nombre, Precio, Botón
+
+        // Agregar encabezados de la tabla
+        panel.addComponent(new Label("Nombre del Activo"));
+        panel.addComponent(new Label("Precio del Activo"));
+        panel.addComponent(new Label("Acción"));
+
+        final Activo[] selectedActivo = {null};
+        final String[] amountStr = {null};
+
+        // Crear una ventana que contenga el panel
+        BasicWindow window = new BasicWindow("Acciones Disponibles Para Compra");
+
+        // Agregar las filas de la tabla con el botón "Simular"
+        for (Activo activo : activos) {
+            // Columna 1: Nombre del activo
+            panel.addComponent(new Label(activo.getName()));
+
+            // Columna 2: Precio del activo
+            panel.addComponent(new Label(String.valueOf(activo.getValue())));
+
+            // Columna 3: Botón "Simular"
+            Button simularButton = new Button("Simular", () -> { selectedActivo[0] = activo;
+                window.close();
+
+                // Acción a realizar cuando se presiona el botón
+                //System.out.println("Simulando la compra de: " + activo.getName());
+            });
+            panel.addComponent(simularButton);
+        }
+
+
+
+
+        window.setComponent(panel);
+
+        // Mostrar la ventana
+//        gui.addWindowAndWait(window);
+//
+//        panel.addComponent(new Button("Cerrar",
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        window.close();
+//                    }
+//                }).setLayoutData(
+//                GridLayout.createLayoutData(
+//                        GridLayout.Alignment.END,
+//                        GridLayout.Alignment.CENTER))
+//        );
+
+        gui.addWindowAndWait(window);
+        return selectedActivo[0];
+    }
+
+    public void showSimulationActivos(DocumentoInversionBolsa doc){
+        BasicWindow window = new BasicWindow("Simulacion de Inversión de Activos");
+        window.setHints(
+                Arrays.asList(
+                        Window.Hint.CENTERED,
+                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+
+        Table<Object> table = new Table<>("Activo", "Precio unitario", "Cantidad", "Precio Final", "Riesgo Asociado" );
+        panel.addComponent(table);
+
+        NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        String monto = decimalFormat.format(doc.getAmount());
+        String riesgo = decimalFormat.format(doc.getActivo().getRiesgoAsociado());
+        table.getTableModel().addRow(new Object[]{doc.getActivo().getName(), doc.getActivo().getValue(), doc.getCantidad(), monto, riesgo});
+
+        panel.addComponent(new Button("Cerrar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
+
+        panel.addComponent(new Button("Comprar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
+    }
+
+
+
+
+//        ActionListDialogBuilder builder = new ActionListDialogBuilder();
+//        builder
+//                .setTitle("Acciones Disponibles para Compra")
+//                .setDescription("")
+//                .addCustomComponent(table)
+//                .build()
+//                .showDialog(gui);
+
+
+
+//        ActionListDialogBuilder builder = new ActionListDialogBuilder();
+//
+//
+//        final Activo[] selectedAction = { null };
+//
+//        for (Activo activo : activos) {
+//            builder.addAction(activo.getName(), () -> {selectedAction[0] = activo;});
+//        }
+//
+//        builder
+//                .setTitle("Acciones Disponibles Para Compra")
+//                .build()
+//                .showDialog(gui);
+//
+//        return selectedAction[0];
+//    }
+
+    public OPERATION_TYPE_BROKER requestOperationTypeBroker() {
+        ActionListDialogBuilder builder = new ActionListDialogBuilder();
+
+        final OPERATION_TYPE_BROKER[] selectedOperation = { OPERATION_TYPE_BROKER.INVALID };
+
+        builder.addAction("Pedir Consejo al Agente de Bolsa", () -> {selectedOperation[0] = OPERATION_TYPE_BROKER.ADVICE;});
+        builder.addAction("Comprar", () -> {selectedOperation[0] = OPERATION_TYPE_BROKER.BUY;});
+        builder.addAction("Vender", () -> {selectedOperation[0] = OPERATION_TYPE_BROKER.SELL;});
+
+        builder
+                .setTitle("Qué operación desea realizar?")
+                .build()
+                .showDialog(gui);
+
+        return selectedOperation[0];
+    }
+
+    public String requestAmountAssets() {
+        return new TextInputDialogBuilder()
+                .setTitle("Cantidad de Activos")
+                .setDescription("Ingrese la cantidad de activos que desea comprar")
+                .setValidationPattern(Pattern.compile("^(10|[1-9])$"), "Puede comprar minimo una acción y máximo 10")
+                .build()
+                .showDialog(gui);
+    }
+
     public void showNotEnoughCreditError() {
         showErrorDialog("No tiene acceso a préstamos tan grandes");
     }
@@ -271,6 +421,10 @@ public class ClientMenuView extends PageView {
         showErrorDialog("Transferencia denegada");
     }
 
+    public void showAdviceMsg(String msg) {
+        showMessageDialog("Agente de Bolsa", msg);
+    }
+
     public void bindTransferButton(Runnable action) {
         transferButton.addListener(transferButton -> action.run());
     }
@@ -298,4 +452,14 @@ public class ClientMenuView extends PageView {
     public void bindExitButton(Runnable action) {
         exitButton.addListener(closeButton -> action.run());
     }
+
+
+
+
+}
+enum OPERATION_TYPE_BROKER {
+    ADVICE,
+    BUY,
+    SELL,
+    INVALID
 }

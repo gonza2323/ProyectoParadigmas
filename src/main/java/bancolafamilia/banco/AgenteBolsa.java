@@ -70,13 +70,13 @@ public class AgenteBolsa {
         if (tipo.equalsIgnoreCase("buy")){
             float montoAInvertir = activo.getValue()*cantidad;
             comision = calcularComision(montoAInvertir);
-            simulacion = new DocumentoInversionBolsa(activo, montoAInvertir, comision, "buy");
+            simulacion = new DocumentoInversionBolsa(activo, montoAInvertir, cantidad, comision, "buy");
             return simulacion;
 
         } else{
             float ganancia = activo.getValue() * cantidad;
             comision = calcularComision(ganancia);
-            simulacion = new DocumentoInversionBolsa(activo, ganancia, comision, "sell");
+            simulacion = new DocumentoInversionBolsa(activo, ganancia, cantidad, comision, "sell");
             return simulacion;
 
         }
@@ -91,20 +91,27 @@ public class AgenteBolsa {
     public String provideAdvice(Client client){
         Activo activoRecomendado = getActivo(activosDisponibles);
 
+        //el cliente tiene un portfolio de activos del tipo PORTFOLIO el cual contine un map(activo, value) llamado activos en el cual almacena todas las acciones compradas
+        if (client.portfolioActivos.getActivos().isEmpty()){
+            return "Tu primera inversión te está esperando!" + "\n\nRecomendacion de compra: EL activo " + activoRecomendado.getName() + " ha matenido su indice de riesgo bajo en las últimas semanas, por lo que es una inversion confiable!";
+        } else {
+            if (client.getPortfolioActivos().getRisk() > 0.7){
+                Activo activoRiesgo;
+                do{
+                    activoRiesgo = getActivo(client.getPortfolioActivos().getList());
 
-        if (client.getPortfolioActivos().getRisk() > 0.7){
-            Activo activoRiesgo;
-            do{
-                activoRiesgo = getActivo(client.getPortfolioActivos().getList());
+                } while (activoRiesgo.equals(activoRecomendado));
 
-            } while (activoRiesgo.equals(activoRecomendado));
+                return "Tu cartera de inversiones representa un riesgo alto. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Venta: vende acciones del activo " + activoRiesgo + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado.getName();
 
-            return "Tu cartera de inversiones representa un riesgo alto. Podrías considerar vender algunos activos que son muy arriesgados!" + "\nRecomendacion de Venta: vende acciones del activo " + activoRiesgo + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado;
+            }else{
 
-        }else{
-            return "Tu cartera de inversiones está bien equilibrada. Sigue con las buenas inversiones!" + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado;
+                return "Tu cartera de inversiones está bien equilibrada. Sigue con las buenas inversiones!" + "\nRecomendacion de Inversion: compra más del activo " + activoRecomendado.getName();
+
+            }
 
         }
+
 
 
     }

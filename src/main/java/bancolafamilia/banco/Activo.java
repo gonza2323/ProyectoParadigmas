@@ -8,9 +8,10 @@ public class Activo {
     private float riesgoAsociado;
 
 
-    public Activo(String name, float value) {
+    public Activo(String name, float value, float riesgoAsociado) {
         this.name = name;
         this.value = value;
+        this.riesgoAsociado = riesgoAsociado;
         this.descripcion = name + ": $" + value;
 
     }

@@ -6,7 +6,7 @@ public class Client extends User { //implements IOpBcoCliente
     public float balance;
     public float deuda;
     private String alias;
-    private Portfolio portfolioActivos;
+    public Portfolio portfolioActivos;
     public boolean flagSolicitud  = false; //esta variable me va a permitir saber que en el client menu page el agente especial le tiene que preguntar al cliente el monto que quiere lavar
      //en esta variable vamos a almacenar el monto que el cliente podria estar lavando
     public boolean flagRiesgoInverison = false;

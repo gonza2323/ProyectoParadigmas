@@ -5,12 +5,14 @@ public class DocumentoInversionBolsa {
     private Activo activo;
     private float amount;
     private float comisiones;
+    private int cantidad;
 
-    public DocumentoInversionBolsa(Activo activo, float amount, float comisiones, String tipo) {
+    public DocumentoInversionBolsa(Activo activo, float amount, int cantidad, float comisiones, String tipo) {
         this.activo = activo;
         this.tipo = tipo;
         this.amount = amount;
         this.comisiones = comisiones;
+        this.cantidad = cantidad;
 
     }
 
@@ -28,6 +30,10 @@ public class DocumentoInversionBolsa {
 
     public Activo getActivo() {
         return activo;
+    }
+
+    public int getCantidad() {
+        return cantidad;
     }
 }
 

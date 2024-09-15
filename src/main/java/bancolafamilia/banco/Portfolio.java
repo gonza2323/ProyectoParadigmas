@@ -35,4 +35,8 @@ public class Portfolio {
         return keyList;
 
     }
+
+    public Map<Activo, Float> getActivos() {
+        return activos;
+    }
 }

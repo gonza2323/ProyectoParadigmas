@@ -1,9 +1,11 @@
 package bancolafamilia.gui;
 
 
+import bancolafamilia.banco.Activo;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
-import com.googlecode.lanterna.gui2.*;
+import bancolafamilia.banco.DocumentoInversionBolsa;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
@@ -141,8 +143,79 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
     private void handleBrokerButton() {
         // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar BOLSA");
+//        List<String> acciones = new ArrayList<>();
+//        acciones.add("Pedir consejo al agente de Bolsa");
+//        acciones.add("Comprar acciones");
+//        acciones.add("Vender acciones");
+//
+//        String accion = view.requestAction(acciones);
+//
+//        if (accion == null) {
+//            return;
+//        }
+
+
+        OPERATION_TYPE_BROKER operationTypeBroker = view.requestOperationTypeBroker();
+
+        if (operationTypeBroker == OPERATION_TYPE_BROKER.INVALID)
+            return;
+
+        String action = null;
+        if (operationTypeBroker == OPERATION_TYPE_BROKER.ADVICE) {
+            String msg = banco.broker.provideAdvice(client);
+            view.showAdviceMsg(msg);
+        } else if (operationTypeBroker == OPERATION_TYPE_BROKER.BUY){
+            Activo activo = view.showActivosDisponibles(banco.broker.getActivosDisponibles());
+            String amountStr = view.requestAmountAssets();
+            int cantidad = Integer.parseInt(amountStr);
+            DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(activo, cantidad, "buy");
+            view.showSimulationActivos(doc);
+
+
+
+
+
+
+        }
     }
+
+//        float amount;
+//        try {
+//            amount = Float.parseFloat(amountStr);
+//        } catch (NumberFormatException e) {
+//            view.showInvalidAmountError();
+//            return;
+//        } catch (NullPointerException e) {
+//            return;
+//        }
+//
+//        if (amount <= 0) {
+//            view.showInvalidAmountError();
+//            return;
+//        }
+//
+//        if (operationType == OPERATION_TYPE.WITHDRAWAL
+//                && amount > client.getBalance()) {
+//            view.showInsufficientFundsError();
+//            return;
+//        }
+//
+//        Boolean success = false;
+//        if (operationType == OPERATION_TYPE.DEPOSIT)
+//            success =banco.solicitudDeposito(client, amount, caja, null);
+//        else if (operationType == OPERATION_TYPE.WITHDRAWAL)
+//            success = banco.withdrawFunds(client, amount, null); // TODO arreglar esto
+//
+//        if (!success) {
+//            view.showError();
+//            return;
+//        }
+//
+//        view.showSuccessMsg();
+//    }
+//
+//        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar BOLSA");*/
+//    }
 
     private void handleAdviceButton() {
         // TODO Auto-generated method stub
@@ -152,4 +225,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     private void handleExitButton() {
         CambiarPagina(new LoginPage(banco, gui));;
     }
+
 }
+
+

@@ -14,7 +14,7 @@ public class Banco implements IOpBcoCliente {
     private float reserves;
     private float deposits;
     private float prestamos;
-    private AgenteBolsa broker;
+    public AgenteBolsa broker;
     
     private float anualInterestRate;
     private float coeficienteDeEncaje;
@@ -41,6 +41,10 @@ public class Banco implements IOpBcoCliente {
         this.operacionesAprobadas = new LinkedList<>();
         this.operacionesProgramadas = new PriorityQueue<>();
         this.listaDocEspecial = new ArrayList<>();
+    }
+
+    public void setBroker(AgenteBolsa broker) {
+        this.broker = broker;
     }
 
     public User findUserByUsername(String username) {
