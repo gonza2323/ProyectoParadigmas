@@ -42,48 +42,6 @@ public class BackupManager implements Serializable {
         return banco;
     }
 
-    public void showTransactions() {
-        Banco banco = restoreBackup();
-        if (banco != null) {
-            for (Operacion operacion : banco.getOperaciones()) {
-                // Ejemplo de cómo podrías mostrar la transacción con seguridad
-                System.out.println("ID: " + operacion.getId() + ", Monto: [PROTEGIDO], Descripción: [PROTEGIDA]");
-            }
-        }
-    }
-
-    public void showClients() {
-        Banco banco = restoreBackup();
-        if (banco != null) {
-            for (Client cliente : banco.getClients()) {
-                // Ejemplo de cómo podrías mostrar la información del cliente con seguridad
-                System.out.println("ID: " + cliente.getId() + ", Nombre: [PROTEGIDO]");
-            }
-        }
-    }
-
-    public void showEmployees(){
-        Banco banco = restoreBackup();
-        if (banco != null) {
-            for (Empleado empleado : banco.getEmployees()) {
-                // Ejemplo de cómo podrías mostrar la información del cliente con seguridad
-                System.out.println("ID: " + empleado.getNombre() + ", Nombre: [PROTEGIDO]");
-            }
-        }
-
-    }
-
-    public void show(){
-        Banco banco = restoreBackup();
-        if (banco != null) {
-            for (Empleado empleado : banco.getEmployees()) {
-                // Ejemplo de cómo podrías mostrar la información del cliente con seguridad
-                System.out.println("ID: " + empleado.getNombre() + ", Nombre: [PROTEGIDO]");
-            }
-        }
-
-    }
-
     public LocalDate getDate() {
         return this.date;
     }

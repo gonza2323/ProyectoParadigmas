@@ -49,10 +49,10 @@ public class ClientMenuView extends PageView {
         super(gui);
     }
 
-    public void startUI() {
+    public void setupUI() {
         // crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+        mainWindow = new BasicWindow("BANCO LA FAMILIA");
+        mainWindow.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
                                       Window.Hint.FIT_TERMINAL_WINDOW,
                                       Window.Hint.NO_DECORATIONS));
 
@@ -64,7 +64,7 @@ public class ClientMenuView extends PageView {
                 .setTopMarginSize(1)
                 .setLeftMarginSize(1)
                 .setRightMarginSize(1));
-        window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // configuración layout
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
@@ -119,9 +119,6 @@ public class ClientMenuView extends PageView {
         panel.addComponent(
             exitButton
                 .setLayoutData(leftJustify));
-
-        // Agregar ventana a la gui
-        gui.addWindowAndWait(window);
     }
 
     public void showHistory(List<Operacion> operaciones){

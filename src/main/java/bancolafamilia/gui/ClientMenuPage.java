@@ -1,6 +1,7 @@
 package bancolafamilia.gui;
 
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
 import bancolafamilia.banco.Operacion;
@@ -13,8 +14,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
-        super(banco, new ClientMenuView(gui), gui);
+    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client, TimeSimulation timeSim) {
+        super(banco, new ClientMenuView(gui), gui, timeSim);
 
         this.client = client;
 
@@ -171,6 +172,6 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new LoginPage(banco, gui, timeSim));;
     }
 }

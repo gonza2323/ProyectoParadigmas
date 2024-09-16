@@ -1,5 +1,6 @@
 package bancolafamilia.gui;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
 import bancolafamilia.banco.Empleado;
@@ -12,15 +13,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 
 public class ActualStateMenuPage extends PageController<ActualStateMenuView>{
-    private Banco banco;
 
 
-    public ActualStateMenuPage(Banco banco, WindowBasedTextGUI gui) {
-        super(banco, new ActualStateMenuView(gui), gui);
-        this.banco = banco;
+    public ActualStateMenuPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
+        super(banco, new ActualStateMenuView(gui), gui, timeSim);
+
 
 
         view.updateReserves(banco.getReservesTotal());
@@ -48,7 +47,7 @@ public class ActualStateMenuPage extends PageController<ActualStateMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new StartMenuPage(banco, gui, timeSim));;
     }
 }
 class ActualStateMenuView extends PageView {
@@ -64,16 +63,16 @@ class ActualStateMenuView extends PageView {
     private final Button showEmployeesButton = new Button("Ver empleados");
     private final Button exitButton = new Button("Salir");
 
-    private Function<Operacion, Boolean> selectPendingOperation;
 
     public ActualStateMenuView(WindowBasedTextGUI gui) {
         super(gui);
     }
 
-    public void startUI() {
+    @Override
+    public void setupUI() {
         // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+        mainWindow = new BasicWindow("BANCO LA FAMILIA");
+        mainWindow.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
                 Window.Hint.FIT_TERMINAL_WINDOW,
                 Window.Hint.NO_DECORATIONS));
 
@@ -86,7 +85,7 @@ class ActualStateMenuView extends PageView {
                         .setBottomMarginSize(1)
                         .setLeftMarginSize(2)
                         .setRightMarginSize(2));
-        window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
 
         // Layout
         LayoutData leftJustifyNoFill = GridLayout.createLayoutData(
@@ -155,7 +154,6 @@ class ActualStateMenuView extends PageView {
                         .setLayoutData(leftJustifyWithFill));
 
 
-        gui.addWindowAndWait(window);
     }
 
     public void showHistory(List<Operacion> operaciones){

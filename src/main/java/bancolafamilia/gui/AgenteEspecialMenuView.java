@@ -51,10 +51,10 @@ class AgenteEspecialMenuView extends PageView {
         }
     }
 
-    public void startUI() {
+    public void setupUI() {
         // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+        mainWindow = new BasicWindow("BANCO LA FAMILIA");
+        mainWindow.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
                                       Window.Hint.FIT_TERMINAL_WINDOW,
                                       Window.Hint.NO_DECORATIONS));
 
@@ -66,7 +66,7 @@ class AgenteEspecialMenuView extends PageView {
                 .setBottomMarginSize(1)
                 .setLeftMarginSize(2)
                 .setRightMarginSize(1));
-        window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // Layout
         
@@ -105,9 +105,6 @@ class AgenteEspecialMenuView extends PageView {
         panel.addComponent(
             exitButton
                 .setLayoutData(leftJustify));
-
-        
-        gui.addWindowAndWait(window);
     }
 
     public void showPendingClients(List<Client> clients) {

@@ -21,6 +21,7 @@ import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Operacion;
 import bancolafamilia.banco.Gerente;
@@ -30,8 +31,8 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager) {
-        super(banco, new ManagerMenuView(gui), gui);
+    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager, TimeSimulation timeSim) {
+        super(banco, new ManagerMenuView(gui), gui, timeSim);
 
         this.manager = manager;
         
@@ -92,6 +93,6 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new LoginPage(banco, gui, timeSim));;
     }
 }
