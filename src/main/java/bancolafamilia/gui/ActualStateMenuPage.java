@@ -120,11 +120,11 @@ class ActualStateMenuView extends PageView {
         panel.addComponent(welcomeMessageLabel);
 
         // Reservas
-        reservesIndicator.setLayoutData(leftJustifyNoFill);                // Ocupar 1 fila
+        reservesIndicator.setLayoutData(leftJustifyWithFill);                // Ocupar 1 fila
         panel.addComponent(reservesIndicator);
 
         // Depósitos
-        depositsIndicator.setLayoutData(rightJustifyNoFill);                   // Ocupar 1 fila
+        depositsIndicator.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
         panel.addComponent(depositsIndicator);
 
         // Préstamos
@@ -295,7 +295,7 @@ class ActualStateMenuView extends PageView {
 
     public void updateDeposits(float deposits) {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
-        depositsIndicator.setText(currencyFormatter.format(deposits) + ": Depósitos");
+        depositsIndicator.setText("Depósitos " + currencyFormatter.format(deposits));
     }
 
     public void updateLoans(float loans) {

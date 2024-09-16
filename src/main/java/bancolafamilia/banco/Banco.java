@@ -234,7 +234,7 @@ public class Banco implements IOperationProcessor, Serializable {
         this.depositsTotal -= withdrawal.amount;
 
         withdrawal.client.reduceBalance(withdrawal.amount);
-        return OpStatus.DENIED;
+        return OpStatus.APPROVED;
     }
 
     @Override
