@@ -131,10 +131,10 @@ class AsesorFinancieroMenuView extends PageView {
     public void showAdviceHistory(ArrayList<financialAdvice> asesoriaBrindada) {
 
         BasicWindow window = new BasicWindow("Historial de Asesorias");
-//        window.setHints(
-//                Arrays.asList(
-//                        Window.Hint.CENTERED,
-//                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setHints(
+                Arrays.asList(
+                        Window.Hint.CENTERED,
+                        Window.Hint.FIT_TERMINAL_WINDOW));
         window.setCloseWindowWithEscape(true);
 
         Panel panel = new Panel();
