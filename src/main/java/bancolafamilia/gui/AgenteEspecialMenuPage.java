@@ -6,6 +6,7 @@ import java.util.function.*;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.AgenteEspecial;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
@@ -17,8 +18,8 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public AgenteEspecialMenuPage(Banco banco, WindowBasedTextGUI gui, AgenteEspecial agente) {
-        super(banco, new AgenteEspecialMenuView(gui), gui);
+    public AgenteEspecialMenuPage(Banco banco, WindowBasedTextGUI gui, AgenteEspecial agente, TimeSimulation timeSim) {
+        super(banco, new AgenteEspecialMenuView(gui), gui, timeSim);
 
         this.agente = agente;
         
@@ -57,6 +58,6 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
     };
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new LoginPage(banco, gui, timeSim));;
     }
 }

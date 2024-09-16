@@ -10,13 +10,17 @@ import java.io.IOException;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        Banco banco = new Banco();
-        Interfaz interfaz = new Interfaz(banco);
-
+        
         Duration tickInterval = Duration.ofSeconds(1);
-        double timeMultiplier = 24*60*60; // Simular 1 día / s
+        double timeMultiplier = 12*60*60; // Simular medio día / s
+        TimeSimulation timeSim = new TimeSimulation(tickInterval, timeMultiplier);
+        
+        Banco banco = new Banco(timeSim);
+        Interfaz interfaz = new Interfaz(banco, timeSim);
 
-        Simulation timeSim = new Simulation(banco, interfaz, tickInterval, timeMultiplier);
+        timeSim.setBank(banco);
+        timeSim.setGui(interfaz);
+
         Thread simThread = new Thread(timeSim);
         simThread.start();
 

@@ -15,14 +15,17 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
 import java.util.regex.Pattern;
+
+import bancolafamilia.Simulation;
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.*;
 import bancolafamilia.banco.Operacion.OpStatus;
 
 
 class StartMenuPage extends PageController<StartMenuView>{
 
-    public StartMenuPage(Banco banco, WindowBasedTextGUI gui) {
-        super(banco, new StartMenuView(gui), gui);
+    public StartMenuPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
+        super(banco, new StartMenuView(gui), gui, timeSim);
         
         view.bindBankLoginButton(() -> handleBankLoginButton());
         view.bindGoToBankButton(() -> handleGoToBankButton());
@@ -32,7 +35,7 @@ class StartMenuPage extends PageController<StartMenuView>{
     }
 
     private void handleBankLoginButton() {
-        CambiarPagina(new LoginPage(banco, gui));
+        CambiarPagina(new LoginPage(banco, gui, timeSim));
     }
 
     private void handleGoToBankButton() {
@@ -103,12 +106,29 @@ class StartMenuPage extends PageController<StartMenuView>{
 
     private void handleShowBankStateButton() {
         // TODO: Página ir al banco
-        CambiarPagina(new StartMenuPage(banco, gui));
+        CambiarPagina(new StartMenuPage(banco, gui, timeSim));
     }
 
     private void handleSimulateOpsButton() {
-        // TODO: Página ir al banco
-        CambiarPagina(new StartMenuPage(banco, gui));
+
+        int numberOfOps;
+        try {
+            numberOfOps = Integer.parseInt(view.requestNumberOfOps());
+        } catch (NumberFormatException e) {
+            view.showError();
+            return;
+        } catch (NullPointerException e) {
+            return;
+        }
+        
+        if (numberOfOps < 5 || numberOfOps > 1000) {
+            view.showOutOfRangeOpsError();
+        }
+
+        Simulation sim = new Simulation(banco, timeSim);
+        sim.createSimulation(numberOfOps, 10);
+        sim.start();
+        // CambiarPagina(new BankStatePage(banco, gui, timeSim)); // TODO
     }
 
     public void handleExitButton() {
@@ -138,12 +158,11 @@ class StartMenuView extends PageView {
         this.exitButton = new Button("Salir");
     }
 
-    public void startUI() {
-        BasicWindow window = new BasicWindow();
-        window.setHints(Arrays.asList(Window.Hint.CENTERED));
+    public void setupUI() {
+        mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED));
 
         Panel panel = new Panel();
-        window.setComponent(panel);
+        mainWindow.setComponent(panel);
         
         int horizontalMargin = 3;
         panel.setLayoutManager(
@@ -169,8 +188,6 @@ class StartMenuView extends PageView {
         simulateOpsButton.setLayoutData(fill).addTo(panel);
         panel.addComponent(new EmptySpace());
         exitButton.setLayoutData(fill).addTo(panel);
-        
-        gui.addWindowAndWait(window);
     }
 
     public int requestCaja(List<Integer> cajas) {
@@ -262,6 +279,20 @@ class StartMenuView extends PageView {
                 return false;
         }
     }
+
+    public String requestNumberOfOps() {
+        return new TextInputDialogBuilder()
+            .setTitle("SIMULAR OPERACIONES")
+            .setDescription("Cuántas operaciones desea simular? (Entre 5 y 1000)")
+            .setValidationPattern(Pattern.compile("^[1-9][0-9]*$"), "Ingrese una cantidad de meses válida")
+            .build()
+            .showDialog(gui);
+    }
+
+    public void showOutOfRangeOpsError() {
+        showErrorDialog("Ingrese entre 5 y 1000 operaciones");
+    }
+
 
     public void showInvalidAmountError() {
         showErrorDialog("Monto inválido");

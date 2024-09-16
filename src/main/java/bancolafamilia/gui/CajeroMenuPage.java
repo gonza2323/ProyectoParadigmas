@@ -13,6 +13,7 @@ import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Cajero;
 
@@ -21,8 +22,8 @@ public class CajeroMenuPage extends PageController<CajeroMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public CajeroMenuPage(Banco banco, WindowBasedTextGUI gui, Cajero cajero) {
-        super(banco, new CajeroMenuView(gui, cajero.getNombre()), gui);
+    public CajeroMenuPage(Banco banco, WindowBasedTextGUI gui, Cajero cajero, TimeSimulation timeSim) {
+        super(banco, new CajeroMenuView(gui, cajero.getNombre()), gui, timeSim);
 
         this.cajero = cajero;
     }
@@ -36,7 +37,7 @@ class CajeroMenuView extends PageView {
         this.name = name;
     }
 
-    public void startUI() {
+    public void setupUI() {
         
     }
 }

@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.Operacion.OpStatus;
 
 /**
@@ -17,6 +18,8 @@ import bancolafamilia.banco.Operacion.OpStatus;
  */
 public class Banco implements IOperationProcessor {
 
+    private final TimeSimulation timeSim;
+    
     private float reservesTotal = 0.0f;
     private float depositsTotal = 0.0f;
     private float loanedTotal = 0.0f;
@@ -33,6 +36,10 @@ public class Banco implements IOperationProcessor {
     private final ArrayList<DocumentoClienteEspecial> listaDocEspecial = new ArrayList<>();;
     private final Queue<Client> unattendedPremiumClients = new LinkedList<>();
 
+    public Banco(TimeSimulation timeSim) {
+        this.timeSim = timeSim;
+    }
+
     // operaciones
     // ========================================================================
     
@@ -47,10 +54,10 @@ public class Banco implements IOperationProcessor {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
-        Operacion transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
+        Operacion transferencia = new Transferencia(timeSim.getDateTime(), sender, recipient, amount, motivo);
 
         if (Transferencia.isTransferenciaEspecial(recipient)) {
-            transferencia = new TransferenciaEspecial(LocalDateTime.now(), sender, recipient, amount, motivo);
+            transferencia = new TransferenciaEspecial(timeSim.getDateTime(), sender, recipient, amount, motivo);
         }
 
         return procesarOperacion(transferencia);
@@ -66,7 +73,7 @@ public class Banco implements IOperationProcessor {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudPrestamo(Client client, float amount, int months) {
-        Operacion loan = new Prestamo(LocalDateTime.now(), client, amount, anualInterestRate, months);
+        Operacion loan = new Prestamo(timeSim.getDateTime(), client, amount, anualInterestRate, months);
         return procesarOperacion(loan);
     }
 
@@ -80,7 +87,7 @@ public class Banco implements IOperationProcessor {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudDeposito(Client client, float amount, Cajero cajero) {
-        Deposito deposit = new Deposito(LocalDateTime.now(), client, amount, cajero);
+        Deposito deposit = new Deposito(timeSim.getDateTime(), client, amount, cajero);
         Deposito approved = cajero.aprobarOperacion(deposit);
         
         if (approved.equals(deposit))
@@ -100,7 +107,7 @@ public class Banco implements IOperationProcessor {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
-        Operacion withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
+        Operacion withdrawal = new Retiro(timeSim.getDateTime(), client, amount, cajero);
         return procesarOperacion(withdrawal);
     }
 
@@ -175,7 +182,7 @@ public class Banco implements IOperationProcessor {
 
         switch (operation.status) {
             case APPROVED:
-                operation.setDate(LocalDateTime.now());
+                operation.setDate(timeSim.getDateTime());
                 operacionesAprobadas.addFirst(operation);
                 break;
             case MANUAL_APPROVAL_REQUIRED:
@@ -329,7 +336,7 @@ public class Banco implements IOperationProcessor {
         int cantTransfDiarias = doc.getDocumentoSimulacion().getNumTransferenciasDiarias();
         float monto = doc.getDocumentoSimulacion().getMontoMaxDiario();
         Client client = doc.getClient();
-        LocalDateTime fechaActual = LocalDateTime.now();
+        LocalDateTime fechaActual = timeSim.getDateTime();
 
 
         for (int i = 0; i< dias; i++){
