@@ -118,15 +118,15 @@ class LoginView extends PageView {
 
     // Métodos para mostrar errores. Son llamados por el contorlador (LoginPage)
     public void showIncorrectUserOrPasswordError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Usuario o contraseña incorrectos");
+        showErrorDialog("Usuario o contraseña incorrectos");
     }
 
     public void showNoPasswordError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Ingrese una contraseña");
+        showErrorDialog("Ingrese una contraseña");
     }
 
     public void showNoUsernameError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Ingrese un nombre de usuario");
+        showErrorDialog("Ingrese un nombre de usuario");
     }
 
     // Métodos que nos permiten configurar que pasa cuando apretamos los botones
@@ -182,7 +182,7 @@ class LoginView extends PageView {
 
         // Etiqueta: username
         contentPanel.addComponent(
-            new Label("Username:")
+            new Label("Usuario:")
                 .setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
         
         // Añadimos el campo username creado en el constructor
@@ -193,7 +193,7 @@ class LoginView extends PageView {
 
         // Etiqueta: password
         contentPanel.addComponent(
-            new Label("Password:")
+            new Label("Contraseña:")
                 .setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
         
         // Añadimos el campo password creado en el constructor

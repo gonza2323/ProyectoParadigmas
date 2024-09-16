@@ -11,48 +11,135 @@ import java.util.stream.Collectors;
 import bancolafamilia.banco.Operacion.OpStatus;
 
 /**
- * Clase que mantiene el estado del banco, y los métodos para que
- * la interfaz interactúe con él.
+ * Clase que mantiene el estado del banco. Ofrece métodos
+ * para acceder a los servicios del banco.
+ * Implementa IOperationProcessor, por lo que es capaz de procesar operaciones.
  */
 public class Banco implements IOperationProcessor {
 
-    private float reservesTotal;
-    private float depositsTotal;
-    private float loanedTotal;
+    private float reservesTotal = 0.0f;
+    private float depositsTotal = 0.0f;
+    private float loanedTotal = 0.0f;
+    private float coeficienteDeEncaje = 0.10f;
+    private float anualInterestRate = 0.08f;
+
+    private final ArrayList<User> users = new ArrayList<>();
+    private final ArrayList<Empleado> empleados = new ArrayList<>();
+
+    private final Queue<Operacion> operacionesPendientes = new LinkedList<>();
+    private final LinkedList<Operacion> operacionesAprobadas = new LinkedList<>();
+    private final PriorityQueue<Operacion> operacionesProgramadas = new PriorityQueue<>();
+
+    private final ArrayList<DocumentoClienteEspecial> listaDocEspecial = new ArrayList<>();;
+    private final Queue<Client> unattendedPremiumClients = new LinkedList<>();
+
+    // operaciones
+    // ========================================================================
     
-    private float anualInterestRate;
-    private float coeficienteDeEncaje;
+    /**
+     * Solicita una transferencia desde la cuenta del cliente. Crea la operación
+     * correspondiente y la manda a procesar. Retorna el estado de la operación luego
+     * de ser procesada
+     * @param sender Cliente que realiza la transferencia
+     * @param recipient Beneficiario de la transferencia
+     * @param amount Cantidad a transferir
+     * @param motivo Motivo de la transferencia
+     * @return Estado de la operación luego de ser solicitada
+     */
+    public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
+        Operacion transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
 
-    private final ArrayList<User> users;
-    private final ArrayList<Empleado> empleados;
+        if (Transferencia.isTransferenciaEspecial(recipient)) {
+            transferencia = new TransferenciaEspecial(LocalDateTime.now(), sender, recipient, amount, motivo);
+        }
 
-    private final Queue<Operacion> operacionesPendientes;
-    private final LinkedList<Operacion> operacionesAprobadas;
-    private final PriorityQueue<Operacion> operacionesProgramadas;
+        return procesarOperacion(transferencia);
+    }
 
-    private final ArrayList<DocumentoClienteEspecial> listaDocEspecial;
-    private final Queue<Client> unattendedPremiumClients;
+    /**
+     * Solicita un préstamo para el cliente. Crea la operación correspondiente
+     * y la manda a procesar. Retorna el estado de la operación luego de
+     * ser procesada.
+     * @param client Cliente que solicita el préstamo
+     * @param amount Cantidad del préstamo solicitado
+     * @param months Periodo del préstamo en meses
+     * @return Estado de la operación luego de ser solicitada
+     */
+    public OpStatus solicitudPrestamo(Client client, float amount, int months) {
+        Operacion loan = new Prestamo(LocalDateTime.now(), client, amount, anualInterestRate, months);
+        return procesarOperacion(loan);
+    }
 
+    /**
+     * Solicita un depósito de la cuenta de un cliente. Crea la operación correspondiente
+     * y la manda a procesar. Retorna el estado de la operación luego de
+     * ser procesada.
+     * @param client Cliente que solicita el depósito
+     * @param amount Cantidad a depositar
+     * @param cajero Cajero responsable
+     * @return Estado de la operación luego de ser solicitada
+     */
+    public OpStatus solicitudDeposito(Client client, float amount, Cajero cajero) {
+        Deposito deposit = new Deposito(LocalDateTime.now(), client, amount, cajero);
+        Deposito approved = cajero.aprobarOperacion(deposit);
+        
+        if (approved.equals(deposit))
+            return procesarOperacion(approved);
+        
+        procesarOperacion(approved);
+        return OpStatus.APPROVED;
+    }
 
-    public Banco() {
-        reservesTotal = 0.0f;
-        depositsTotal = 0.0f;
-        loanedTotal = 0.0f;
-        this.anualInterestRate = 0.08f;
-        this.coeficienteDeEncaje = 0.10f;
-        this.users = new ArrayList<User>();
-        this.empleados = new ArrayList<>();
-        this.operacionesPendientes = new LinkedList<>();
-        this.operacionesAprobadas = new LinkedList<>();
-        this.operacionesProgramadas = new PriorityQueue<>();
-        this.listaDocEspecial = new ArrayList<>();
-        this.unattendedPremiumClients = new LinkedList<>();
+    /**
+     * Solicita un retiro de la cuenta de un cliente. Crea la operación correspondiente
+     * y la manda a procesar. Retorna el estado de la operación luego de
+     * ser procesada.
+     * @param client Cliente que solicita el retiro
+     * @param amount Cantidad a retirar
+     * @param cajero Cajero responsable
+     * @return Estado de la operación luego de ser solicitada
+     */
+    public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
+        Operacion withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
+        return procesarOperacion(withdrawal);
+    }
+
+    /**
+     * Programa las operaciones en la lista recibida.
+     * A medida que avanza la simulación del tiempo, se irán procesando en
+     * la fecha correcta. Si se insertan operaciones con fecha previa a la
+     * actual, se procesarán casi instantáneamente.
+     * @param operaciones Operaciones a programar
+     */
+    public void programarOperaciones(List<Operacion> operaciones) {
+        operacionesPendientes.addAll(operaciones);
+    }
+
+    /**
+     * Aprueba la operación pendiente que reciba.
+     * La intenta remover de la lista de operaciones pendientes. Si estaba
+     * pendiente, la manda a procesar con estado aprobada.
+     * @param operation Operación a aprobar
+     */
+    public void aprobarOperacionPendiente(Operacion operation) {
+        operation.aprobar();
+        if (operacionesPendientes.remove(operation))
+            procesarOperacion(operation);
+    }
+
+    /**
+     * Deniega la operación pendiente que reciba.
+     * La intenta remover de la lista de operaciones pendientes.
+     * @param operation Operación a denegar
+     */
+    public void denegarOperacion(Operacion operacion) {
+        operacion.denegar();
+        operacionesPendientes.remove(operacion);
     }
 
     /**
      * Recibe la fecha actual de la simulación y procesa todas las operaciones
      * en la cola de "pendientes" que debería haber procesado antes de esa fecha
-     * 
      * @param currenDateTime Tiempo actual de la simulación
      * @return Retorna si se procesó alguna operación programada
      */
@@ -69,6 +156,14 @@ public class Banco implements IOperationProcessor {
         return hasProcesedOperations;
     }
 
+    /**
+     * Procesa una operación de cualquier tipo
+     * <p>Toda operación del banco pasa por este método. Según el resultado del
+     * procesado, la operación habrá quedado aprobada, pendiente de aprobación
+     * por el gerente, o denegada</p>
+     * @param operation Operación a procesar
+     * @return Estado de la operación luego de ser procesada
+     */
     private OpStatus procesarOperacion(Operacion operation) {
         
         if (operation.amount <= 0 || operation.status == OpStatus.DENIED) {
@@ -80,6 +175,7 @@ public class Banco implements IOperationProcessor {
 
         switch (operation.status) {
             case APPROVED:
+                operation.setDate(LocalDateTime.now());
                 operacionesAprobadas.addFirst(operation);
                 break;
             case MANUAL_APPROVAL_REQUIRED:
@@ -91,6 +187,18 @@ public class Banco implements IOperationProcessor {
         return operation.status;
     }
 
+    /*
+     * Los siguientes métodos se encargan de los detalles del procesamiento
+     * de cada tipo de operación y no deben ser llamados directamente. Solo
+     * son llamados desde procesarOperacion(Operacion operation).
+     * Sin embargo, deben ser públicos.
+     */
+
+    /**
+     * Procesa un depósito
+     * @param deposit Depósito a procesar
+     * @return Estado del depósito luego de ser procesado
+     */
     @Override
     public OpStatus processOperation(Deposito deposit) {
         if (deposit.amount > Deposito.montoMax // 
@@ -187,58 +295,9 @@ public class Banco implements IOperationProcessor {
         return OpStatus.APPROVED;
     }
 
-    public void aprobarOperacionPendiente(Operacion operacion) {
-        operacion.aprobar();
-        if (operacionesPendientes.remove(operacion))
-            procesarOperacion(operacion);
+    private boolean clientHasPendingSpecialTransfer(Client client) {
+        return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client) && t instanceof TransferenciaEspecial);
     }
-
-    public void denegarOperacion(Operacion operacion) {
-        operacion.denegar();
-        operacionesPendientes.remove(operacion);
-    }
-
-    public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
-        Operacion transferencia = new Transferencia(LocalDateTime.now(), sender, recipient, amount, motivo);
-
-        if (Transferencia.isTransferenciaEspecial(recipient)) {
-            transferencia = new TransferenciaEspecial(LocalDateTime.now(), sender, recipient, amount, motivo);
-        }
-
-        return procesarOperacion(transferencia);
-    }
-
-    public OpStatus solicitudPrestamo(Client client, float amount, int months) {
-        Operacion loan = new Prestamo(LocalDateTime.now(), client, amount, anualInterestRate, months);
-        return procesarOperacion(loan);
-    }
-
-    public OpStatus solicitudDeposito(Client client, float amount, Cajero cajero) {
-        Deposito deposit = new Deposito(LocalDateTime.now(), client, amount, cajero);
-        Deposito approved = cajero.aprobarOperacion(deposit);
-        
-        if (approved.equals(deposit))
-            return procesarOperacion(approved);
-        
-        procesarOperacion(approved);
-        return OpStatus.APPROVED;
-    }
-
-    public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
-        Operacion withdrawal = new Retiro(LocalDateTime.now(), client, amount, cajero);
-        return procesarOperacion(withdrawal);
-    }
-
-    //3. DEPOSITOS -----------------------------------------------------------------------------------------------------
-
-    //3.1 METODOS AUXILIARES PARA DEPÓSITOS ILEGITIMOS -----------------------------------------------------------------
-
-    //3.1.2 METODOS PARA EL INTERCAMBIO DE INFO CLIENTE-AGENTE ESPECIAL-------------------------------------------------
-    //Estos metodos son llamados desde la AgenteEspecialMenuPage--------------------------------------------------------
-
-
-    //3.2 METODOS PARA DEPOSITOS EN GRAL -------------------------------------------------------------------------------
-    //Este metodo es llamado desde la pagina despositos-----------------------------------------------------------------
 
 
     //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
@@ -263,7 +322,6 @@ public class Banco implements IOperationProcessor {
     //     listaDocEspecial.add(doc); //el banco agrega el docuemnto a su lista cuando ya esta completo, es decir que tiene los datos de docuemntoCliente  y los datos de documentoTransaccionEspecial
     //     return doc.getDocumentoSimulacion();
     //     //devuelve el documento donde esta la info de la simulacion que debe hacer el agente especial
-
     // }
 
     public void programarOpEspecial(DocumentoClienteEspecial doc){
@@ -285,9 +343,19 @@ public class Banco implements IOperationProcessor {
         }
     }
 
+    /**
+     * Calcula el límite máximo de financiación de un cliente. Tiene en cuenta tanto
+     * las finanzas del cliente como las del banco (el banco intenta cubrir siempre
+     * un cierto porcentaje de los depósitos).
+     * @param client Cliente a analizar
+     * @return Límite máximo de financiación del cliente
+     */
     public float getMaxClientLoan(Client client) {
         // máximo dispuesto a prestar a ese cliente
-        float clientCreditLimit = Math.max((client.getBalance() - 1.10f * client.getDebt()) * 2.00f, 0.0f);
+        float base = 5000.0f;
+        float cashFactor = 0.50f;
+        float debtFactor = 0.70f;
+        float clientCreditLimit = Math.max(base + cashFactor * client.getBalance() - debtFactor * client.getDebt(), 0.0f);
         
         // máximo que puede prestar el banco para poder seguir
         // cubriendo cierto porcentaje de los depósitos
@@ -296,6 +364,9 @@ public class Banco implements IOperationProcessor {
 
         return Math.min(clientCreditLimit, bankLoanCapacity); // devolvemos el menor
     }
+
+    // métodos auxiliares
+    // ========================================================================
 
     public void addUser(User user) {
         // TODO: Revisar que no exista ya un cliente con
@@ -322,9 +393,7 @@ public class Banco implements IOperationProcessor {
             .collect(Collectors.toList());
     }
 
-    // INFORMACION A CLIENTES EN LA CLIENT MENU PAGE -----------------------------------------------------------------
-
-    public List<Operacion> getOperacionesCliente(Client client) { //agregamos este metodo para sacar la lista de operaciones de cliente
+    public List<Operacion> getOperacionesCliente(Client client) {
         return operacionesAprobadas.stream()
                 .filter(op -> op.getParticipants().contains(client))
                 .collect(Collectors.toList());
@@ -352,20 +421,19 @@ public class Banco implements IOperationProcessor {
             .collect(Collectors.toList());
     }
 
-    private boolean clientHasPendingSpecialTransfer(Client client) {
-        return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client) && t instanceof TransferenciaEspecial);
-    }
+    // getters
 
-    public List<Operacion> getOperaciones() { return operacionesAprobadas; }
-    public Queue<Operacion> getOperacionesPendientes() { return operacionesPendientes; }
-    public PriorityQueue<Operacion> getOperacionesProgramadas() {return operacionesProgramadas; }
-    
     public float getReservesTotal() { return reservesTotal; }
-    public float getLoanedTotal() { return loanedTotal; }
     public float getDepositsTotal() { return depositsTotal; }
+    public float getLoanedTotal() { return loanedTotal; }
     public float getBalance() { return reservesTotal + loanedTotal - depositsTotal; }
+    public float getAnualInterestRate() { return anualInterestRate; }
+
     public List<Empleado> getEmployees() { return empleados; }
 
-    public float getAnualInterestRate() { return anualInterestRate; }
+    public Queue<Operacion> getOperacionesPendientes() { return operacionesPendientes; }
+    public List<Operacion> getOperaciones() { return operacionesAprobadas; }
+    public PriorityQueue<Operacion> getOperacionesProgramadas() {return operacionesProgramadas; }
+    
     public Queue<Client> getPendingPremiumClients() { return unattendedPremiumClients; }
 }

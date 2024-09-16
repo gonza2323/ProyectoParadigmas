@@ -11,6 +11,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.GridLayout.Alignment;
 import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
 import java.util.regex.Pattern;
@@ -27,7 +28,7 @@ class StartMenuPage extends PageController<StartMenuView>{
         view.bindGoToBankButton(() -> handleGoToBankButton());
         view.bindShowBankStateButton(() -> handleShowBankStateButton());
         view.bindSimulateOpsButton(() -> handleSimulateOpsButton());
-        view.bindExitButton(() -> handleCloseButton());
+        view.bindExitButton(() -> handleExitButton());
     }
 
     private void handleBankLoginButton() {
@@ -102,16 +103,19 @@ class StartMenuPage extends PageController<StartMenuView>{
 
     private void handleShowBankStateButton() {
         // TODO: Página ir al banco
-        CambiarPagina(null);
+        CambiarPagina(new StartMenuPage(banco, gui));
     }
 
     private void handleSimulateOpsButton() {
         // TODO: Página ir al banco
-        CambiarPagina(null);
+        CambiarPagina(new StartMenuPage(banco, gui));
     }
 
-    public void handleCloseButton() {
-        CambiarPagina(null);
+    public void handleExitButton() {
+        boolean shouldExit = view.showConfirmExitDialog();
+
+        if (shouldExit)
+            CambiarPagina(null);
     }
 }
 
@@ -238,6 +242,25 @@ class StartMenuView extends PageView {
             .setValidationPattern(Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$"), "Ingrese un monto válido")
             .build()
             .showDialog(gui);
+    }
+
+    public boolean showConfirmExitDialog() {
+        var response = new MessageDialogBuilder()
+            .setTitle("SALIR")
+            .setText("Está seguro de que desea salir?")
+            .addButton(MessageDialogButton.No)
+            .addButton(MessageDialogButton.Yes)
+            .build()
+            .showDialog(gui);
+        
+        switch (response) {
+            case Yes:
+                return true;
+            case No:
+                return false;
+            default:
+                return false;
+        }
     }
 
     public void showInvalidAmountError() {

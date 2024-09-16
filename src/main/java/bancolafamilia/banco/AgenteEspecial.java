@@ -17,6 +17,7 @@ public class AgenteEspecial extends Empleado {
 
     //clientesPendientes: aqui se almacenan los clienetes que hicieron la transferencia especial pero aun no han avisado el monto que quiere lavar - no se si es necesaria pero la dejo por las dudas!
     private LinkedList<Client> clientesPendientes;
+    private ArrayList<Client> assignedClients = new ArrayList();
 
     //activosEnProceso: es una lista con dcoumentos creados por el agente especial para mandarselos al cajero y para que el gerente pueda llevar el control de lo que se esta haciendo
     private LinkedList<DocumentoClienteEspecial> activosEnProceso;
@@ -63,34 +64,28 @@ public class AgenteEspecial extends Empleado {
 
     // }
 
-    public LinkedList<DocumentoClienteEspecial> getActivosEnProceso() {
-        return activosEnProceso;
+    public void acceptClient(Client client, Queue<Client> pendingPremiumClients, List<Cajero> cajeros) {
+        int nroCaja = assignTellerToPremiumClient(client, cajeros);
+        assignedClients.add(client);
+        pendingPremiumClients.remove(client);
+        client.sendNotification("Utilice la caja Nro. " + nroCaja);
     }
 
-    //Este getter le proporciona al cajero la cuenta cliente del agente especial para que sepa a donde va a depositar el dinero para el lavado.
-    public Client getCtaCliente() { return ctaCliente; }
-    public float getBalance() { return ctaCliente.getBalance(); }
-
-    public void assignTellerToPremiumClient(Client client, Queue<Client> pendingPremiumClients, List<Cajero> cajeros) {
-
-        pendingPremiumClients.remove(client);
-        
-        //2. El agente manipula al cajero
+    private int assignTellerToPremiumClient(Client client, List<Cajero> cajeros) {
         Random random = new Random();
         int randomIndex = random.nextInt(cajeros.size());
         Cajero cajero = cajeros.get(randomIndex);
 
-        //3. crea el documento en el registra: cliente, monto y la caja a la que va a ir.
         DocumentoClienteEspecial document = new DocumentoClienteEspecial(client, this);
-
-        //4. le envia el documento al cajero para que sepa que cliente va a ir y el monto que va a depositar
         cajero.recieveDocument(document);
 
-        client.sendNotification("Utilice la caja Nro. " + cajero.getCaja());
-
-        //6. registra el documento en la lista de los activos que esta lavando - esta lista tambien sirve para que el gerente sepa los movimientos que tiene que supervisar
-        activosEnProceso.add(document);
+        return cajero.getCaja();
     }
+
+    public Client getCtaCliente() { return ctaCliente; }
+    public float getBalance() { return ctaCliente.getBalance(); }
+    public LinkedList<DocumentoClienteEspecial> getActivosEnProceso() { return activosEnProceso; }
+    public ArrayList<Client> getAssignedClients() { return assignedClients; }
 }
 
 

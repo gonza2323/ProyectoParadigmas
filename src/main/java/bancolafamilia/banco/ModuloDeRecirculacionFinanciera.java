@@ -1,6 +1,6 @@
 package bancolafamilia.banco;
 
-public class ModuloEspecial {
+public class ModuloDeRecirculacionFinanciera {
 
     // montoMaxTotal indica es el monto maximo que puede transferir en un dia - es decir la suma de los montos de todas las transferencias no rastreables no debe superar el montoMAxTotal
     public final float montoMaxTotal = 5000000;
@@ -11,7 +11,7 @@ public class ModuloEspecial {
     public float montoAOperar;
     public DocumentoTransaccionEspecial documento;
 
-    public ModuloEspecial(float montoAOperar) {
+    public ModuloDeRecirculacionFinanciera(float montoAOperar) {
         this.montoAOperar = montoAOperar;
     }
 

@@ -9,7 +9,7 @@ public abstract class Operacion implements Comparable<Operacion> {
     private static int nextId = 1;
 
     protected final int id;
-    protected final LocalDateTime date; //este método es protected porque necesitamos un setter para el tributo cliente de deposito
+    protected LocalDateTime date; //este método es protected porque necesitamos un setter para el tributo cliente de deposito
     protected Client client; //solo los clientes realizan estas operaciones
     protected final float amount;
     protected OpStatus status;
@@ -54,4 +54,8 @@ public abstract class Operacion implements Comparable<Operacion> {
     public OpStatus isAprobada(){ return status; }
 
     public int getId() { return id; }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 }

@@ -26,6 +26,7 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
         view.updateBalance(agente.getBalance());
 
         view.bindPendingClientsButton(() -> handlePendingClientsButton());
+        view.bindCurrentClientsButton(() -> handleCurrentClientsButton());
         view.bindExitButton(() -> handleExitButton());
 
         view.bindSelectPendingClientButton(handleSelectPendingClient);
@@ -36,16 +37,24 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
         view.showPendingClients(clients);
     }
 
+    private void handleCurrentClientsButton() {
+        List<Client> clients = new ArrayList<>(agente.getAssignedClients());
+        view.showCurrentClients(clients);
+    };
+
     private Function<Client, Boolean> handleSelectPendingClient = (Client client) -> {
         Boolean shouldApprove = view.requestConfirmClient();
 
         if (!shouldApprove)
             return false;
         
-        agente.assignTellerToPremiumClient(client, banco.getPendingPremiumClients(), banco.getCajeros());
+        agente.acceptClient(client, banco.getPendingPremiumClients(), banco.getCajeros());
         return true;
     };
 
+    private Function<Client, Boolean> handleSelectDocument = (Client client) -> {
+        return false;
+    };
 
     private void handleExitButton() {
         CambiarPagina(new LoginPage(banco, gui));;

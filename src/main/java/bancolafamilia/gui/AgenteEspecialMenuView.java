@@ -111,7 +111,70 @@ class AgenteEspecialMenuView extends PageView {
     }
 
     public void showPendingClients(List<Client> clients) {
-        BasicWindow window = new BasicWindow("OPERACIONES POR APROBAR");
+        BasicWindow window = new BasicWindow("CLIENTES DISPONIBLES");
+        window.setHints(
+            Arrays.asList(
+                Window.Hint.CENTERED,
+                Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+        
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+        
+        Table<Object> table = new Table<>("Id", "Nombre", "DNI", "Usuario", "Alias", "Balance", "Deuda");
+        panel.addComponent(table);
+
+        NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+
+        for (Client c : clients) {
+            String id = Integer.toString(c.getId());
+            String name = c.getNombre();
+            String dni = numberFormat.format(c.getDNI());
+            String username = c.getUsername();
+            String alias = c.getAlias();
+            String balance = currencyFormatter.format(c.getBalance());
+            String debt = currencyFormatter.format(c.getDebt());
+
+            table.getTableModel().addRow(id, name, dni, username, alias, balance, debt);
+        }
+
+        table.setSelectAction(() -> {
+            if (table.getTableModel().getRowCount() == 0)
+                return;
+            
+            String idStr = (String)table.getTableModel().getCell(0, table.getSelectedRow());
+            int id = Integer.parseInt(idStr);
+
+            for (Client c : clients) {
+                if (c.getId() == id) {
+                    Boolean shouldRemoveRow = selectPendingClient.apply(c);
+
+                    if (shouldRemoveRow) {
+                        table.getTableModel().removeRow(table.getSelectedRow());
+                    }
+                }
+            }
+        });
+
+        panel.addComponent(new Button("Cerrar",
+            new Runnable() {
+                @Override
+                public void run() {
+                    window.close();
+                }
+        }).setLayoutData(
+            GridLayout.createLayoutData(
+                GridLayout.Alignment.END,
+                GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
+    }
+
+    public void showCurrentClients(List<Client> clients) {
+        BasicWindow window = new BasicWindow("CLIENTES ASIGNADOS");
         window.setHints(
             Arrays.asList(
                 Window.Hint.CENTERED,
