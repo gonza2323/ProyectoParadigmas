@@ -1,17 +1,21 @@
 package bancolafamilia.banco;
 
-public class ModuloEspecial {
+import java.io.Serializable;
+
+public class ModuloDeRecirculacionFinanciera implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // montoMaxTotal indica es el monto maximo que puede transferir en un dia - es decir la suma de los montos de todas las transferencias no rastreables no debe superar el montoMAxTotal
     public final float montoMaxTotal = 5000000;
 
     //montoMaxParcial es monto maximo que pueden tener cada una de las pequeñas transferencias no restreables
     //podria utilizar direcatmente Transferencia.montoInmediata pero lo coloco en un atributo pq el bco podria decidir despues cambiar el limite
-    public final float montoMaxParcial = Transferencia.montoInmediata;
+    public final float montoMaxParcial = Transferencia.maxAmountImmediate;
     public float montoAOperar;
     public DocumentoTransaccionEspecial documento;
 
-    public ModuloEspecial(float montoAOperar) {
+    public ModuloDeRecirculacionFinanciera(float montoAOperar) {
         this.montoAOperar = montoAOperar;
     }
 

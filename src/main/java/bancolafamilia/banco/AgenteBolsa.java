@@ -1,11 +1,14 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class AgenteBolsa {
+public class AgenteBolsa implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String name;
     private int dni;

@@ -1,8 +1,11 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class TransaccionBolsa extends Operacion {
+public class TransaccionBolsa extends Operacion implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public Activo activo;
     private String tipo;
@@ -37,8 +40,8 @@ public class TransaccionBolsa extends Operacion {
     }
 
     @Override
-    public void realizarOperacion() {
-
+    public OpStatus process(IOperationProcessor processor) {
+        return null;
     }
 
     @Override

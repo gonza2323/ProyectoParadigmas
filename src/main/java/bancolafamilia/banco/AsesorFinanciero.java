@@ -3,11 +3,16 @@ package bancolafamilia.banco;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class AsesorFinanciero extends Empleado {
+import java.io.Serializable;
 
-    private final ArrayList<String> adviceForClients;
-    private final ArrayList<String> adviceForPremiumClients;
-    private final ArrayList<financialAdvice> adviceRecord;
+public class AsesorFinanciero extends Empleado implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    private ArrayList<String> adviceForClients;
+    private ArrayList<String> adviceForPremiumClients;
+    private ArrayList<financialAdvice> adviceRecord;
+
+
 
     public AsesorFinanciero(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
@@ -17,11 +22,6 @@ public class AsesorFinanciero extends Empleado {
 
     }
 
-
-    @Override
-    public void recieveSolicitud(Operacion operacion) {
-
-    }
 
     public String getAdvice(ArrayList<String> lista){
         Random random = new Random();

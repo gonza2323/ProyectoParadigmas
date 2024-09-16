@@ -1,36 +1,33 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Arrays;
 
-public class Deposito extends Operacion{
-    
-    public static final float montoMax = 300000000;
-    public static final float montoInmediato = 170000000;
+public class Deposito extends Operacion implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    public static final float montoMax = 500000;
     
     private final Cajero cajeroResponsable;
-    public int caja;
-    public boolean flag = false;
 
-    public Deposito(LocalDateTime date, Client client, float amount, int caja, Cajero cajero) {
+    public Deposito(LocalDateTime date, Client client, float amount, Cajero cajero) {
         super(date, client, amount);
-        this.caja = caja;
         this.cajeroResponsable = cajero;
     }
 
     @Override
     public String getDescription() {
-        return "Realizado en sucursal";
-    }
-    
-    @Override
-    public void realizarOperacion() {
-        client.balance += amount;
+        return "Realizado en caja Nro. " + cajeroResponsable.getCaja();
     }
 
     public int getCaja() {
-        return caja;
+        return cajeroResponsable.getCaja();
+    }
+
+    public Cajero getCajero() {
+        return cajeroResponsable;
     }
 
     @Override
@@ -38,12 +35,13 @@ public class Deposito extends Operacion{
         return employee instanceof Cajero;
     }
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
-
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    @Override
+    public OpStatus process(IOperationProcessor processor) {
+        return processor.processOperation(this);
     }
 
     @Override

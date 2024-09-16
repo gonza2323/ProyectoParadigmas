@@ -1,100 +1,50 @@
 package bancolafamilia;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
+import java.util.*;
+import java.time.*;
 
-import bancolafamilia.banco.Banco;
-import bancolafamilia.gui.Interfaz;
+import bancolafamilia.banco.*;
 
-public class Simulation implements Runnable {
+/**
+ * Simula operaciones en el banco. Genera 
+ */
+public class Simulation {
 
-    private final Banco banco;
-    private final Interfaz gui;
+    Banco banco;
+    TimeSimulation timeSim;
+    private PriorityQueue<Operacion> plannedOperations = new PriorityQueue<>();
 
-    private final Duration tickInterval;
-    private final double timeMultiplier;
-    private final Object pauseLock = new Object();
-    
-    private volatile boolean isPaused;
-    private volatile boolean isStopped;
-    private Instant currentTime;
-
-    public Simulation(Banco banco, Interfaz gui, Duration tickInterval, double timeMultiplier) {
+    public Simulation(Banco banco, TimeSimulation timeSim) {
         this.banco = banco;
-        this.gui = gui;
-        this.tickInterval = tickInterval;
-        this.timeMultiplier = timeMultiplier;
-        this.currentTime = Instant.now();
-        this.isPaused = true;
-        this.isStopped = false;
     }
 
-    public void run() {
-        Instant nextTickTime = Instant.now().plus(tickInterval);
-
-        while (!isStopped) {
-            synchronized (pauseLock) {
-                while (isPaused) {
-                    try {
-                        pauseLock.wait(); // Wait while paused
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
-                }
-            }
-            
-            performTick();
-            
-            Instant currentTime = Instant.now();
-            long sleepDuration = Duration.between(currentTime, nextTickTime).toMillis();
-            sleepDuration = sleepDuration < 0 ? tickInterval.toMillis() : sleepDuration;
-
-            try {
-                Thread.sleep(sleepDuration);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-
-            nextTickTime = Instant.now().plus(tickInterval);
-        }
+    /**
+     * Genera una secuencia aleatoria de operaciones
+     * De ser necesario, agregará clientes al banco
+     * @param operationsAmount
+     */
+    public void createSimulation(int amountOfOperations, int days) {
+        
     }
 
-    private void performTick() {
-        currentTime = currentTime.plus(tickInterval.multipliedBy((long) timeMultiplier));
-        gui.updateTime();
+    public void startSimulation() {
+        
+    }
+}
 
-        boolean hasChanged = banco.procesarOperacionesProgramadas(getDateTime());
+abstract class Event implements Comparable<Event> {
+    private final LocalDateTime date;
 
-        if (hasChanged)
-            gui.update();
+    public Event(LocalDateTime date) {
+        this.date = date;
     }
 
-    public void pause() {
-        synchronized (pauseLock) {
-            isPaused = true;
-        }
+    @Override
+    public int compareTo(Event other) {
+        return this.date.compareTo(other.date);
     }
 
-    public void resume() {
-        synchronized (pauseLock) {
-            isPaused = false;
-            pauseLock.notify();
-        }
-    }
+    public LocalDateTime getDate() { return date; }
 
-    public void stop() {
-        isStopped = true; // Set stop flag to true
-        resume(); // Ensure thread wakes up if paused and exits
-    }
-
-    public LocalDateTime getDateTime() {
-        return LocalDateTime.ofInstant(currentTime, ZoneId.systemDefault());
-    }
+    abstract void process();
 }

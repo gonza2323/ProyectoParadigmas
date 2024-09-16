@@ -1,11 +1,12 @@
 package bancolafamilia.gui;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.*;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 import java.util.Arrays;
+
 
 
 /*
@@ -24,8 +25,8 @@ class LoginPage extends PageController<LoginView>{
     
     // El constructer super(), siempre requiere Banco, Vista y gui.
     // Otra página podría requerir más cosas.
-    public LoginPage(Banco banco, WindowBasedTextGUI gui) {
-        super(banco, new LoginView(gui), gui); // Constructor clase base
+    public LoginPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
+        super(banco, new LoginView(gui), gui, timeSim); // Constructor clase base
         
         // Le decimos a LoginView, qué acciones ejecutar (de esta clase),
         // cuando se aprieta cada botón
@@ -65,15 +66,15 @@ class LoginPage extends PageController<LoginView>{
         PageController<?> nextPage;
         
         if (user instanceof Client)
-            nextPage = new ClientMenuPage(banco, gui, (Client)user);
+            nextPage = new ClientMenuPage(banco, gui, (Client)user, timeSim);
         else if (user instanceof Cajero)
-            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user);
+            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user, timeSim);
         else if (user instanceof AsesorFinanciero)
-            nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user);
+            nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user, timeSim);
         else if (user instanceof AgenteEspecial)
-            nextPage = new AgenteEspecialMenuPage(banco, gui, (AgenteEspecial)user);
+            nextPage = new AgenteEspecialMenuPage(banco, gui, (AgenteEspecial)user, timeSim);
         else if (user instanceof Gerente)
-            nextPage = new ManagerMenuPage(banco, gui, (Gerente)user);
+            nextPage = new ManagerMenuPage(banco, gui, (Gerente)user, timeSim);
         else
             nextPage = null;
         
@@ -82,7 +83,7 @@ class LoginPage extends PageController<LoginView>{
 
     // Método para manejar cuando el usuario aprieta Cerrar
     public void handleCloseButton() {
-        CambiarPagina(new StartMenuPage(banco, gui)); // Cambiamos de página a null (termina el programa)
+        CambiarPagina(new StartMenuPage(banco, gui, timeSim)); // Cambiamos de página a null (termina el programa)
     }
 
 }
@@ -118,15 +119,15 @@ class LoginView extends PageView {
 
     // Métodos para mostrar errores. Son llamados por el contorlador (LoginPage)
     public void showIncorrectUserOrPasswordError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Usuario o contraseña incorrectos");
+        showErrorDialog("Usuario o contraseña incorrectos");
     }
 
     public void showNoPasswordError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Ingrese una contraseña");
+        showErrorDialog("Ingrese una contraseña");
     }
 
     public void showNoUsernameError() {
-        MessageDialog.showMessageDialog(gui, "ERROR", "Ingrese un nombre de usuario");
+        showErrorDialog("Ingrese un nombre de usuario");
     }
 
     // Métodos que nos permiten configurar que pasa cuando apretamos los botones
@@ -150,18 +151,18 @@ class LoginView extends PageView {
     }
 
     // Implementación de setupUI() para LoginView
-    public void startUI() {
+    public void setupUI() {
 
         // Crea una ventana y le dice que se centre
         // Siempre hace falta una ventana (preferentemente solo 1)
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
+        mainWindow = new BasicWindow("BANCO LA FAMILIA");
+        mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
 
         // La ventana solo puede contener un elemento, entonces
         // creamos un "panel", que puede tener muchos objectos organizados de distintas formas
         // En este caso, que organice todo en 2 columnas
         Panel contentPanel = new Panel(new GridLayout(2));
-        window.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(contentPanel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
         
         // Configuramos la separación entre columnas y filas pa que quede lindo
         GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
@@ -182,7 +183,7 @@ class LoginView extends PageView {
 
         // Etiqueta: username
         contentPanel.addComponent(
-            new Label("Username:")
+            new Label("Usuario:")
                 .setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
         
         // Añadimos el campo username creado en el constructor
@@ -193,7 +194,7 @@ class LoginView extends PageView {
 
         // Etiqueta: password
         contentPanel.addComponent(
-            new Label("Password:")
+            new Label("Contraseña:")
                 .setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
         
         // Añadimos el campo password creado en el constructor
@@ -219,13 +220,5 @@ class LoginView extends PageView {
                 .setLayoutData(
                     GridLayout.createHorizontallyEndAlignedLayoutData(1)));
 
-        // LO MÁS IMPROTANTE. Finalmente se añade la ventana a la pantalla y espera el input
-        // del usuario. Si no el programa continua y se cierra, ya que la página siguiente
-        // es "null" por defecto.
-        gui.addWindowAndWait(window);
-
-        // La ejecución no continúa hasta que se cierre la ventana, que ocurrirá en la lógica
-        // del controlador cuando este llame a cambiarPagina(PageController). Mientras tanto,
-        // seguirá renderizando la página actual.
     }
 }

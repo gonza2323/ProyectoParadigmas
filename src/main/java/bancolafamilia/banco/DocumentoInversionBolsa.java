@@ -1,6 +1,10 @@
 package bancolafamilia.banco;
 
-public class DocumentoInversionBolsa {
+import java.io.Serializable;
+
+public class DocumentoInversionBolsa implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Client client;
     private String tipo;

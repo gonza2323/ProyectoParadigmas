@@ -1,5 +1,6 @@
 package bancolafamilia.gui;
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.AsesorFinanciero;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.financialAdvice;
@@ -14,11 +15,11 @@ import java.util.Locale;
 
 public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMenuView>{
     private AsesorFinanciero asesor;
-
+    
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public AsesorFinancieroMenuPage(Banco banco, WindowBasedTextGUI gui, AsesorFinanciero asesor) {
-        super(banco, new AsesorFinancieroMenuView(gui, asesor.getNombre()), gui);
+    public AsesorFinancieroMenuPage(Banco banco, WindowBasedTextGUI gui, AsesorFinanciero asesor, TimeSimulation timeSim) {
+        super(banco, new AsesorFinancieroMenuView(gui, asesor.getNombre()), gui, timeSim);
 
         this.asesor = asesor;
 
@@ -38,7 +39,7 @@ public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMen
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new LoginPage(banco, gui, timeSim));;
     }
 }
 
@@ -58,10 +59,12 @@ class AsesorFinancieroMenuView extends PageView {
 
     }
 
-    public void startUI() {
+
+        
+    public void setupUI() {
         // Crea una ventana y le dice que se centre
-        BasicWindow window = new BasicWindow("BANCO LA FAMILIA");
-        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+        mainWindow = new BasicWindow("BANCO LA FAMILIA");
+        mainWindow.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
                 Window.Hint.FIT_TERMINAL_WINDOW,
                 Window.Hint.NO_DECORATIONS));
 
@@ -74,7 +77,7 @@ class AsesorFinancieroMenuView extends PageView {
                         .setBottomMarginSize(1)
                         .setLeftMarginSize(2)
                         .setRightMarginSize(2));
-        window.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
+        mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
 
         // Layout
         LayoutData leftJustifyNoFill = GridLayout.createLayoutData(
@@ -123,9 +126,6 @@ class AsesorFinancieroMenuView extends PageView {
         panel.addComponent(
                 exitButton
                         .setLayoutData(leftJustifyWithFill));
-
-
-        gui.addWindowAndWait(window);
     }
 
     public void showAdviceHistory(ArrayList<financialAdvice> asesoriaBrindada) {

@@ -1,6 +1,7 @@
 package bancolafamilia.gui;
 
 
+import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.*;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
@@ -9,13 +10,15 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
-        super(banco, new ClientMenuView(gui, client.getNombre()), gui);
+    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client, TimeSimulation timeSim) {
+        super(banco, new ClientMenuView(gui), gui, timeSim);
 
         this.client = client;
 
+        view.updateName(client.getNombre());
         view.updateBalance(client.getBalance());
         view.updateDeuda(client.getDebt());
+        view.updateNotificationsButton(client.hasNewNotifications());
 
         view.bindTransferButton(() -> handleTransferButton());
         view.bindHistoryButton(() -> handleHistoryButton());
@@ -23,6 +26,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         view.bindLoanButton(() -> handleLoanButton());
         view.bindBrokerButton(() -> handleBrokerButton());
         view.bindAdviceButton(() -> handleAdviceButton());
+        view.bindNotificationsButton(() -> handleNotificationsButton());
         view.bindExitButton(() -> handleExitButton());
     }
 
@@ -68,13 +72,21 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.solicitudTransferencia(client, recipient, amount, motivo);
+        Operacion.OpStatus status = banco.solicitudTransferencia(client, recipient, amount, motivo);
 
-        if (success) {
-            view.updateBalance(client.getBalance());
-            view.showTransferSuccessMsg();
-        } else {
-            view.showTransferError();
+        switch (status) {
+            case APPROVED:
+                view.updateBalance(client.getBalance());
+                view.showTransferSuccessMsg();
+                break;
+            case MANUAL_APPROVAL_REQUIRED:
+                view.showPendingApprovalMsg();
+                break;
+            case DENIED:
+                view.showTransferError();
+                break;
+            default:
+                break;
         }
     }
 
@@ -126,15 +138,25 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             return;
         }
 
-        boolean success = banco.requestLoan(client, loanAmount, loanLengthInMonths);
-        
-        if (success) {
-            view.updateBalance(client.getBalance());
-            view.updateDeuda(client.getDebt());
-            view.showLoanSuccessMsg();
-        } else {
-            view.showLoanError();
+        Operacion.OpStatus status = banco.solicitudPrestamo(client, loanAmount, loanLengthInMonths);
+
+        switch (status) {
+            case APPROVED:
+                view.updateBalance(client.getBalance());
+                view.updateDeuda(client.getDebt());
+                view.showLoanSuccessMsg();
+                break;
+            case DENIED:
+                view.showLoanError();
+            default:
+                break;
         }
+    }
+
+    private void handleNotificationsButton() {
+        client.markNotificationsRead();
+        view.updateNotificationsButton(client.hasNewNotifications());
+        view.showNotifications(client.getNotifications());
     }
 
     private void handleBrokerButton() {
@@ -227,7 +249,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui));;
+        CambiarPagina(new LoginPage(banco, gui, timeSim));;
     }
 
 }
