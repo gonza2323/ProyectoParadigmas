@@ -1,20 +1,8 @@
 package bancolafamilia.gui;
 
-import java.util.Arrays;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-
 import bancolafamilia.banco.AsesorFinanciero;
 import bancolafamilia.banco.Banco;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
 public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMenuView>{
     private AsesorFinanciero asesor;

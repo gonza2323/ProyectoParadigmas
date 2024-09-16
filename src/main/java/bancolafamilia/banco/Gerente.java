@@ -1,7 +1,10 @@
 package bancolafamilia.banco;
 
-public class Gerente extends Empleado {
+import java.io.Serializable;
 
+public class Gerente extends Empleado implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     public static final String motivoEspecial = "honorarios";
     public static final int montoEspecial = 20; //monto maximo que debe transferir el mafioso al agente especial
     private static AgenteEspecial asistente; //tiene un "asistente ejecutivo que es el que hace las tareas de lavado "

@@ -1,12 +1,7 @@
 package bancolafamilia.gui;
 
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.List;
-import java.util.stream.Collectors;
-import com.googlecode.lanterna.TerminalSize;
+import bancolafamilia.banco.*;
+import bancolafamilia.banco.Operacion.OpStatus;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.GridLayout.Alignment;
 import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
@@ -14,9 +9,12 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
 
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
-import bancolafamilia.banco.*;
-import bancolafamilia.banco.Operacion.OpStatus;
+import java.util.stream.Collectors;
 
 
 class StartMenuPage extends PageController<StartMenuView>{
@@ -27,6 +25,7 @@ class StartMenuPage extends PageController<StartMenuView>{
         view.bindBankLoginButton(() -> handleBankLoginButton());
         view.bindGoToBankButton(() -> handleGoToBankButton());
         view.bindShowBankStateButton(() -> handleShowBankStateButton());
+        view.bindShowBankBackupButton(() -> handleShowBankBackupButton());
         view.bindSimulateOpsButton(() -> handleSimulateOpsButton());
         view.bindExitButton(() -> handleExitButton());
     }
@@ -106,6 +105,53 @@ class StartMenuPage extends PageController<StartMenuView>{
         CambiarPagina(new StartMenuPage(banco, gui));
     }
 
+    private void handleShowBankBackupButton() {
+
+        OPERATION_TYPE_BACKUP operationTypeBackup = view.requestOperationTypeBackup();
+
+        if (operationTypeBackup == OPERATION_TYPE_BACKUP.INVALID)
+            return;
+
+
+        if (operationTypeBackup == OPERATION_TYPE_BACKUP.BACKUP){
+
+            BackupManager.BACKUP_STATUS status = banco.getBackupManager().createBackup(banco);
+
+            switch (status){
+                case SUCCESS:
+                    view.showSuccessBackupMsg();
+                    break;
+                case FAILED:
+                    view.showFailedBackupMsg();
+                    break;
+                default:
+                    break;
+            }
+
+        } else if (operationTypeBackup == OPERATION_TYPE_BACKUP.RESTORE) {
+            if (banco.getBackupManager() == null || banco.getBackupManager().getDate() == null){
+                view.showNonexistentBackupError();
+
+            } else {
+                if (view.requestBackup(banco.getBackupManager())){
+                    Banco bancoRestaurado = banco.getBackupManager().restoreBackup();
+                    //esto asignará la referencia del objeto restaurado a la variable banco
+                    //tuve que cambiar el atributo banco de PageController para que no fuera final pq sino no me lo toma
+                    if (bancoRestaurado.equals(banco)){
+                        view.showFailedRestoreBackupMsg();
+                    } else{
+                        banco = bancoRestaurado;
+                        view.showSuccessRestoreBackupMsg();
+                    }
+
+                }
+            }
+        }
+
+    }
+
+
+
     private void handleSimulateOpsButton() {
         // TODO: Página ir al banco
         CambiarPagina(new StartMenuPage(banco, gui));
@@ -116,6 +162,7 @@ class StartMenuPage extends PageController<StartMenuView>{
 
         if (shouldExit)
             CambiarPagina(null);
+            //aqui va lo de copia de seguridad.
     }
 }
 
@@ -125,15 +172,17 @@ class StartMenuView extends PageView {
     private final Button bankLoginButton;
     private final Button goToBankButton;
     private final Button showBankStateButton;
+    private final Button bankBackupButton;
     private final Button simulateOpsButton;
     private final Button exitButton;
 
     public StartMenuView(WindowBasedTextGUI gui) {
         super(gui);
 
-        this.bankLoginButton = new Button("Sistema Banco");
+        this.bankLoginButton = new Button("Iniciar sesion");
         this.goToBankButton = new Button("Ir al banco");
         this.showBankStateButton = new Button("Estado del banco");
+        this.bankBackupButton = new Button("Copia de seguridad");
         this.simulateOpsButton = new Button(" Simular movimientos ");
         this.exitButton = new Button("Salir");
     }
@@ -166,6 +215,7 @@ class StartMenuView extends PageView {
         bankLoginButton.setLayoutData(fill).addTo(panel);
         goToBankButton.setLayoutData(fill).addTo(panel);
         showBankStateButton.setLayoutData(fill).addTo(panel);
+        bankBackupButton.setLayoutData(fill).addTo(panel);
         simulateOpsButton.setLayoutData(fill).addTo(panel);
         panel.addComponent(new EmptySpace());
         exitButton.setLayoutData(fill).addTo(panel);
@@ -223,6 +273,69 @@ class StartMenuView extends PageView {
         return selectedOperation[0];
     }
 
+    public OPERATION_TYPE_BACKUP requestOperationTypeBackup() {
+        ActionListDialogBuilder builder = new ActionListDialogBuilder();
+
+        final OPERATION_TYPE_BACKUP[] selectedOperation = { OPERATION_TYPE_BACKUP.INVALID };
+
+        builder.addAction("Hacer copia de seguridad", () -> {selectedOperation[0] = OPERATION_TYPE_BACKUP.BACKUP;});
+        builder.addAction("Restaurar copia de seguridad", () -> {selectedOperation[0] = OPERATION_TYPE_BACKUP.RESTORE;});
+
+        builder
+                .setTitle("Copia de Seguridad: BANCO LA FAMILIA")
+                .build()
+                .showDialog(gui);
+
+        return selectedOperation[0];
+    }
+
+    public boolean requestBackup(BackupManager backup) {
+
+        final Boolean[] flag = {false};
+
+        BasicWindow window = new BasicWindow("BACKUP");
+        window.setHints(
+                Arrays.asList(
+                        Window.Hint.CENTERED,
+                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+
+        panel.addComponent(new Label("La ultima Copia de Seguridad fue realizada el: " + backup.getDate()));
+
+
+        panel.addComponent(new Button("Restaurar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        flag[0]  = true;
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
+
+        panel.addComponent(new Button("Cancelar",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        window.close();
+                    }
+                }).setLayoutData(
+                GridLayout.createLayoutData(
+                        GridLayout.Alignment.END,
+                        GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
+        return flag[0];
+    }
+
     public String requestWithdrawalAmount(float currentBalance) {
         NumberFormat currencyFormater = NumberFormat.getCurrencyInstance(Locale.US);
         
@@ -278,8 +391,26 @@ class StartMenuView extends PageView {
         showMessageDialog(null, "OPERACIÓN EXITOSA");
     }
 
+    public void showSuccessBackupMsg() {
+        showMessageDialog(null, "Copia de seguridad creada exitosamente!");
+    }
+
+    public void showSuccessRestoreBackupMsg() { showMessageDialog(null, "Copia de seguridad restaurada exitosamente!");}
+
+    public void showFailedBackupMsg() {
+        showMessageDialog(null, "Error al crear la copia de seguridad...");
+    }
+
+    public void showFailedRestoreBackupMsg() {
+        showMessageDialog(null, "Error al restaurar la copia de seguridad...");
+    }
+
     public void showInsufficientFundsError() {
         showErrorDialog("Fondos insuficientes");
+    }
+
+    public void showNonexistentBackupError() {
+        showErrorDialog("El archivo de copia de seguridad está vacío");
     }
 
     public void bindBankLoginButton(Runnable action) {
@@ -294,6 +425,10 @@ class StartMenuView extends PageView {
         showBankStateButton.addListener(showBankStateButton -> action.run());
     }
 
+    public void bindShowBankBackupButton(Runnable action) {
+        bankBackupButton.addListener(showBankBackupButton -> action.run());
+    }
+
     public void bindSimulateOpsButton(Runnable action) {
         simulateOpsButton.addListener(simulateOpsButton -> action.run());
     }
@@ -306,5 +441,11 @@ class StartMenuView extends PageView {
 enum OPERATION_TYPE {
     DEPOSIT,
     WITHDRAWAL,
+    INVALID
+}
+
+enum OPERATION_TYPE_BACKUP {
+    RESTORE,
+    BACKUP,
     INVALID
 }

@@ -1,6 +1,8 @@
 package bancolafamilia.banco;
 
-public interface IOperationProcessor {
+import java.io.Serializable;
+
+public interface IOperationProcessor extends Serializable {
     public Operacion.OpStatus processOperation(Deposito deposit);
     public Operacion.OpStatus processOperation(DepositoEspecial deposit);
     public Operacion.OpStatus processOperation(Retiro retiro);

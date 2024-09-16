@@ -1,6 +1,10 @@
 package bancolafamilia.banco;
 
-public class ModuloDeRecirculacionFinanciera {
+import java.io.Serializable;
+
+public class ModuloDeRecirculacionFinanciera implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // montoMaxTotal indica es el monto maximo que puede transferir en un dia - es decir la suma de los montos de todas las transferencias no rastreables no debe superar el montoMAxTotal
     public final float montoMaxTotal = 5000000;

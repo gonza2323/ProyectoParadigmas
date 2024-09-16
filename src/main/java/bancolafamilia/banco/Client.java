@@ -1,9 +1,11 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Client extends User { //implements IOpBcoCliente
+public class Client extends User implements Serializable { //implements IOpBcoCliente
 
+    private static final long serialVersionUID = 1L;
     private float balance;
     private float deuda;
     private String alias;

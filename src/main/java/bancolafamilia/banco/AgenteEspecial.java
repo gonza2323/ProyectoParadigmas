@@ -1,13 +1,15 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-public class AgenteEspecial extends Empleado {
+public class AgenteEspecial extends Empleado implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     //montoMaxEspecial: monto maximo que se puede aceptar para lavar plata
     public static final float montoMaxOpEspecial = 300000000;
 

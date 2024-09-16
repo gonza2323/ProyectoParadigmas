@@ -1,11 +1,12 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 
-public abstract class Operacion implements Comparable<Operacion> {
-
+public abstract class Operacion implements Comparable<Operacion>, Serializable {
+    private static final long serialVersionUID = 1L;
     private static int nextId = 1;
 
     protected final int id;

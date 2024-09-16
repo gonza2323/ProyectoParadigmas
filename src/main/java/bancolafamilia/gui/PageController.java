@@ -1,13 +1,7 @@
 package bancolafamilia.gui;
 
-import java.lang.ModuleLayer.Controller;
-
-import javax.swing.text.View;
-
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-
 import bancolafamilia.banco.Banco;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
 /*
  * Para crear una página, se deben crear dos classes. Una que herede de
@@ -23,7 +17,7 @@ import bancolafamilia.banco.Banco;
  * Las vistas heredan siempre de la clase View.
 */
 public abstract class PageController<V extends PageView> {
-    protected final Banco banco;            // Toda página tiene una referencia al banco
+    protected Banco banco;            // Toda página tiene una referencia al banco
     protected final V view;                 // Referencia a la vista asociada
     protected final WindowBasedTextGUI gui; // Referencia a la gui. No hay que tocarla en esta clase
                                             // pero se necesita para crear la siguiente página

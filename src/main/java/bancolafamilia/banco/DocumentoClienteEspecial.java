@@ -1,6 +1,10 @@
 package bancolafamilia.banco;
 
-public class DocumentoClienteEspecial {
+import java.io.Serializable;
+
+public class DocumentoClienteEspecial implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private Client client;
     private AgenteEspecial agent;
     private DocumentoTransaccionEspecial documentoSimulacion;

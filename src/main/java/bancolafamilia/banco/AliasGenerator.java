@@ -1,11 +1,13 @@
 
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.util.*;
 
 
-public class AliasGenerator {
+public class AliasGenerator implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private static final List<String> WORD_LIST = Arrays.asList(
         "banana", "mapa", "casa", "perro", "gato", "manzana", "zapato", "florero", 
         "taza", "queso", "mango", "piedra", "naranja", "agua", "pesos", "maceta", 

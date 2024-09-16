@@ -1,22 +1,21 @@
 package bancolafamilia.banco;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
-
 import bancolafamilia.banco.Operacion.OpStatus;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Clase que mantiene el estado del banco. Ofrece métodos
  * para acceder a los servicios del banco.
  * Implementa IOperationProcessor, por lo que es capaz de procesar operaciones.
  */
-public class Banco implements IOperationProcessor {
+public class Banco implements IOperationProcessor, Serializable {
 
+    private static final long serialVersionUID = 1L;
+    private BackupManager backupManager = new BackupManager();
     private float reservesTotal = 0.0f;
     private float depositsTotal = 0.0f;
     private float loanedTotal = 0.0f;
@@ -428,6 +427,10 @@ public class Banco implements IOperationProcessor {
     public float getLoanedTotal() { return loanedTotal; }
     public float getBalance() { return reservesTotal + loanedTotal - depositsTotal; }
     public float getAnualInterestRate() { return anualInterestRate; }
+
+    public BackupManager getBackupManager() {
+        return this.backupManager;
+    }
 
     public List<Empleado> getEmployees() { return empleados; }
 

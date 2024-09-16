@@ -1,9 +1,11 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Cajero extends Empleado {
+public class Cajero extends Empleado implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private static int nextNumCaja = 1;
     
     //cada cajero va a tener asignado un numero de caja fijo

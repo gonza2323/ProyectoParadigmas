@@ -1,7 +1,10 @@
 package bancolafamilia.banco;
 
-public class DocumentoTransaccionEspecial{
+import java.io.Serializable;
 
+public class DocumentoTransaccionEspecial implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     public int tiempoDias;
     public int numTransferenciasDiarias;
     public float montoMaxDiario;

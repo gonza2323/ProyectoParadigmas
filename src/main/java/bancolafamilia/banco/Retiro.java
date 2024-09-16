@@ -1,11 +1,13 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
-public class Retiro extends Operacion {
-    
+public class Retiro extends Operacion implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     public static final float montoMax = 500000;
 
     private final Cajero cajeroResponsable;

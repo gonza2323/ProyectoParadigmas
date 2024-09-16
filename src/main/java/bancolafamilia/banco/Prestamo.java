@@ -1,13 +1,16 @@
 package bancolafamilia.banco;
 
-import java.text.NumberFormat;
+import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.util.Locale;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
-public class Prestamo extends Operacion{
-    
+public class Prestamo extends Operacion implements Serializable {
+
+
+    private static final long serialVersionUID = 1L;
     public static float minimumLoanAmount = 1000;
     public static float maxAmount = 15000000;
     
