@@ -3,7 +3,6 @@ package bancolafamilia.gui;
 
 import bancolafamilia.banco.*;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
 public class ClientMenuPage extends PageController<ClientMenuView>{
     private Client client;
@@ -145,10 +144,10 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         if (operationTypeBroker == OPERATION_TYPE_BROKER.INVALID)
             return;
 
-        String action = null;
+
         if (operationTypeBroker == OPERATION_TYPE_BROKER.ADVICE) {
             String msg = banco.broker.provideAdvice(client);
-            view.showAdviceMsg(msg);
+            view.showAdviceMsgBroker(msg);
 
         } else if (operationTypeBroker == OPERATION_TYPE_BROKER.BUY){
             Activo activo = view.showActivosDisponibles(banco.broker.getActivosDisponibles());
@@ -211,8 +210,20 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleAdviceButton() {
-        // TODO Auto-generated method stub
-        MessageDialog.showMessageDialog(gui, "ERROR", "Falta implementar ASESORAMIENTO");
+        OPERATION_TYPE_ADVISOR operationTypeAdvisor = view.requestOperationTypeAdvisor();
+
+        if (operationTypeAdvisor == OPERATION_TYPE_ADVISOR.INVALID)
+            return;
+
+
+        if (operationTypeAdvisor == OPERATION_TYPE_ADVISOR.LEGITIMO) {
+            financialAdvice advice = banco.solicitudAsesoriaFinanciera(client, "legitimo");
+            view.showAdviceMsgAsesorF(advice.getAdvice());
+
+        } else if (operationTypeAdvisor == OPERATION_TYPE_ADVISOR.PREMIUM) {
+            financialAdvice advice = banco.solicitudAsesoriaFinanciera(client, "premium");
+            view.showAdviceMsgAsesorF(advice.getAdvice());
+        }
     }
 
     private void handleExitButton() {

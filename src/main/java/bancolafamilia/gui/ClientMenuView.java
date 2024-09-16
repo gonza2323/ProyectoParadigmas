@@ -482,6 +482,22 @@ public class ClientMenuView extends PageView {
         return selectedOperation[0];
     }
 
+    public OPERATION_TYPE_ADVISOR requestOperationTypeAdvisor() {
+        ActionListDialogBuilder builder = new ActionListDialogBuilder();
+
+        final OPERATION_TYPE_ADVISOR[] selectedOperation = { OPERATION_TYPE_ADVISOR.INVALID};
+
+        builder.addAction("Asesoría en Inversiones", () -> {selectedOperation[0] = OPERATION_TYPE_ADVISOR.LEGITIMO;});
+        builder.addAction("Mover dinero discretamente", () -> {selectedOperation[0] = OPERATION_TYPE_ADVISOR.PREMIUM;});
+
+        builder
+                .setTitle("¿Qué tipo de asesoría financiera necesita?")
+                .build()
+                .showDialog(gui);
+
+        return selectedOperation[0];
+    }
+
     public String requestAmountAssets() {
         return new TextInputDialogBuilder()
                 .setTitle("Compra de Activos")
@@ -544,8 +560,12 @@ public class ClientMenuView extends PageView {
         showErrorDialog("Transferencia denegada");
     }
 
-    public void showAdviceMsg(String msg) {
+    public void showAdviceMsgBroker(String msg) {
         showMessageDialog("Agente de Bolsa", msg);
+    }
+
+    public void showAdviceMsgAsesorF(String msg) {
+        showMessageDialog("Asesor Financiero", msg);
     }
 
     public void bindTransferButton(Runnable action) {
@@ -584,5 +604,11 @@ enum OPERATION_TYPE_BROKER {
     ADVICE,
     BUY,
     SELL,
+    INVALID
+}
+
+enum OPERATION_TYPE_ADVISOR {
+    LEGITIMO,
+    PREMIUM,
     INVALID
 }

@@ -62,6 +62,8 @@ public class App {
         Activo activo4 = new Activo("DataNet", 260000, 0.6f);
         Activo activo5 = new Activo("Quantum Tech", 300000, 0.7f);
 
+        AsesorFinanciero asesor = new AsesorFinanciero("Cesar", 1782, "especiaal", "123456");
+        banco.addUser(asesor);
 
         AgenteBolsa broker = new AgenteBolsa("Jose", 1241, 0.10f);
         banco.setBroker(broker);

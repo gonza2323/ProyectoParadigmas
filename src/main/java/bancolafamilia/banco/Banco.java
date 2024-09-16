@@ -1,11 +1,7 @@
 package bancolafamilia.banco;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -429,6 +425,28 @@ public class Banco implements IOpBcoCliente {
         return null;
     }
 
+    public financialAdvice solicitudAsesoriaFinanciera(Client client, String tipo){
+        List<AsesorFinanciero> asesoresFinancieros = new ArrayList<>();
+        financialAdvice advice;
 
+        for (Empleado empleado: empleados){
+            if (empleado instanceof AsesorFinanciero){
+                asesoresFinancieros.add((AsesorFinanciero) empleado);
+            }
+        }
+
+        //elige un asesor al azar y le envia la solicitud de consejo
+        Random random = new Random();
+        int randomIndex = random.nextInt(asesoresFinancieros.size());
+        AsesorFinanciero asesor = asesoresFinancieros.get(randomIndex);
+
+        if (tipo.equalsIgnoreCase("premium")){
+            advice = asesor.asesorarClientePremiun(client);
+        } else {
+            advice = asesor.asesorarCliente(client);
+        }
+
+        return advice;
+    }
 }
 
