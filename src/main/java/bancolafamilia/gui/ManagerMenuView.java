@@ -1,37 +1,19 @@
 package bancolafamilia.gui;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.function.Consumer;
-import java.util.function.*;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Button;
-import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.GridLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.LayoutData;
-import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.table.Table;
-import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
-
-import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
 import bancolafamilia.banco.Empleado;
 import bancolafamilia.banco.Operacion;
-import bancolafamilia.banco.Gerente;
+import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
+import com.googlecode.lanterna.gui2.table.Table;
+
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Function;
 
 class ManagerMenuView extends PageView {
     private final Label welcomeMessageLabel = new Label("");
@@ -125,11 +107,11 @@ class ManagerMenuView extends PageView {
         panel.addComponent(welcomeMessageLabel);
 
         // Reservas
-        reservesIndicator.setLayoutData(leftJustifyNoFill);                // Ocupar 1 fila
+        reservesIndicator.setLayoutData(leftJustifyWithFill);                // Ocupar 1 fila
         panel.addComponent(reservesIndicator); 
 
         // Depósitos
-        depositsIndicator.setLayoutData(rightJustifyNoFill);                   // Ocupar 1 fila
+        depositsIndicator.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
         panel.addComponent(depositsIndicator); 
 
         // Préstamos
@@ -375,7 +357,7 @@ class ManagerMenuView extends PageView {
     
     public void updateDeposits(float deposits) {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
-        depositsIndicator.setText(currencyFormatter.format(deposits) + ": Depósitos");
+        depositsIndicator.setText("Depósitos " + currencyFormatter.format(deposits));
     }
 
     public void updateLoans(float loans) {
