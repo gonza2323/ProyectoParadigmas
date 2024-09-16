@@ -57,8 +57,8 @@ public class AsesorFinanciero extends Empleado {
     public ArrayList<String> getAdviceForClients() {
         adviceForClients.add("Invertir en bonos gubernamentales y acciones de bajo riesgo.");
         adviceForClients.add("Diversificar fondos en bienes raíces, tecnología y fondos indexados.");
-        adviceForClients.add("Considera comprar propiedades inmobiliarias en ubicaciones con alta demanda de alquiler. Los bienes raíces son una inversión segura que genera ingresos pasivos a través de la renta y aumenta su valor con el tiempo.");
-        adviceForClients.add("La inversión en energía renovable y proyectos sostenibles está en auge, con gobiernos y empresas priorizando la transición hacia fuentes más limpias. Este tipo de inversión puede tener un impacto positivo tanto en tu portafolio como en el medio ambiente.");
+        adviceForClients.add("Considera comprar propiedades inmobiliarias en ubicaciones con alta demanda de alquiler." + "\nLos bienes raíces son una inversión segura que genera ingresos pasivos a través de la renta y aumenta su valor con el tiempo.");
+        adviceForClients.add("La inversión en energía renovable y proyectos sostenibles está en auge." + "\nEste tipo de inversión puede tener un impacto positivo tanto en tu portafolio como en el medio ambiente.");
 
         return adviceForClients;
     }
@@ -67,8 +67,8 @@ public class AsesorFinanciero extends Empleado {
         adviceForPremiumClients.add("Transferir fondos a cuentas en paraísos fiscales como las Islas Caimán");
         adviceForPremiumClients.add("Crear empresas fachada para disfrazar el origen del dienro");
         adviceForPremiumClients.add("Realizar transferencias pequeñas y frecuentes para evitar levantar sospechas");
-        adviceForPremiumClients.add("Las criptomonedas ofrecen un nivel adicional de anonimato y son ideales para transferencias rápidas a través de fronteras. Sin embargo, debes usar monederos digitales anónimos y plataformas descentralizadas para evitar ser rastreado.");
-        adviceForPremiumClients.add("Para evitar que las autoridades financieras detecten movimientos sospechosos, realiza depósitos y retiros pequeños en cuentas bancarias distintas y en diferentes días. Esto ayudará a evitar alertas automáticas de los bancos.");
+        adviceForPremiumClients.add("Las criptomonedas ofrecen un nivel adicional de anonimato y son ideales para transferencias rápidas a través de fronteras."+"\nSin embargo, debes usar monederos digitales anónimos y plataformas descentralizadas para evitar ser rastreado.");
+        adviceForPremiumClients.add("Para evitar que las autoridades financieras detecten movimientos sospechosos, realiza depósitos y retiros pequeños en cuentas " + "\nbancarias distintas y en diferentes días. Esto ayudará a evitar alertas automáticas de los bancos.");
 
         return adviceForPremiumClients;
 
