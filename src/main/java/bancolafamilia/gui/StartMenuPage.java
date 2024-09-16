@@ -102,7 +102,7 @@ class StartMenuPage extends PageController<StartMenuView>{
 
     private void handleShowBankStateButton() {
         // TODO: Página ir al banco
-        CambiarPagina(new StartMenuPage(banco, gui));
+        CambiarPagina(new ActualStateMenuPage(banco, gui));
     }
 
     private void handleShowBankBackupButton() {
@@ -289,6 +289,7 @@ class StartMenuView extends PageView {
         return selectedOperation[0];
     }
 
+
     public boolean requestBackup(BackupManager backup) {
 
         final Boolean[] flag = {false};
@@ -449,3 +450,5 @@ enum OPERATION_TYPE_BACKUP {
     BACKUP,
     INVALID
 }
+
+
