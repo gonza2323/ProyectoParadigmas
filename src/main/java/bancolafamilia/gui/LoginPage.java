@@ -71,8 +71,6 @@ class LoginPage extends PageController<LoginView>{
         
         if (user instanceof Client)
             nextPage = new ClientMenuPage(banco, gui, (Client)user);
-        else if (user instanceof Cajero)
-            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user);
         else if (user instanceof AsesorFinanciero)
             nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user);
         else if (user instanceof AgenteEspecial)
@@ -80,7 +78,7 @@ class LoginPage extends PageController<LoginView>{
         else if (user instanceof Gerente)
             nextPage = new ManagerMenuPage(banco, gui, (Gerente)user);
         else
-            nextPage = null;
+            nextPage = new LoginPage(banco, gui);
         
         CambiarPagina(nextPage);
     }

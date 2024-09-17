@@ -49,7 +49,7 @@ public class ClientMenuView extends PageView {
 
         // panel
         Panel panel = new Panel(
-            new GridLayout(2)
+            new GridLayout(1)
                 .setHorizontalSpacing(1)
                 .setVerticalSpacing(1)
                 .setTopMarginSize(1)
@@ -60,6 +60,9 @@ public class ClientMenuView extends PageView {
         // configuración layout
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
         
+        // Reloj
+        panel.addComponent(clockBarPanel);
+
         // Mensaje de bienvenida
         welcomeMessageLabel.setLayoutData(horizontalFill);
         panel.addComponent(welcomeMessageLabel);
@@ -638,11 +641,6 @@ public class ClientMenuView extends PageView {
 
     public void bindExitButton(Runnable action) {
         exitButton.addListener(b -> action.run());
-    }
-
-    @Override
-    public void setupClockUI() {
-        
     }
 }
 enum OPERATION_TYPE_BROKER {

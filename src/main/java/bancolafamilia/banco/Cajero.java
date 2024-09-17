@@ -2,6 +2,8 @@ package bancolafamilia.banco;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+
 import bancolafamilia.banco.Operacion.OpStatus;
 
 public class Cajero extends Empleado implements Serializable {
@@ -58,5 +60,9 @@ public class Cajero extends Empleado implements Serializable {
 
     public int getCaja() {
         return numCaja;
+    }
+
+    public List<DocumentoClienteEspecial> getDocuments() {
+        return documentosOperacionesEspeciales;
     }
 }

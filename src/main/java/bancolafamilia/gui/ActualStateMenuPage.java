@@ -5,8 +5,11 @@ import bancolafamilia.banco.Banco;
 import bancolafamilia.banco.Client;
 import bancolafamilia.banco.Empleado;
 import bancolafamilia.banco.Operacion;
+
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
+import com.googlecode.lanterna.gui2.table.TableModel;
 
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
@@ -24,14 +27,9 @@ public class ActualStateMenuPage extends PageController<ActualStateMenuView> {
         view.updateLoans(banco.getLoanedTotal());
         view.updateBalance(banco.getBalance());
 
-        view.bindHistoryButton(() -> handleHistoryButton());
         view.bindShowClientsButton(() -> handleShowClientsButton());
         view.bindShowEmployeesButton(() -> handleShowEmployeesButton());
         view.bindExitButton(() -> handleExitButton());
-    }
-
-    private void handleHistoryButton() {
-        view.showHistory(banco.getOperaciones());
     }
 
     private void handleShowClientsButton() {
@@ -46,6 +44,20 @@ public class ActualStateMenuPage extends PageController<ActualStateMenuView> {
         CambiarPagina(new StartMenuPage(banco, gui));
         ;
     }
+
+    @Override
+    public void update() {
+        view.updateReserves(banco.getReservesTotal());
+        view.updateDeposits(banco.getDepositsTotal());
+        view.updateLoans(banco.getLoanedTotal());
+        view.updateBalance(banco.getBalance());
+        view.updateTable(banco.getOperaciones());
+    }
+
+    @Override
+    public void controllerSetup() {
+        update();
+    }
 }
 
 class ActualStateMenuView extends PageView {
@@ -56,11 +68,11 @@ class ActualStateMenuView extends PageView {
     private final Label loansIndicator = new Label("");
     private final Label balanceIndicator = new Label("");
 
-    private final Button historyButton = new Button("Movimientos");
     private final Button showClientsButton = new Button("Ver clientes");
     private final Button showEmployeesButton = new Button("Ver empleados");
     private final Button exitButton = new Button("Salir");
 
+    private final Table tablaMovimientos = new Table<>("null");
 
     public ActualStateMenuView(WindowBasedTextGUI gui) {
         super(gui);
@@ -74,22 +86,33 @@ class ActualStateMenuView extends PageView {
                 Arrays.asList(Window.Hint.FULL_SCREEN, Window.Hint.FIT_TERMINAL_WINDOW, Window.Hint.NO_DECORATIONS));
 
         // Panel
-        Panel panel = new Panel(new GridLayout(2).setHorizontalSpacing(1).setVerticalSpacing(1).setTopMarginSize(1)
-                .setBottomMarginSize(1).setLeftMarginSize(2).setRightMarginSize(2));
+        Panel panel = new Panel(new GridLayout(1)
+                    .setHorizontalSpacing(1)
+                    .setVerticalSpacing(1)
+                    .setTopMarginSize(1)
+                    .setBottomMarginSize(1)
+                    .setLeftMarginSize(2)
+                    .setRightMarginSize(2));
         mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
 
         // Layout
         LayoutData leftJustifyNoFill = GridLayout.createLayoutData(GridLayout.Alignment.BEGINNING,
-                GridLayout.Alignment.CENTER, true, false, 1, 1);
+                GridLayout.Alignment.BEGINNING, false, false, 1, 1);
 
         LayoutData rightJustifyNoFill = GridLayout.createLayoutData(GridLayout.Alignment.END,
-                GridLayout.Alignment.CENTER, true, false, 1, 1);
+                GridLayout.Alignment.BEGINNING, true, false, 1, 1);
+        
+        LayoutData rightJustifyExpand = GridLayout.createLayoutData(GridLayout.Alignment.END,
+                GridLayout.Alignment.BEGINNING, true, true, 1, 1);
 
         LayoutData leftJustifyWithFill = GridLayout.createLayoutData(GridLayout.Alignment.BEGINNING,
                 GridLayout.Alignment.BEGINNING, true, false, 2, 1);
 
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
 
+        // Reloj
+        panel.addComponent(clockBarPanel);
+        
         // Mensaje de bienvenida
         welcomeMessageLabel.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(welcomeMessageLabel);
@@ -113,47 +136,47 @@ class ActualStateMenuView extends PageView {
         // Separador
         panel.addComponent(new Separator(Direction.HORIZONTAL).setLayoutData(horizontalFill));
 
-        // Botones
-        panel.addComponent(historyButton.setLayoutData(leftJustifyWithFill));
-        panel.addComponent(showClientsButton.setLayoutData(leftJustifyWithFill));
-        panel.addComponent(showEmployeesButton.setLayoutData(leftJustifyWithFill));
-        panel.addComponent(exitButton.setLayoutData(leftJustifyWithFill));
+        Panel panel2 = new Panel(
+            new GridLayout(2)
+            .setHorizontalSpacing(10));
+        panel2.setLayoutData(horizontalFill);
+        panel.addComponent(panel2);
+
+
+        Panel buttonsPanel = new Panel(
+            new GridLayout(1)
+            .setVerticalSpacing(1));
+        buttonsPanel.setLayoutData(leftJustifyNoFill);
+        panel2.addComponent(buttonsPanel);
+
+        buttonsPanel.addComponent(showClientsButton.setLayoutData(leftJustifyNoFill));
+        buttonsPanel.addComponent(showEmployeesButton.setLayoutData(leftJustifyNoFill));
+        buttonsPanel.addComponent(exitButton.setLayoutData(leftJustifyNoFill));
+
+        tablaMovimientos.setLayoutData(leftJustifyWithFill);
+
+        tablaMovimientos.setPreferredSize(new TerminalSize(400, 16));
+        panel2.addComponent(tablaMovimientos);
     }
 
-    public void showHistory(List<Operacion> operaciones) {
-
-        BasicWindow window = new BasicWindow("Historial de Operaciones");
-        window.setHints(Arrays.asList(Window.Hint.CENTERED, Window.Hint.FIT_TERMINAL_WINDOW));
-        window.setCloseWindowWithEscape(true);
-
-        Panel panel = new Panel();
-        panel.setLayoutManager(new GridLayout(1));
-        window.setComponent(panel);
-
-        Table<Object> table = new Table<>("ID", "Fecha", "Tipo", "Monto", "Detalle");
-        panel.addComponent(table);
-
+    public void updateTable(List<Operacion> operaciones) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         NumberFormat decimalFormat = NumberFormat.getCurrencyInstance(Locale.US);
+
+        TableModel<Object> tableModel = new TableModel("ID", "Fecha", "Tipo", "Cliente", "Monto", "Detalle");
 
         for (Operacion op : operaciones) {
             String id = Integer.toString(op.getId());
             String clase = op.getClass().getSimpleName();
+            String client = op.getClass().getName();
             String fecha = op.getDate().format(formatter);
             String description = op.getDescription();
             String monto = decimalFormat.format(op.getAmount());
 
-            table.getTableModel().addRow(id, fecha, clase, monto, description);
+            tableModel.addRow(id, fecha, clase, client, monto, description);
         }
 
-        panel.addComponent(new Button("Cerrar", new Runnable() {
-            @Override
-            public void run() {
-                window.close();
-            }
-        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
-
-        gui.addWindowAndWait(window);
+        tablaMovimientos.setTableModel(tableModel);
     }
 
     public void showClients(List<Client> clients) {
@@ -244,10 +267,6 @@ class ActualStateMenuView extends PageView {
     public void updateBalance(float balance) {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
         balanceIndicator.setText("Balance " + currencyFormatter.format(balance));
-    }
-
-    public void bindHistoryButton(Runnable action) {
-        historyButton.addListener(b -> action.run());
     }
 
     public void bindShowClientsButton(Runnable action) {

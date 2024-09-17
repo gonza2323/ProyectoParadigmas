@@ -172,25 +172,29 @@ class StartMenuPage extends PageController<StartMenuView>{
 
     private void handleSimulateOpsButton() {
 
+        String numberOfOpsStr = view.requestNumberOfOps();
+
+        if (numberOfOpsStr == null)
+            return;
+
         int numberOfOps;
         try {
-            numberOfOps = Integer.parseInt(view.requestNumberOfOps());
+            numberOfOps = Integer.parseInt(numberOfOpsStr);
         } catch (NumberFormatException e) {
             view.showError();
-            return;
-        } catch (NullPointerException e) {
             return;
         }
 
         if (numberOfOps < 5 || numberOfOps > 1000) {
             view.showOutOfRangeOpsError();
+            return;
         }
 
         Simulation sim = new Simulation(banco);
-        sim.createSimulation(numberOfOps, 10); // TODO
+        sim.performSimulation(numberOfOps);
         
-        // sim.start();
-        // CambiarPagina(new BankStatePage(banco, gui, timeSim)); // TODO
+        TimeSimulation.getInstance().setTimeMultiplier(3);
+        CambiarPagina(new ActualStateMenuPage(banco, gui));
     }
 
     public void handleExitButton() {

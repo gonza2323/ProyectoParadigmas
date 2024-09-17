@@ -113,6 +113,11 @@ public class Interfaz {
         
         if (key.getCharacter() == 'p') {
             TimeSimulation.getInstance().togglePause();
+        } else if (key.getCharacter() == 'a') {
+            TimeSimulation.getInstance().decreaseSpeed();
+        } else if (key.getCharacter() == 'd') {
+            TimeSimulation.getInstance().increaseSpeed();
         }
+
     }
 }

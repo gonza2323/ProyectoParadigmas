@@ -102,6 +102,9 @@ class ManagerMenuView extends PageView {
         
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
         
+        // Reloj
+        panel.addComponent(clockBarPanel);
+
         // Mensaje de bienvenida
         welcomeMessageLabel.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
         panel.addComponent(welcomeMessageLabel);

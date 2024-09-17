@@ -17,6 +17,9 @@ import bancolafamilia.gui.Interfaz;
 public class TimeSimulation implements Runnable {
 
     private static TimeSimulation timeSim;
+    private final float[] speeds = {1f, 60f, 3600f, 3600f * 12f, 3600f * 24f, 3600f * 24f * 7};
+    private final String[] timeMultiplierStrings = {"Tiempo Real", "1 min/s", "1 hora/s", "12 horas/s", "1 día/s", "1 semana/s"};
+    private int currentSelectedSpeed = 2;
 
     private Banco banco;
     private Interfaz gui;
@@ -100,23 +103,6 @@ public class TimeSimulation implements Runnable {
         resume(); // Ensure thread wakes up if paused and exits
     }
 
-    public double setTimeMultiplier(TimeMultiplier multiplier) {
-        switch (multiplier) {
-            case REAL_TIME:
-                return timeMultiplier = 1.0;
-            case ONE_DAY_PER_SECOND:
-                return timeMultiplier = 1.0 * 3600 * 24;
-            case TWO_DAYS_PER_SECOND:
-                return timeMultiplier = 1.0 * 3600 * 24;
-            case ONE_WEEK_PER_SECOND:
-                return timeMultiplier = 1.0 * 3600 * 24 * 7;
-            case ONE_MONTH_PER_SECOND:
-                return timeMultiplier = 1.0 * 3600 * 24 * 30;
-            default:
-                return timeMultiplier = 1.0;
-        }
-    }
-
     public LocalDateTime getDateTime() {
         return LocalDateTime.ofInstant(currentTime, ZoneId.systemDefault());
     }
@@ -137,18 +123,38 @@ public class TimeSimulation implements Runnable {
         return timeSim;
     }
 
-    enum TimeMultiplier {
-        REAL_TIME,
-        ONE_DAY_PER_SECOND,
-        TWO_DAYS_PER_SECOND,
-        ONE_WEEK_PER_SECOND,
-        ONE_MONTH_PER_SECOND
-    }
-
     public void togglePause() {
         if (isPaused)
             resume();
         else
             pause();
     }
+
+    public void decreaseSpeed() {
+        if (currentSelectedSpeed > 0) {
+            currentSelectedSpeed -= 1;
+            timeMultiplier = speeds[currentSelectedSpeed];
+        }
+    }
+
+    public void increaseSpeed() {
+        if (currentSelectedSpeed < speeds.length - 1) {
+            currentSelectedSpeed += 1;
+            timeMultiplier = speeds[currentSelectedSpeed];
+        }
+    }
+
+    public void setTimeMultiplier(int timeMultiplierIndex) {
+        if (0 < timeMultiplierIndex && timeMultiplierIndex < speeds.length) {
+            currentSelectedSpeed = timeMultiplierIndex;
+            timeMultiplier = speeds[currentSelectedSpeed];
+        }
+    }
+
+    public String getTimeMultiplierStr() {
+        return timeMultiplierStrings[currentSelectedSpeed];
+    }
+
+
+
 }

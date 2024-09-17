@@ -5,6 +5,8 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 
+import bancolafamilia.TimeSimulation;
+
 import java.time.format.DateTimeFormatter;
 import java.time.*;
 import java.util.Arrays;
@@ -74,7 +76,9 @@ public abstract class PageView {
 
     public final void updateClock(LocalDateTime newTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        currentTimeLabel.setText(formatter.format(newTime));
+        currentTimeLabel.setText(formatter.format(newTime) + "  "
+                                + TimeSimulation.getInstance().getTimeMultiplierStr() + "  "
+                                + "Use \"a\" y \"d\" para controlar la velocidad, \"p\" para pausar");
     }
 
     public final void render() {
