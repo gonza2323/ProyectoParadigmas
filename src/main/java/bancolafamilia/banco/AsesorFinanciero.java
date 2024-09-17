@@ -1,11 +1,10 @@
 package bancolafamilia.banco;
 
-import java.time.LocalDateTime;
-import java.util.*;
-
 import bancolafamilia.TimeSimulation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class AsesorFinanciero extends Empleado implements Serializable {
 
@@ -52,6 +51,10 @@ public class AsesorFinanciero extends Empleado implements Serializable {
     }
 
 
+    /**
+     * Contiene los consejos para clientes legales que puede emitir el asesor financiero
+     * return Array de consejos para movimientos legales
+     */
     public ArrayList<String> getAdviceForClients() {
         adviceForClients.add("Invertir en bonos gubernamentales y acciones de bajo riesgo.");
         adviceForClients.add("Diversificar fondos en bienes raíces, tecnología y fondos indexados.");
@@ -60,6 +63,11 @@ public class AsesorFinanciero extends Empleado implements Serializable {
 
         return adviceForClients;
     }
+
+    /**
+     * Contiene los consejos para clientes mafiosos que puede emitir el asesor financiero
+     * return Array de consejos para mover dinero discretamente
+     */
 
     public ArrayList<String> getAdviceForPremiumClients() {
         adviceForPremiumClients.add("Transferir fondos a cuentas en paraísos fiscales como las Islas Caimán");

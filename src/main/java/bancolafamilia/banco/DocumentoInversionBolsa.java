@@ -2,6 +2,10 @@ package bancolafamilia.banco;
 
 import java.io.Serializable;
 
+/**
+ * Representa el documento en el que se lleva el registro
+ * del cliente y los resultados de sus operaciones con el activo asociado
+ */
 public class DocumentoInversionBolsa implements Serializable {
 
     private static final long serialVersionUID = 1L;

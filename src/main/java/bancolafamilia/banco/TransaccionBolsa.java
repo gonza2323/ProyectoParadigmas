@@ -3,6 +3,11 @@ package bancolafamilia.banco;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Representa la transaccion que se realiza en la bolsa
+ * Sirve para llevar un record de las transacciones que han heco los clientes
+ */
+
 public class TransaccionBolsa extends Operacion implements Serializable {
 
     private static final long serialVersionUID = 1L;

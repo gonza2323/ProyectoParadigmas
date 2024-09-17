@@ -3,6 +3,9 @@ package bancolafamilia.banco;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Representa el consejo finanicero que emite el asesor
+ */
 public class financialAdvice implements Serializable {
 
     private static final long serialVersionUID = 1L;
