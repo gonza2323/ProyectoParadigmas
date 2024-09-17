@@ -12,6 +12,8 @@ import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.dialogs.*;
 
 import bancolafamilia.banco.Client;
+import bancolafamilia.banco.DocumentoClienteEspecial;
+import bancolafamilia.banco.SimulacionDeRecirculacion;
 import bancolafamilia.banco.Empleado;
 import bancolafamilia.banco.Operacion;
 
@@ -20,13 +22,14 @@ class AgenteEspecialMenuView extends PageView {
     
     private final Label balanceIndicator = new Label("");
 
-    private final Button pendingDocumentsButton = new Button("Documentos Pendientes");
-    private final Button finishedDocumentsButton = new Button("Documentos Ejecutados");
+    private final Button pendingTasksButton = new Button("Tareas Pendientes");
+    private final Button finishedTasksButton = new Button("Tareas Finalizadas");
     private final Button pendingClientsButton = new Button("Clientes disponibles");
     private final Button currentClientsButton = new Button("Clientes actuales");
     private final Button exitButton = new Button("Salir");
 
     private Function<Client, Boolean> selectPendingClient;
+    private Function<DocumentoClienteEspecial, Boolean> selectPendingTask;
 
     public AgenteEspecialMenuView(WindowBasedTextGUI gui) {
         super(gui);
@@ -91,10 +94,10 @@ class AgenteEspecialMenuView extends PageView {
         
         // Botones
         panel.addComponent(
-            pendingDocumentsButton
+            pendingTasksButton
                 .setLayoutData(leftJustify));
         panel.addComponent(
-            finishedDocumentsButton
+            finishedTasksButton
                 .setLayoutData(leftJustify));
         panel.addComponent(
             pendingClientsButton
@@ -200,6 +203,46 @@ class AgenteEspecialMenuView extends PageView {
             table.getTableModel().addRow(id, name, dni, username, alias, balance, debt);
         }
 
+        panel.addComponent(new Button("Cerrar",
+            new Runnable() {
+                @Override
+                public void run() {
+                    window.close();
+                }
+        }).setLayoutData(
+            GridLayout.createLayoutData(
+                GridLayout.Alignment.END,
+                GridLayout.Alignment.CENTER))
+        );
+
+        gui.addWindowAndWait(window);
+    }
+
+    public void showActivosPendientes(List<DocumentoClienteEspecial> tasks) {
+        BasicWindow window = new BasicWindow("TAREAS PENDIENTES");
+        window.setHints(
+            Arrays.asList(
+                Window.Hint.CENTERED,
+                Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setCloseWindowWithEscape(true);
+        
+        Panel panel = new Panel();
+        panel.setLayoutManager(new GridLayout(1));
+        window.setComponent(panel);
+        
+        Table<Object> table = new Table<>("id", "Cliente", "Monto");
+        panel.addComponent(table);
+
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+
+        for (DocumentoClienteEspecial d : tasks) {
+            String id = Integer.toString(d.getId());
+            String name = d.getClient().getNombre();
+            String amount = currencyFormatter.format(d.getAmount());
+
+            table.getTableModel().addRow(id, name, amount);
+        }
+
         table.setSelectAction(() -> {
             if (table.getTableModel().getRowCount() == 0)
                 return;
@@ -207,9 +250,9 @@ class AgenteEspecialMenuView extends PageView {
             String idStr = (String)table.getTableModel().getCell(0, table.getSelectedRow());
             int id = Integer.parseInt(idStr);
 
-            for (Client c : clients) {
-                if (c.getId() == id) {
-                    Boolean shouldRemoveRow = selectPendingClient.apply(c);
+            for (DocumentoClienteEspecial d : tasks) {
+                if (d.getId() == id) {
+                    Boolean shouldRemoveRow = selectPendingTask.apply(d);
 
                     if (shouldRemoveRow) {
                         table.getTableModel().removeRow(table.getSelectedRow());
@@ -242,12 +285,12 @@ class AgenteEspecialMenuView extends PageView {
         balanceIndicator.setText("Balance " + currencyFormatter.format(balance));
     }
 
-    public void bindPendingDocumentsButton(Runnable action) {
-        this.pendingDocumentsButton.addListener(b -> action.run());
+    public void bindPendingTasksButton(Runnable action) {
+        this.pendingTasksButton.addListener(b -> action.run());
     }
 
-    public void bindFinishedDocumentsButton(Runnable action) {
-        this.finishedDocumentsButton.addListener(b -> action.run());
+    public void bindFinishedTasksButton(Runnable action) {
+        this.finishedTasksButton.addListener(b -> action.run());
     }
 
     public void bindPendingClientsButton(Runnable action) {
@@ -262,7 +305,36 @@ class AgenteEspecialMenuView extends PageView {
         this.exitButton.addListener(b -> action.run());
     }
 
-    public void bindSelectPendingClientButton(Function<Client, Boolean> action) {
+    public void bindSelectPendingClient(Function<Client, Boolean> action) {
         this.selectPendingClient = action;
+    }
+
+    public void bindSelectPendingTask(Function<DocumentoClienteEspecial, Boolean> action) {
+        this.selectPendingTask = action;
+    }
+
+    public Boolean showTaskSimulation(SimulacionDeRecirculacion simulation) {
+
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+        var response = new MessageDialogBuilder()
+            .setTitle("CONFIRMAR REALIZAR TAREA")
+            .setText("Desea realizar la tarea?\nDetalles:" 
+                    + "\nMonto a procesar: " + currencyFormatter.format(simulation.getMonto())
+                    + "\nNro. de transacciones: " + simulation.getTotalTransfers()
+                    + "\nNro. de transacciones diarias: " + simulation.getNumTransferenciasDiarias()
+                    + "\nPlazo total en días: " + simulation.getTiempoDias())
+            .addButton(MessageDialogButton.No)
+            .addButton(MessageDialogButton.Yes)
+            .build()
+            .showDialog(gui);
+        
+        switch (response) {
+            case Yes:
+                return true;
+            case No:
+                return false;
+            default:
+                return false;
+        }
     }
 }

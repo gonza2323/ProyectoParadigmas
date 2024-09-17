@@ -1,51 +1,101 @@
 package bancolafamilia.banco;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
+import bancolafamilia.TimeSimulation;
+
+
+/**
+ * Permite simular y ejecutar operaciones de lavado de dinero
+ */
 public class ModuloDeRecirculacionFinanciera implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // montoMaxTotal indica es el monto maximo que puede transferir en un dia - es decir la suma de los montos de todas las transferencias no rastreables no debe superar el montoMAxTotal
-    public final float montoMaxTotal = 5000000;
+    private final Banco banco;
 
-    //montoMaxParcial es monto maximo que pueden tener cada una de las pequeñas transferencias no restreables
-    //podria utilizar direcatmente Transferencia.montoInmediata pero lo coloco en un atributo pq el bco podria decidir despues cambiar el limite
-    public final float montoMaxParcial = Transferencia.maxAmountImmediate;
-    public float montoAOperar;
-    public DocumentoTransaccionEspecial documento;
+    private final static float maxDailyAmount = 5000000;
+    private final static float maxAmountPerTransfer = Transferencia.maxAmountImmediate;
+    
+    private final float amount;
 
-    public ModuloDeRecirculacionFinanciera(float montoAOperar) {
-        this.montoAOperar = montoAOperar;
+    public ModuloDeRecirculacionFinanciera(float montoAOperar, Banco banco) {
+        this.banco = banco;
+        this.amount = montoAOperar;
     }
 
     //1. Calucla el tiempo minimo en dias en que se puede lavar la plata
-    public int calcularPlazo(float montoAOperar){
-        float plazoOperacion = montoAOperar/montoMaxTotal;
+    private int calcularPlazoEnDias() {
+        float plazoOperacion = amount / maxDailyAmount;
         //math.ceil redondea hacia arriba el resultado de plazoOp
         return (int) Math.ceil(plazoOperacion);
     }
 
-    //2. calcula cuantas transferencias diarias
-    public int calcularPartes(){
-        float partesDiarias = montoMaxTotal/montoMaxParcial;
-        //math.floor redondea hacia abajo el resultado de plazoOp
-        //redondea hacia abajo para que la suma de todas las op pequeñas no rastreables diarias no supere el montoMAxPArcial
-        return (int) Math.floor(partesDiarias);
+    private int calculateTotalTransfers() {
+        int daysAtFullCapacity = (int) Math.floor(amount / maxDailyAmount);
+        float remainingMoney = amount / maxDailyAmount - daysAtFullCapacity * maxDailyAmount;
+        int remainingTransfers = (int) Math.ceil(remainingMoney / maxAmountPerTransfer);
+        
+        return daysAtFullCapacity * calculateMaxDailyTransfers() + remainingTransfers;
     }
 
-    public DocumentoTransaccionEspecial sendDocumentoTransaccion(){
-
-        DocumentoTransaccionEspecial doc = new DocumentoTransaccionEspecial(calcularPlazo(montoAOperar), calcularPartes(), montoMaxParcial);
-
-        return doc;
-        //Este doc le dice al agenteEspecial, debes transferir en:
-        // - "x" dias
-        // - max "z" transferencias diarias
-        //  - cada transferencia de max "j" pesos
-
+    private int calculateMaxDailyTransfers() {
+        return (int) Math.ceil(maxDailyAmount / maxAmountPerTransfer);
     }
 
+    public SimulacionDeRecirculacion simulate(){
+        return new SimulacionDeRecirculacion(
+            amount,
+            calcularPlazoEnDias(),
+            calculateMaxDailyTransfers(),
+            maxDailyAmount,
+            calculateTotalTransfers()
+        );
+    }
 
+    public SimulacionDeRecirculacion execute(Client client, AgenteEspecial agent) {
+        int daysAtFullCapacity = (int) Math.floor(amount / maxDailyAmount);
+        float remainingMoneyOnLastDay = amount % maxDailyAmount;
+
+        int amountFullTransfersOnFullDays = (int) Math.floor(maxDailyAmount / maxAmountPerTransfer);
+        float remainingMoneyOnFullDays = maxDailyAmount % maxAmountPerTransfer;
+        
+        int fullCapacityTransfersLastDay = (int) Math.floor(remainingMoneyOnLastDay / maxAmountPerTransfer);
+        float lastRemainingMoney = remainingMoneyOnLastDay % maxAmountPerTransfer;
+
+        List<Operacion> operaciones = new LinkedList<Operacion>();
+        
+        LocalDateTime date = TimeSimulation.getTime().plusDays(1);
+        String motivo = "Dividendos";
+        
+        for (int i = 0; i < daysAtFullCapacity; i++) {
+            for (int j = 0; j < amountFullTransfersOnFullDays; j++) {
+                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
+                operaciones.add(transfer);
+            }
+            if (remainingMoneyOnFullDays > 0) {
+                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, remainingMoneyOnFullDays, motivo);
+                operaciones.add(transfer);
+            }
+            date = date.plusDays(1);
+        }
+
+        if (remainingMoneyOnLastDay > 0) {
+            for (int i = 0; i < fullCapacityTransfersLastDay; i++) {
+                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
+                operaciones.add(transfer);
+            }
+            if (lastRemainingMoney > 0) {
+                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, lastRemainingMoney, motivo);
+                operaciones.add(transfer);
+            }
+        }
+
+        banco.programarOperaciones(operaciones);
+        return simulate();
+    }
 }
-

@@ -2,6 +2,7 @@ package bancolafamilia.banco;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import bancolafamilia.banco.Operacion.OpStatus;
 
 public class Cajero extends Empleado implements Serializable {
 
@@ -20,18 +21,6 @@ public class Cajero extends Empleado implements Serializable {
         this.numCaja = nextNumCaja++;
     }
 
-    // //1. El cajero recibe las solicitud de las operaciones que estan pendientes de aprobacion
-    // @Override
-    // public void recieveSolicitud(Operacion operacion) {
-    //     if (operacion.isAprobadaPor(this)){
-
-    //         //2. se fija si las operaciones son depositos y si tienen su numero de caja y acepta las que le corresponden
-    //         if ((operacion instanceof Deposito) && ((Deposito) operacion).getCaja() == this.numCaja){
-    //             this.aprobarOperacion(operacion);
-    //         }
-    //     }
-    // }
-
     // Con este metodo recibe los documentos que le envia el agente especial
     public void recieveDocument(DocumentoClienteEspecial documento){
         documentosOperacionesEspeciales.add(documento);
@@ -44,15 +33,18 @@ public class Cajero extends Empleado implements Serializable {
 
         if (document != null && deposit.amount > Deposito.montoMax
             && deposit.amount < AgenteEspecial.montoMaxOpEspecial){
+            
+            // Asignamos este depósito al agente especial
+            var task = new DocumentoClienteEspecial(deposit.client, document.getAgenteEspecial());
+            task.setAmount(deposit.amount);
+            document.getAgenteEspecial().addNewDocument(task);
+            
+            // Convierte al depósito en especial, y le cambia el destino a la cuenta del agente especial
             deposit = new DepositoEspecial(deposit.getDate(), document.getAgenteEspecial().getCtaCliente(), deposit.amount, deposit.getCajero());
             deposit.aprobar();
         }
 
         return deposit;
-    }
-
-    public void notificarAgenteEspecial(AgenteEspecial agenteEspecial, DocumentoClienteEspecial document) {
-        // agenteEspecial.verificarFondos(document);
     }
 
     public DocumentoClienteEspecial findDocument(Operacion operacion){

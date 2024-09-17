@@ -2,6 +2,8 @@ package bancolafamilia.gui;
 
 import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.*;
+
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 
@@ -27,12 +29,11 @@ class LoginPage extends PageController<LoginView>{
     // Otra página podría requerir más cosas.
     public LoginPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
         super(banco, new LoginView(gui), gui, timeSim); // Constructor clase base
-        
+
         // Le decimos a LoginView, qué acciones ejecutar (de esta clase),
         // cuando se aprieta cada botón
         view.bindLoginButton(() -> handleLoginButton());
         view.bindCloseButton(() -> handleCloseButton());
-
     }
 
     // Método para manejar cuando el usuario aprieta Login
@@ -85,7 +86,6 @@ class LoginPage extends PageController<LoginView>{
     public void handleCloseButton() {
         CambiarPagina(new StartMenuPage(banco, gui, timeSim)); // Cambiamos de página a null (termina el programa)
     }
-
 }
 
 
@@ -157,6 +157,7 @@ class LoginView extends PageView {
         // Siempre hace falta una ventana (preferentemente solo 1)
         mainWindow = new BasicWindow("BANCO LA FAMILIA");
         mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
+        mainWindow.setCloseWindowWithEscape(true);
 
         // La ventana solo puede contener un elemento, entonces
         // creamos un "panel", que puede tener muchos objectos organizados de distintas formas
@@ -220,5 +221,21 @@ class LoginView extends PageView {
                 .setLayoutData(
                     GridLayout.createHorizontallyEndAlignedLayoutData(1)));
 
+    }
+
+    @Override
+    public void setupClockUI() {
+        super.setupClockUI();
+        Window clockBarWindow = new BasicWindow();
+        clockBarWindow.setHints(
+            Arrays.asList(Window.Hint.FIT_TERMINAL_WINDOW,
+                          Window.Hint.NO_DECORATIONS,
+                          Window.Hint.NO_POST_RENDERING,
+                          Window.Hint.NO_FOCUS,
+                          Window.Hint.FIXED_POSITION));
+                          
+        clockBarWindow.setPosition(new TerminalPosition(0, 0));
+        clockBarWindow.setComponent(clockBarPanel);
+        gui.addWindow(clockBarWindow);
     }
 }

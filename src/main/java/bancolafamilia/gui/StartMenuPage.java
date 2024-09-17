@@ -4,12 +4,24 @@ import bancolafamilia.Simulation;
 import bancolafamilia.TimeSimulation;
 import bancolafamilia.banco.*;
 import bancolafamilia.banco.Operacion.OpStatus;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.GridLayout.Alignment;
 import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialogBuilder;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -17,6 +29,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import bancolafamilia.Simulation;
+import bancolafamilia.TimeSimulation;
+import bancolafamilia.banco.*;
+import bancolafamilia.banco.Operacion.OpStatus;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 class StartMenuPage extends PageController<StartMenuView>{
@@ -171,8 +189,9 @@ class StartMenuPage extends PageController<StartMenuView>{
         }
 
         Simulation sim = new Simulation(banco, timeSim);
-        sim.createSimulation(numberOfOps, 10);
-        sim.startSimulation();
+        sim.createSimulation(numberOfOps, 10); // TODO
+        
+        // sim.start();
         // CambiarPagina(new BankStatePage(banco, gui, timeSim)); // TODO
     }
 
@@ -181,6 +200,17 @@ class StartMenuPage extends PageController<StartMenuView>{
 
         if (shouldExit)
             CambiarPagina(null);
+    }
+
+    @Override
+    public void controllerSetup() {
+        view.mainWindow.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Escape)
+                    handleExitButton();
+            }
+        });
     }
 }
 
@@ -374,19 +404,23 @@ class StartMenuView extends PageView {
     }
 
     public boolean showConfirmExitDialog() {
-        var response = new MessageDialogBuilder()
+        var dialog = new MessageDialogBuilder()
             .setTitle("SALIR")
             .setText("Está seguro de que desea salir?")
             .addButton(MessageDialogButton.No)
             .addButton(MessageDialogButton.Yes)
-            .build()
-            .showDialog(gui);
+            .build();
+        
+        dialog.setCloseWindowWithEscape(true);
+        var response = dialog.showDialog(gui);
+
+        if (response == null)
+            return false;
         
         switch (response) {
             case Yes:
                 return true;
             case No:
-                return false;
             default:
                 return false;
         }
@@ -465,6 +499,22 @@ class StartMenuView extends PageView {
 
     public void bindExitButton(Runnable action) {
         exitButton.addListener(closeButton -> action.run());
+    }
+
+    @Override
+    public void setupClockUI() {
+        super.setupClockUI();
+        Window clockBarWindow = new BasicWindow();
+        clockBarWindow.setHints(
+            Arrays.asList(Window.Hint.FIT_TERMINAL_WINDOW,
+                          Window.Hint.NO_DECORATIONS,
+                          Window.Hint.NO_POST_RENDERING,
+                          Window.Hint.NO_FOCUS,
+                          Window.Hint.FIXED_POSITION));
+                          
+        clockBarWindow.setPosition(new TerminalPosition(0, 0));
+        clockBarWindow.setComponent(clockBarPanel);
+        gui.addWindow(clockBarWindow);
     }
 }
 

@@ -53,6 +53,9 @@ public class Banco implements IOperationProcessor, Serializable {
      * Solicita una transferencia desde la cuenta del cliente. Crea la operación
      * correspondiente y la manda a procesar. Retorna el estado de la operación luego
      * de ser procesada
+     * 
+     * Si cumple lo necesario para ser transferencia especial, 
+     * 
      * @param sender Cliente que realiza la transferencia
      * @param recipient Beneficiario de la transferencia
      * @param amount Cantidad a transferir
@@ -60,9 +63,9 @@ public class Banco implements IOperationProcessor, Serializable {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
-        Operacion transferencia = new Transferencia(timeSim.getDateTime(), sender, recipient, amount, motivo);
+        Transferencia transferencia = new Transferencia(timeSim.getDateTime(), sender, recipient, amount, motivo);
 
-        if (Transferencia.isTransferenciaEspecial(recipient)) {
+        if (Transferencia.isTransferenciaEspecial(transferencia)) {
             transferencia = new TransferenciaEspecial(timeSim.getDateTime(), sender, recipient, amount, motivo);
         }
 
@@ -125,7 +128,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * @param operaciones Operaciones a programar
      */
     public void programarOperaciones(List<Operacion> operaciones) {
-        operacionesPendientes.addAll(operaciones);
+        operacionesProgramadas.addAll(operaciones);
     }
 
     /**
@@ -145,7 +148,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * La intenta remover de la lista de operaciones pendientes.
      * @param //operation Operación a denegar
      */
-    public void denegarOperacion(Operacion operacion) {
+    public void denegarOperacionPendiente(Operacion operacion) {
         operacion.denegar();
         operacionesPendientes.remove(operacion);
     }
@@ -164,6 +167,7 @@ public class Banco implements IOperationProcessor, Serializable {
             operacionesProgramadas.remove();
             procesarOperacion(earliestOperation);
             hasProcesedOperations = true;
+            earliestOperation = operacionesProgramadas.peek();
         }
 
         return hasProcesedOperations;
@@ -230,12 +234,9 @@ public class Banco implements IOperationProcessor, Serializable {
         if (deposit.amount > Deposito.montoMax //
             && deposit.status != OpStatus.APPROVED)
             return OpStatus.DENIED;
-
-        this.reservesTotal += deposit.amount;
-        this.depositsTotal += deposit.amount;
-
+        
         deposit.client.addBalance(deposit.amount);
-        return OpStatus.DENIED;
+        return OpStatus.DENIED; // De esta forma, el sistema no la deja registrada, pero se realizó
     }
 
     @Override
@@ -284,7 +285,27 @@ public class Banco implements IOperationProcessor, Serializable {
         transfer.client.promoteToPremiumClient();
         unattendedPremiumClients.add(transfer.client);
 
-        return OpStatus.DENIED;
+        return OpStatus.DENIED; // De esta forma, el sistema no la deja registrada, pero se realizó
+    }
+
+    @Override
+    public OpStatus processOperation(TransferenciaInternacional transfer) {
+        if (transfer.amount > Transferencia.maxAmount)
+            return OpStatus.DENIED;
+        
+        if (transfer.amount > Transferencia.maxAmountImmediate
+            && transfer.status != OpStatus.APPROVED)
+            return OpStatus.MANUAL_APPROVAL_REQUIRED;
+        
+        if (transfer.amount > transfer.client.getBalance())
+            return OpStatus.DENIED;
+        
+        transfer.client.reduceBalance(transfer.amount);
+        transfer.recipient.addBalance(transfer.amount);
+        reservesTotal += transfer.amount;
+        depositsTotal += transfer.amount;
+
+        return OpStatus.APPROVED;
     }
 
     @Override
@@ -310,50 +331,6 @@ public class Banco implements IOperationProcessor, Serializable {
 
     private boolean clientHasPendingSpecialTransfer(Client client) {
         return operacionesPendientes.stream().anyMatch(t -> t.client.equals(client) && t instanceof TransferenciaEspecial);
-    }
-
-
-    //3.3 LAVADO DE DINERO ------------------------------------------------------------------------------------------------
-    //Estos metodos son llamados desde la AgenteEspecialMenuPage -------------------------------------------------------
-
-    //el agente especial tiene una pestaña de notificaciones en la que se le informa los clientes que ya han depositado para que revise su cuenta e inicie el proceso de lavado
-
-    public ArrayList<DocumentoClienteEspecial> notificacionFondosAgenteE(AgenteEspecial agente){
-        ArrayList<DocumentoClienteEspecial> listaDocumentos = new ArrayList<>();
-        for (DocumentoClienteEspecial doc: agente.getActivosEnProceso()){
-            if (doc.inProcess){
-                listaDocumentos.add(doc);
-            }
-        }
-        return listaDocumentos;
-        //con esta lista le muestra al agente el cliente y el monto que deposito el cliente
-    }
-
-    // public DocumentoTransaccionEspecial simularTransaccionEspecial(AgenteEspecial agente, DocumentoClienteEspecial documentoCliente){
-    //     //este DocumentoClienteEspecial ya tiene la parte dela simulacion asociada
-    //     DocumentoClienteEspecial doc = agente.solicitarInfoModuloEspecial(documentoCliente);
-    //     listaDocEspecial.add(doc); //el banco agrega el docuemnto a su lista cuando ya esta completo, es decir que tiene los datos de docuemntoCliente  y los datos de documentoTransaccionEspecial
-    //     return doc.getDocumentoSimulacion();
-    //     //devuelve el documento donde esta la info de la simulacion que debe hacer el agente especial
-    // }
-
-    public void programarOpEspecial(DocumentoClienteEspecial doc){
-        int dias = doc.getDocumentoSimulacion().getTiempoDias();
-        int cantTransfDiarias = doc.getDocumentoSimulacion().getNumTransferenciasDiarias();
-        float monto = doc.getDocumentoSimulacion().getMontoMaxDiario();
-        Client client = doc.getClient();
-        LocalDateTime fechaActual = timeSim.getDateTime();
-
-
-        for (int i = 0; i< dias; i++){
-            for (int j = 0; j < cantTransfDiarias; j++){
-                //le puse que el cliente sea null porque como es una transferencia no rastreable no sabemos de que cuenta llega el dinero pero si sabemos a que cuenta entra el dinero!
-                Transferencia transNoRastreable = new Transferencia(fechaActual.plusDays(1), null, client, monto, "no rastreable");
-                operacionesProgramadas.add(transNoRastreable);
-            }
-            //DESPUES LAS OPERACIONES VAN DE LA COLA DE OPERACIONES PROGRAMADAS DIRECTAMEMTE AL METODO transferMoney(transferencia)
-
-        }
     }
 
     /**

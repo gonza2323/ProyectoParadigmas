@@ -30,11 +30,6 @@ public class Deposito extends Operacion implements Serializable {
         return cajeroResponsable;
     }
 
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Cajero;
-    }
-
     public void setClient(Client client) {
         this.client = client;
     }

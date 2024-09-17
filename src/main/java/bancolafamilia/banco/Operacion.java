@@ -38,7 +38,6 @@ public abstract class Operacion implements Comparable<Operacion>, Serializable {
     
     public abstract String getDescription();
     public abstract OpStatus process(IOperationProcessor processor);
-    public abstract boolean isAprobadaPor(Empleado employee);
 
     @Override
     public int compareTo(Operacion other) {

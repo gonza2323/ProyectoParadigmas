@@ -19,8 +19,8 @@ import java.util.Arrays;
 public abstract class PageView {
 
     protected final Label currentTimeLabel = new Label("[Current Time]");
-    protected Window mainWindow = new BasicWindow();            // ventana principal de esta página
-    private final Window clockBarWindow = new BasicWindow();
+    protected BasicWindow mainWindow = new BasicWindow();            // ventana principal de esta página
+    protected Panel clockBarPanel = new Panel();
     
     // Referencia a la gui
     // Se necesita para crear ventanas, botones, etc.
@@ -60,22 +60,16 @@ public abstract class PageView {
     }
 
     public void setupClockUI() {
-        clockBarWindow.setHints(
-            Arrays.asList(Window.Hint.FIT_TERMINAL_WINDOW,
-                          Window.Hint.NO_DECORATIONS,
-                          Window.Hint.NO_POST_RENDERING,
-                          Window.Hint.NO_FOCUS,
-                          Window.Hint.FIXED_SIZE,
-                          Window.Hint.FIXED_POSITION));
-        clockBarWindow.setFixedSize(new TerminalSize(400, 1));
-        clockBarWindow.setPosition(new TerminalPosition(0, 0));
-        
-        Panel panel = new Panel(new GridLayout(1));
-        currentTimeLabel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
-        clockBarWindow.setComponent(panel);
-    
-        panel.addComponent(currentTimeLabel);
-        gui.addWindow(clockBarWindow);
+        clockBarPanel = new Panel(new GridLayout(1));
+        clockBarPanel.addComponent(currentTimeLabel);
+        clockBarPanel.setPreferredSize(new TerminalSize(400, 1));
+
+        currentTimeLabel.setLayoutData(GridLayout
+            .createLayoutData(
+                GridLayout.Alignment.CENTER,
+                GridLayout.Alignment.CENTER,
+                true,
+                false));
     }
 
     public final void updateClock(LocalDateTime newTime) {

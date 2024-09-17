@@ -640,9 +640,10 @@ public class ClientMenuView extends PageView {
         exitButton.addListener(b -> action.run());
     }
 
-
-
-
+    @Override
+    public void setupClockUI() {
+        
+    }
 }
 enum OPERATION_TYPE_BROKER {
     ADVICE,

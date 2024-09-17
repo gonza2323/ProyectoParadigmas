@@ -29,11 +29,6 @@ public class Retiro extends Operacion implements Serializable {
     }
 
     @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Cajero;
-    }
-
-    @Override
     public List<User> getParticipants() {
         return Arrays.asList(client, cajeroResponsable);
     }

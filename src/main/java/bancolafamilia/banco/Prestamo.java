@@ -44,10 +44,5 @@ public class Prestamo extends Operacion implements Serializable {
         return processor.processOperation(this);
     }
 
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Gerente;
-    }
-
     public int getMonths() { return months; }
 }

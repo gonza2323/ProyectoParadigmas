@@ -14,10 +14,13 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.bundle.LanternaThemes;
 import com.googlecode.lanterna.graphics.ThemeDefinition;
 import com.googlecode.lanterna.gui2.DefaultWindowManager;
+import com.googlecode.lanterna.gui2.TextGUI.Listener;
 import com.googlecode.lanterna.gui2.EmptySpace;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.TextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -63,6 +66,13 @@ public class Interfaz {
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
         this.currentPage = new StartMenuPage(banco, gui, timeSim);
+
+        gui.addListener(new Listener() {
+            public boolean onUnhandledKeyStroke(TextGUI textGUI, KeyStroke keyStroke) {
+                handleInput(keyStroke);
+                return false;
+            }
+        });
     }
 
     // Inicializa la pantalla y empieza el loop de la interfaz
@@ -96,5 +106,15 @@ public class Interfaz {
 
     public void update() {
         currentPage.update();
+    }
+
+    private void handleInput(KeyStroke key) {
+        if (key.getCharacter() == null) {
+            return;
+        }
+        
+        if (key.getCharacter() == 'p') {
+            TimeSimulation.getInstance().togglePause();
+        }
     }
 }
