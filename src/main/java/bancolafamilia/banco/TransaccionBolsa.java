@@ -24,8 +24,6 @@ public class TransaccionBolsa extends Operacion implements Serializable {
         this.cantidad = cantidad;
         this.activo = activo;
         this.comision = comision;
-
-
     }
 
     @Override
@@ -42,11 +40,6 @@ public class TransaccionBolsa extends Operacion implements Serializable {
     @Override
     public OpStatus process(IOperationProcessor processor) {
         return null;
-    }
-
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return false; //no la aprueba ningun empleado
     }
 
     @Override
