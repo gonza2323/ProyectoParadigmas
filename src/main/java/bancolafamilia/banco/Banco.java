@@ -17,7 +17,6 @@ public class Banco implements IOperationProcessor, Serializable {
 
     private static final long serialVersionUID = 1L;
     private BackupManager backupManager = new BackupManager();
-    private transient final TimeSimulation timeSim;
 
     private float reservesTotal = 0.0f;
     private float depositsTotal = 0.0f;
@@ -35,14 +34,12 @@ public class Banco implements IOperationProcessor, Serializable {
     private final ArrayList<TransaccionBolsa> transaccionesBolsa = new ArrayList<>();
     //Con transaccionesBolsa sabemos la fecha y hora y la info de cada una de las op de compra-venta de activos
 
-    private final ArrayList<DocumentoClienteEspecial> listaDocEspecial = new ArrayList<>();;
     private final Queue<Client> unattendedPremiumClients = new LinkedList<>();
     private final ArrayList<DocumentoInversionBolsa> inversionesPerClient;
     //Con inversionesPerClient vamos registrando la info sobre la cantidad de acciones, monto y comisiones de un mismo activo del cliente
 
 
-    public Banco(TimeSimulation timeSim) {
-        this.timeSim = timeSim;
+    public Banco() {
         this.inversionesPerClient = new ArrayList<>();
     }
 
@@ -63,10 +60,10 @@ public class Banco implements IOperationProcessor, Serializable {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudTransferencia(Client sender, Client recipient, float amount, String motivo) {
-        Transferencia transferencia = new Transferencia(timeSim.getDateTime(), sender, recipient, amount, motivo);
+        Transferencia transferencia = new Transferencia(TimeSimulation.getTime(), sender, recipient, amount, motivo);
 
-        if (Transferencia.isTransferenciaEspecial(transferencia)) {
-            transferencia = new TransferenciaEspecial(timeSim.getDateTime(), sender, recipient, amount, motivo);
+        if (Transferencia.isSpecialAlias(transferencia.getRecipient().getAlias())) {
+            transferencia = new TransferenciaEspecial(TimeSimulation.getTime(), sender, recipient, amount, motivo);
         }
 
         return procesarOperacion(transferencia);
@@ -82,7 +79,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudPrestamo(Client client, float amount, int months) {
-        Operacion loan = new Prestamo(timeSim.getDateTime(), client, amount, anualInterestRate, months);
+        Operacion loan = new Prestamo(TimeSimulation.getTime(), client, amount, anualInterestRate, months);
         return procesarOperacion(loan);
     }
 
@@ -96,7 +93,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudDeposito(Client client, float amount, Cajero cajero) {
-        Deposito deposit = new Deposito(timeSim.getDateTime(), client, amount, cajero);
+        Deposito deposit = new Deposito(TimeSimulation.getTime(), client, amount, cajero);
         Deposito approved = cajero.aprobarOperacion(deposit);
         
         if (approved.equals(deposit))
@@ -116,7 +113,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * @return Estado de la operación luego de ser solicitada
      */
     public OpStatus solicitudRetiro(Client client, float amount, Cajero cajero) {
-        Operacion withdrawal = new Retiro(timeSim.getDateTime(), client, amount, cajero);
+        Operacion withdrawal = new Retiro(TimeSimulation.getTime(), client, amount, cajero);
         return procesarOperacion(withdrawal);
     }
 
@@ -181,7 +178,7 @@ public class Banco implements IOperationProcessor, Serializable {
      * @param operation Operación a procesar
      * @return Estado de la operación luego de ser procesada
      */
-    private OpStatus procesarOperacion(Operacion operation) {
+    public OpStatus procesarOperacion(Operacion operation) {
 
         if (operation.amount <= 0 || operation.status == OpStatus.DENIED) {
             operation.status = OpStatus.DENIED;
@@ -192,7 +189,7 @@ public class Banco implements IOperationProcessor, Serializable {
 
         switch (operation.status) {
             case APPROVED:
-                operation.setDate(timeSim.getDateTime());
+                operation.setDate(TimeSimulation.getTime());
                 operacionesAprobadas.addFirst(operation);
                 break;
             case MANUAL_APPROVAL_REQUIRED:
@@ -274,12 +271,13 @@ public class Banco implements IOperationProcessor, Serializable {
     public OpStatus processOperation(TransferenciaEspecial transfer) {
         if (transfer.amount > Transferencia.maxAmount
             || transfer.client.isPremiumClient() == true
-            || clientHasPendingSpecialTransfer(transfer.client))
+            || clientHasPendingSpecialTransfer(transfer.client)
+            || !transfer.isSpecialTransfer())
             return OpStatus.DENIED;
 
         if (transfer.status != OpStatus.APPROVED)
             return OpStatus.MANUAL_APPROVAL_REQUIRED;
-
+        
         transfer.recipient.reduceBalance(transfer.amount);
         transfer.recipient.addBalance(transfer.amount);
         transfer.client.promoteToPremiumClient();
@@ -300,10 +298,12 @@ public class Banco implements IOperationProcessor, Serializable {
         if (transfer.amount > transfer.client.getBalance())
             return OpStatus.DENIED;
         
+        float transferFee = 0.15f;
+
         transfer.client.reduceBalance(transfer.amount);
-        transfer.recipient.addBalance(transfer.amount);
+        transfer.recipient.addBalance(transfer.amount * (1 - transferFee));
         reservesTotal += transfer.amount;
-        depositsTotal += transfer.amount;
+        depositsTotal += transfer.amount * (1 - transferFee);
 
         return OpStatus.APPROVED;
     }
@@ -390,6 +390,9 @@ public class Banco implements IOperationProcessor, Serializable {
     }
 
     public Client findClientByAlias(String alias) {
+        if (Transferencia.isSpecialAlias(alias))
+            return Client.createTempSpecialClient();
+
         for (User user : users)
             if (user instanceof Client)
                 if (((Client)user).getAlias().equals(alias.toLowerCase()))
@@ -500,6 +503,16 @@ public class Banco implements IOperationProcessor, Serializable {
 
         return advice;
     }
+
+    public void addReserves(float amount) {
+        reservesTotal += amount;
+    }
+
+    public void addDeposits(float amount) {
+        depositsTotal += amount;
+    }
+
+    public void addLoanedAmount(float amount) {
+        loanedTotal += amount;
+    }
 }
-
-

@@ -18,8 +18,8 @@ public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMen
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public AsesorFinancieroMenuPage(Banco banco, WindowBasedTextGUI gui, AsesorFinanciero asesor, TimeSimulation timeSim) {
-        super(banco, new AsesorFinancieroMenuView(gui, asesor.getNombre()), gui, timeSim);
+    public AsesorFinancieroMenuPage(Banco banco, WindowBasedTextGUI gui, AsesorFinanciero asesor) {
+        super(banco, new AsesorFinancieroMenuView(gui), gui);
 
         this.asesor = asesor;
 
@@ -32,27 +32,21 @@ public class AsesorFinancieroMenuPage extends PageController<AsesorFinancieroMen
     private void handleHistoryButton(){
         ArrayList<financialAdvice> asesoriaBrindada = asesor.getAdviceRecord();
         view.showAdviceHistory(asesoriaBrindada);
-
-
-
-
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui, timeSim));;
+        CambiarPagina(new LoginPage(banco, gui));;
     }
 }
 
 class AsesorFinancieroMenuView extends PageView {
     private final Label welcomeMessageLabel;
-    private final String name;
 
     private final Button historyButton;
     private final Button exitButton;
 
-    public AsesorFinancieroMenuView(WindowBasedTextGUI gui, String name) {
+    public AsesorFinancieroMenuView(WindowBasedTextGUI gui) {
         super(gui);
-        this.name = name;
         this.welcomeMessageLabel = new Label("");
         this.historyButton = new Button("Historial de Asesorias");
         this.exitButton = new Button("Salir");

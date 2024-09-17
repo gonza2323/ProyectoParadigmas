@@ -22,8 +22,8 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public AgenteEspecialMenuPage(Banco banco, WindowBasedTextGUI gui, AgenteEspecial agente, TimeSimulation timeSim) {
-        super(banco, new AgenteEspecialMenuView(gui), gui, timeSim);
+    public AgenteEspecialMenuPage(Banco banco, WindowBasedTextGUI gui, AgenteEspecial agente) {
+        super(banco, new AgenteEspecialMenuView(gui), gui);
 
         this.agente = agente;
         
@@ -88,6 +88,6 @@ public class AgenteEspecialMenuPage extends PageController<AgenteEspecialMenuVie
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui, timeSim));;
+        CambiarPagina(new LoginPage(banco, gui));;
     }
 }

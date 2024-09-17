@@ -3,6 +3,8 @@ package bancolafamilia.banco;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import bancolafamilia.TimeSimulation;
+
 import java.io.Serializable;
 
 public class AsesorFinanciero extends Empleado implements Serializable {
@@ -12,16 +14,12 @@ public class AsesorFinanciero extends Empleado implements Serializable {
     private ArrayList<String> adviceForPremiumClients;
     private ArrayList<financialAdvice> adviceRecord;
 
-
-
     public AsesorFinanciero(String nombre, int dni, String username, String password) {
         super(nombre, dni, username, password);
         this.adviceForClients = new ArrayList<>();
         this.adviceForPremiumClients = new ArrayList<>();
         this.adviceRecord = new ArrayList<>();
-
     }
-
 
     public String getAdvice(ArrayList<String> lista){
         Random random = new Random();
@@ -36,14 +34,14 @@ public class AsesorFinanciero extends Empleado implements Serializable {
 
     public financialAdvice asesorarClientePremiun(Client client){
         String newAdvice = getAdvice(getAdviceForPremiumClients());
-        financialAdvice advice = new financialAdvice(LocalDateTime.now(), client, newAdvice, "premium");
+        financialAdvice advice = new financialAdvice(TimeSimulation.getTime(), client, newAdvice, "premium");
         addAvice(client,advice);
         return advice;
     }
 
     public financialAdvice asesorarCliente(Client client){
         String newAdvice = getAdvice(getAdviceForClients());
-        financialAdvice advice = new financialAdvice(LocalDateTime.now(), client, newAdvice, "legitimo");
+        financialAdvice advice = new financialAdvice(TimeSimulation.getTime(), client, newAdvice, "legitimo");
         addAvice(client,advice);
         return advice;
 

@@ -6,8 +6,11 @@ import bancolafamilia.banco.*;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 
@@ -27,8 +30,8 @@ class LoginPage extends PageController<LoginView>{
     
     // El constructer super(), siempre requiere Banco, Vista y gui.
     // Otra página podría requerir más cosas.
-    public LoginPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
-        super(banco, new LoginView(gui), gui, timeSim); // Constructor clase base
+    public LoginPage(Banco banco, WindowBasedTextGUI gui) {
+        super(banco, new LoginView(gui), gui); // Constructor clase base
 
         // Le decimos a LoginView, qué acciones ejecutar (de esta clase),
         // cuando se aprieta cada botón
@@ -67,15 +70,15 @@ class LoginPage extends PageController<LoginView>{
         PageController<?> nextPage;
         
         if (user instanceof Client)
-            nextPage = new ClientMenuPage(banco, gui, (Client)user, timeSim);
+            nextPage = new ClientMenuPage(banco, gui, (Client)user);
         else if (user instanceof Cajero)
-            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user, timeSim);
+            nextPage = new CajeroMenuPage(banco, gui, (Cajero)user);
         else if (user instanceof AsesorFinanciero)
-            nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user, timeSim);
+            nextPage = new AsesorFinancieroMenuPage(banco, gui, (AsesorFinanciero)user);
         else if (user instanceof AgenteEspecial)
-            nextPage = new AgenteEspecialMenuPage(banco, gui, (AgenteEspecial)user, timeSim);
+            nextPage = new AgenteEspecialMenuPage(banco, gui, (AgenteEspecial)user);
         else if (user instanceof Gerente)
-            nextPage = new ManagerMenuPage(banco, gui, (Gerente)user, timeSim);
+            nextPage = new ManagerMenuPage(banco, gui, (Gerente)user);
         else
             nextPage = null;
         
@@ -84,7 +87,18 @@ class LoginPage extends PageController<LoginView>{
 
     // Método para manejar cuando el usuario aprieta Cerrar
     public void handleCloseButton() {
-        CambiarPagina(new StartMenuPage(banco, gui, timeSim)); // Cambiamos de página a null (termina el programa)
+        CambiarPagina(new StartMenuPage(banco, gui)); // Cambiamos de página a null (termina el programa)
+    }
+
+    @Override
+    public void controllerSetup() {
+        view.mainWindow.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Escape)
+                    handleCloseButton();
+            }
+        });
     }
 }
 
@@ -157,7 +171,6 @@ class LoginView extends PageView {
         // Siempre hace falta una ventana (preferentemente solo 1)
         mainWindow = new BasicWindow("BANCO LA FAMILIA");
         mainWindow.setHints(Arrays.asList(Window.Hint.CENTERED)); // Centrada, pero hay más opciones
-        mainWindow.setCloseWindowWithEscape(true);
 
         // La ventana solo puede contener un elemento, entonces
         // creamos un "panel", que puede tener muchos objectos organizados de distintas formas

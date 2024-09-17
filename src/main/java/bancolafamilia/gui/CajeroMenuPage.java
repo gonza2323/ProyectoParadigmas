@@ -22,8 +22,8 @@ public class CajeroMenuPage extends PageController<CajeroMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public CajeroMenuPage(Banco banco, WindowBasedTextGUI gui, Cajero cajero, TimeSimulation timeSim) {
-        super(banco, new CajeroMenuView(gui, cajero.getNombre()), gui, timeSim);
+    public CajeroMenuPage(Banco banco, WindowBasedTextGUI gui, Cajero cajero) {
+        super(banco, new CajeroMenuView(gui, cajero.getNombre()), gui);
 
         this.cajero = cajero;
     }

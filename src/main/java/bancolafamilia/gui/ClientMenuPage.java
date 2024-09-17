@@ -10,8 +10,8 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client, TimeSimulation timeSim) {
-        super(banco, new ClientMenuView(gui), gui, timeSim);
+    public ClientMenuPage(Banco banco, WindowBasedTextGUI gui, Client client) {
+        super(banco, new ClientMenuView(gui), gui);
 
         this.client = client;
 
@@ -183,19 +183,28 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
             if (activo == null){return;}
 
             String amountStr = view.requestAmountAssets();
-            int cantidad = Integer.parseInt(amountStr);
+
+            int cantidad;
+            try {
+                cantidad = Integer.parseInt(amountStr);
+            } catch (NumberFormatException e) {
+                view.showError();
+                return;
+            } catch (NullPointerException e) {
+                return;
+            }
+
             DocumentoInversionBolsa doc = banco.broker.simularOperacionActivos(client, activo, cantidad, "buy");
             boolean comprar = view.showSimulationCompra(doc);
 
             if (comprar){
-                if (banco.operarEnLaBolsa(doc,client,activo,cantidad,"buy")){
+                if (banco.operarEnLaBolsa(doc, client, activo, cantidad, "buy")){
                     view.showBuySuccessMsg(doc.getActivo().getName(), doc.getCantidad(), doc.getAmount(), doc.getComisiones());
                     view.updateBalance(client.getBalance());
 
                 } else {
                     view.showInsufficientFundsError();
                 }
-
             }
 
         } else if (operationTypeBroker == OPERATION_TYPE_BROKER.SELL) {
@@ -215,7 +224,15 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
 
             //float monto = banco.getMontoInversionesAsociadas(activo, client);
             String amountStr = view.requestAmountAssetsVenta();
-            int cantidad = Integer.parseInt(amountStr);
+            int cantidad;
+            try {
+                cantidad = Integer.parseInt(amountStr);
+            } catch (NumberFormatException e) {
+                view.showError();
+                return;
+            } catch (NullPointerException e) {
+                return;
+            }
 
             if (cantidad > cantActivosEnCartera){
                 view.showValueError();
@@ -255,7 +272,7 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui, timeSim));;
+        CambiarPagina(new LoginPage(banco, gui));;
     }
 
 }

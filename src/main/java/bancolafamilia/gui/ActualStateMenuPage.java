@@ -14,13 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class ActualStateMenuPage extends PageController<ActualStateMenuView>{
+public class ActualStateMenuPage extends PageController<ActualStateMenuView> {
 
-
-    public ActualStateMenuPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
-        super(banco, new ActualStateMenuView(gui), gui, timeSim);
-
-
+    public ActualStateMenuPage(Banco banco, WindowBasedTextGUI gui) {
+        super(banco, new ActualStateMenuView(gui), gui);
 
         view.updateReserves(banco.getReservesTotal());
         view.updateDeposits(banco.getDepositsTotal());
@@ -31,7 +28,6 @@ public class ActualStateMenuPage extends PageController<ActualStateMenuView>{
         view.bindShowClientsButton(() -> handleShowClientsButton());
         view.bindShowEmployeesButton(() -> handleShowEmployeesButton());
         view.bindExitButton(() -> handleExitButton());
-
     }
 
     private void handleHistoryButton() {
@@ -47,9 +43,11 @@ public class ActualStateMenuPage extends PageController<ActualStateMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new StartMenuPage(banco, gui, timeSim));;
+        CambiarPagina(new StartMenuPage(banco, gui));
+        ;
     }
 }
+
 class ActualStateMenuView extends PageView {
     private final Label welcomeMessageLabel = new Label("ESTADO ACTUAL BANCO LA FAMILIA");
 
@@ -72,97 +70,60 @@ class ActualStateMenuView extends PageView {
     public void setupUI() {
         // Crea una ventana y le dice que se centre
         mainWindow = new BasicWindow("BANCO LA FAMILIA");
-        mainWindow.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
-                Window.Hint.FIT_TERMINAL_WINDOW,
-                Window.Hint.NO_DECORATIONS));
+        mainWindow.setHints(
+                Arrays.asList(Window.Hint.FULL_SCREEN, Window.Hint.FIT_TERMINAL_WINDOW, Window.Hint.NO_DECORATIONS));
 
         // Panel
-        Panel panel = new Panel(
-                new GridLayout(2)
-                        .setHorizontalSpacing(1)
-                        .setVerticalSpacing(1)
-                        .setTopMarginSize(1)
-                        .setBottomMarginSize(1)
-                        .setLeftMarginSize(2)
-                        .setRightMarginSize(2));
+        Panel panel = new Panel(new GridLayout(2).setHorizontalSpacing(1).setVerticalSpacing(1).setTopMarginSize(1)
+                .setBottomMarginSize(1).setLeftMarginSize(2).setRightMarginSize(2));
         mainWindow.setComponent(panel); // IMPORTANTE, si no, no se va a dibujar nada y termina el programa.
 
         // Layout
-        LayoutData leftJustifyNoFill = GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,
-                GridLayout.Alignment.CENTER,
-                true,
-                false,
-                1,
-                1);
+        LayoutData leftJustifyNoFill = GridLayout.createLayoutData(GridLayout.Alignment.BEGINNING,
+                GridLayout.Alignment.CENTER, true, false, 1, 1);
 
-        LayoutData rightJustifyNoFill = GridLayout.createLayoutData(
-                GridLayout.Alignment.END,
-                GridLayout.Alignment.CENTER,
-                true,
-                false,
-                1,
-                1);
+        LayoutData rightJustifyNoFill = GridLayout.createLayoutData(GridLayout.Alignment.END,
+                GridLayout.Alignment.CENTER, true, false, 1, 1);
 
-        LayoutData leftJustifyWithFill = GridLayout.createLayoutData(
-                GridLayout.Alignment.BEGINNING,
-                GridLayout.Alignment.BEGINNING,
-                true,
-                false,
-                2,
-                1);
+        LayoutData leftJustifyWithFill = GridLayout.createLayoutData(GridLayout.Alignment.BEGINNING,
+                GridLayout.Alignment.BEGINNING, true, false, 2, 1);
 
         LayoutData horizontalFill = GridLayout.createHorizontallyFilledLayoutData(2);
 
         // Mensaje de bienvenida
-        welcomeMessageLabel.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
+        welcomeMessageLabel.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(welcomeMessageLabel);
 
         // Reservas
-        reservesIndicator.setLayoutData(leftJustifyWithFill);                // Ocupar 1 fila
+        reservesIndicator.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(reservesIndicator);
 
         // Depósitos
-        depositsIndicator.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
+        depositsIndicator.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(depositsIndicator);
 
         // Préstamos
-        loansIndicator.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
+        loansIndicator.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(loansIndicator);
 
         // Balance
-        balanceIndicator.setLayoutData(leftJustifyWithFill);                   // Ocupar 1 fila
+        balanceIndicator.setLayoutData(leftJustifyWithFill); // Ocupar 1 fila
         panel.addComponent(balanceIndicator);
 
         // Separador
-        panel.addComponent(
-                new Separator(Direction.HORIZONTAL)
-                        .setLayoutData(horizontalFill));
+        panel.addComponent(new Separator(Direction.HORIZONTAL).setLayoutData(horizontalFill));
 
         // Botones
-        panel.addComponent(
-                historyButton
-                        .setLayoutData(leftJustifyWithFill));
-        panel.addComponent(
-                showClientsButton
-                        .setLayoutData(leftJustifyWithFill));
-        panel.addComponent(
-                showEmployeesButton
-                        .setLayoutData(leftJustifyWithFill));
-        panel.addComponent(
-                exitButton
-                        .setLayoutData(leftJustifyWithFill));
-
-
+        panel.addComponent(historyButton.setLayoutData(leftJustifyWithFill));
+        panel.addComponent(showClientsButton.setLayoutData(leftJustifyWithFill));
+        panel.addComponent(showEmployeesButton.setLayoutData(leftJustifyWithFill));
+        panel.addComponent(exitButton.setLayoutData(leftJustifyWithFill));
     }
 
-    public void showHistory(List<Operacion> operaciones){
+    public void showHistory(List<Operacion> operaciones) {
 
         BasicWindow window = new BasicWindow("Historial de Operaciones");
-        window.setHints(
-                Arrays.asList(
-                        Window.Hint.CENTERED,
-                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setHints(Arrays.asList(Window.Hint.CENTERED, Window.Hint.FIT_TERMINAL_WINDOW));
         window.setCloseWindowWithEscape(true);
 
         Panel panel = new Panel();
@@ -185,27 +146,19 @@ class ActualStateMenuView extends PageView {
             table.getTableModel().addRow(id, fecha, clase, monto, description);
         }
 
-        panel.addComponent(new Button("Cerrar",
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        window.close();
-                    }
-                }).setLayoutData(
-                GridLayout.createLayoutData(
-                        GridLayout.Alignment.END,
-                        GridLayout.Alignment.CENTER))
-        );
+        panel.addComponent(new Button("Cerrar", new Runnable() {
+            @Override
+            public void run() {
+                window.close();
+            }
+        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
 
         gui.addWindowAndWait(window);
     }
 
     public void showClients(List<Client> clients) {
         BasicWindow window = new BasicWindow("CLIENTES");
-        window.setHints(
-                Arrays.asList(
-                        Window.Hint.CENTERED,
-                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setHints(Arrays.asList(Window.Hint.CENTERED, Window.Hint.FIT_TERMINAL_WINDOW));
         window.setCloseWindowWithEscape(true);
 
         Panel panel = new Panel();
@@ -230,27 +183,19 @@ class ActualStateMenuView extends PageView {
             table.getTableModel().addRow(name, dni, username, alias, balance, debt, isPremium);
         }
 
-        panel.addComponent(new Button("Cerrar",
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        window.close();
-                    }
-                }).setLayoutData(
-                GridLayout.createLayoutData(
-                        GridLayout.Alignment.END,
-                        GridLayout.Alignment.CENTER))
-        );
+        panel.addComponent(new Button("Cerrar", new Runnable() {
+            @Override
+            public void run() {
+                window.close();
+            }
+        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
 
         gui.addWindowAndWait(window);
     }
 
     public void showEmployees(List<Empleado> employees) {
         BasicWindow window = new BasicWindow("EMPLEADOS");
-        window.setHints(
-                Arrays.asList(
-                        Window.Hint.CENTERED,
-                        Window.Hint.FIT_TERMINAL_WINDOW));
+        window.setHints(Arrays.asList(Window.Hint.CENTERED, Window.Hint.FIT_TERMINAL_WINDOW));
         window.setCloseWindowWithEscape(true);
 
         Panel panel = new Panel();
@@ -271,17 +216,12 @@ class ActualStateMenuView extends PageView {
             table.getTableModel().addRow(nombre, rol, dni, usuario);
         }
 
-        panel.addComponent(new Button("Cerrar",
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        window.close();
-                    }
-                }).setLayoutData(
-                GridLayout.createLayoutData(
-                        GridLayout.Alignment.END,
-                        GridLayout.Alignment.CENTER))
-        );
+        panel.addComponent(new Button("Cerrar", new Runnable() {
+            @Override
+            public void run() {
+                window.close();
+            }
+        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.END, GridLayout.Alignment.CENTER)));
 
         gui.addWindowAndWait(window);
     }
@@ -321,6 +261,4 @@ class ActualStateMenuView extends PageView {
     public void bindExitButton(Runnable action) {
         exitButton.addListener(b -> action.run());
     }
-
 }
-

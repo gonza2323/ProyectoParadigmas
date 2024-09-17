@@ -30,7 +30,6 @@ public abstract class PageController<V extends PageView> {
     protected final V view;                 // Referencia a la vista asociada
     protected final WindowBasedTextGUI gui; // Referencia a la gui. No hay que tocarla en esta clase
                                             // pero se necesita para crear la siguiente página
-    protected final TimeSimulation timeSim;
     private PageController<?> nextPage;     // Guarda la próxima página a la que se tiene que pasar
                                             // es null si ya se tiene que salir del programa
                                             // Es privada. Si se quiere cambiar de página hay que
@@ -40,11 +39,10 @@ public abstract class PageController<V extends PageView> {
      * Siempre requiere una referencia al banco, a la vista asociada, y a la gui
      * No hay que tocar la gui en esta clase, solo usarla para construir la siguiente pagina.
      */
-    public PageController(Banco banco, V view, WindowBasedTextGUI gui, TimeSimulation timeSim) {
+    public PageController(Banco banco, V view, WindowBasedTextGUI gui) {
         this.banco = banco;
         this.view = view;
         this.gui = gui;
-        this.timeSim = timeSim;
         this.nextPage = null;
     }
 
@@ -69,7 +67,7 @@ public abstract class PageController<V extends PageView> {
     }
 
     public void updateTime() {
-        view.updateClock(timeSim.getDateTime());
+        view.updateClock(TimeSimulation.getTime());
     }
 
     public void update() { };

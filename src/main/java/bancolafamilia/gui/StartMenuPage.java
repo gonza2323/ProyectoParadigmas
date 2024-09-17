@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 class StartMenuPage extends PageController<StartMenuView>{
 
-    public StartMenuPage(Banco banco, WindowBasedTextGUI gui, TimeSimulation timeSim) {
-        super(banco, new StartMenuView(gui), gui, timeSim);
+    public StartMenuPage(Banco banco, WindowBasedTextGUI gui) {
+        super(banco, new StartMenuView(gui), gui);
         
         view.bindBankLoginButton(() -> handleBankLoginButton());
         view.bindGoToBankButton(() -> handleGoToBankButton());
@@ -51,7 +51,7 @@ class StartMenuPage extends PageController<StartMenuView>{
     }
 
     private void handleBankLoginButton() {
-        CambiarPagina(new LoginPage(banco, gui, timeSim));
+        CambiarPagina(new LoginPage(banco, gui));
     }
 
     private void handleGoToBankButton() {
@@ -122,7 +122,7 @@ class StartMenuPage extends PageController<StartMenuView>{
 
     private void handleShowBankStateButton() {
         // TODO: Página ir al banco
-        CambiarPagina(new ActualStateMenuPage(banco, gui, timeSim));
+        CambiarPagina(new ActualStateMenuPage(banco, gui));
     }
 
     private void handleShowBankBackupButton() {
@@ -167,9 +167,7 @@ class StartMenuPage extends PageController<StartMenuView>{
                 }
             }
         }
-
     }
-
 
 
     private void handleSimulateOpsButton() {
@@ -188,7 +186,7 @@ class StartMenuPage extends PageController<StartMenuView>{
             view.showOutOfRangeOpsError();
         }
 
-        Simulation sim = new Simulation(banco, timeSim);
+        Simulation sim = new Simulation(banco);
         sim.createSimulation(numberOfOps, 10); // TODO
         
         // sim.start();
