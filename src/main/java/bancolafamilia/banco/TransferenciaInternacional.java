@@ -1,8 +1,11 @@
 package bancolafamilia.banco;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class TransferenciaInternacional extends Transferencia {
+public class TransferenciaInternacional extends Transferencia implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final float maxAmountImmediate = 500000; // monto máximo transferencia inmediata
     public static final float maxAmount = 10000000; // monto máximo legal
