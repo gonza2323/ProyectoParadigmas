@@ -31,8 +31,8 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     
     // En esta página, el constructor requiere también un User,
     // que fue el que se logueó, además del banco y la gui
-    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager, TimeSimulation timeSim) {
-        super(banco, new ManagerMenuView(gui), gui, timeSim);
+    public ManagerMenuPage(Banco banco, WindowBasedTextGUI gui, Gerente manager) {
+        super(banco, new ManagerMenuView(gui), gui);
 
         this.manager = manager;
         
@@ -100,6 +100,6 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     }
 
     private void handleExitButton() {
-        CambiarPagina(new LoginPage(banco, gui, timeSim));;
+        CambiarPagina(new LoginPage(banco, gui));;
     }
 }

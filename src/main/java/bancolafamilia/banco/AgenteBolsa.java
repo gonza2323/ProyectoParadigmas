@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import bancolafamilia.TimeSimulation;
+
+
 public class AgenteBolsa implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -60,7 +63,7 @@ public class AgenteBolsa implements Serializable {
             client.getPortfolioActivos().removeActivo(activo, amount);
         }
 
-        TransaccionBolsa transaccion = new TransaccionBolsa(LocalDateTime.now(), client, activo, cantidad, amount, comision, tipo);
+        TransaccionBolsa transaccion = new TransaccionBolsa(TimeSimulation.getTime(), client, activo, cantidad, amount, comision, tipo);
         return transaccion;
 
     }

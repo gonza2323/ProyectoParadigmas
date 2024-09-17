@@ -47,7 +47,11 @@ public class Client extends User implements Serializable { //implements IOpBcoCl
         return portfolioActivos;
     }
 
-
+    public static Client createTempSpecialClient() {
+        Client special = new Client("Banco La Familia", 0, "", "");
+        special.setAlias("la.cosa.nostra");
+        return special;
+    }
 
     public boolean isPremiumClient() { return isPremiumClient; }
 
@@ -68,6 +72,9 @@ public class Client extends User implements Serializable { //implements IOpBcoCl
 
     public void markNotificationsRead() {
         hasNewNotifications = false;
+    }
+
+    public class createSpecialClient {
     }
 }
 

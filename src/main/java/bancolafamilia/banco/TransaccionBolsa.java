@@ -12,8 +12,6 @@ public class TransaccionBolsa extends Operacion implements Serializable {
     private int cantidad;
     private float comision;
 
-
-
     //tipo = comprar o vender
 
     public TransaccionBolsa(LocalDateTime date, Client client, Activo activo, int cantidad, float amount, float comision, String tipo) {

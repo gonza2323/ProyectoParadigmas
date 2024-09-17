@@ -2,6 +2,9 @@ package bancolafamilia.banco;
 
 import java.io.Serializable;
 
+/**
+ * Representa un activo en la bolsa.
+ */
 public class Activo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,7 +21,6 @@ public class Activo implements Serializable {
         this.value = value;
         this.riesgoAsociado = riesgoAsociado;
         this.descripcion = name + ": $" + value;
-
     }
 
     public String getName() {
@@ -39,9 +41,7 @@ public class Activo implements Serializable {
 
     public float getGanancias() {
         float random = (float)Math.random();
-        this.ganancias = value*random;
+        this.ganancias = value * random;
         return this.ganancias;
-
-
     }
 }

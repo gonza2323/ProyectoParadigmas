@@ -43,13 +43,11 @@ public class Interfaz {
 
     private final Screen screen;            // pantalla
     private final WindowBasedTextGUI gui;   // gui
-    private final TimeSimulation timeSim;
     
     private PageController<?> currentPage; // pagina actual
 
-    public Interfaz(Banco banco, TimeSimulation timeSim) throws IOException {
-        this.timeSim = timeSim;
-
+    public Interfaz(Banco banco) throws IOException {
+        
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
         
         // Si estamos en Windows, cambiamos algunas configuraciones
@@ -65,7 +63,7 @@ public class Interfaz {
 
         // Acá se configura la página inicial, para debuggear más rápido se puede cambiar
         // por la que uno esté armando en ese momento.
-        this.currentPage = new StartMenuPage(banco, gui, timeSim);
+        this.currentPage = new StartMenuPage(banco, gui);
 
         gui.addListener(new Listener() {
             public boolean onUnhandledKeyStroke(TextGUI textGUI, KeyStroke keyStroke) {

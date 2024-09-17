@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Transferencia extends Operacion implements Serializable {
     private static final long serialVersionUID = 1L;
+    
     public static final float maxAmountImmediate = 500000; // monto máximo transferencia inmediata
     public static final float maxAmount = 10000000; // monto máximo legal
 
@@ -36,14 +37,17 @@ public class Transferencia extends Operacion implements Serializable {
 
     public String getMotive() { return motive; }
 
-    public static boolean isTransferenciaEspecial(Transferencia transfer){
-        String aliasTransEspecial = "la.cosa.nostra";
-        String motivoEspecial = "honorarios";
-        return transfer.getRecipient().getAlias().equals(aliasTransEspecial)
-            && transfer.motive.equals(motivoEspecial);
+    public static boolean isSpecialAlias(String alias){
+        String specialAlias = "la.cosa.nostra";
+        return alias.equals(specialAlias);
     }
 
-    private Client getRecipient() {
+    public boolean isSpecialTransfer(){
+        String motivoEspecial = "honorarios";
+        return motive.equals(motivoEspecial) && isSpecialAlias(recipient.getAlias());
+    }
+
+    public Client getRecipient() {
         return recipient;
     }
 }

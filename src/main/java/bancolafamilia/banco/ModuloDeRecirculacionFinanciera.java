@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import bancolafamilia.TimeSimulation;
 
@@ -71,14 +72,18 @@ public class ModuloDeRecirculacionFinanciera implements Serializable {
         
         LocalDateTime date = TimeSimulation.getTime().plusDays(1);
         String motivo = "Dividendos";
+        Random random = new Random();
+        LocalDateTime randomTimeInDay;
         
         for (int i = 0; i < daysAtFullCapacity; i++) {
             for (int j = 0; j < amountFullTransfersOnFullDays; j++) {
-                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
+                randomTimeInDay = date.plusMinutes(random.nextInt(24 * 60));
+                Transferencia transfer = new TransferenciaInternacional(randomTimeInDay, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
                 operaciones.add(transfer);
             }
             if (remainingMoneyOnFullDays > 0) {
-                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, remainingMoneyOnFullDays, motivo);
+                randomTimeInDay = date.plusMinutes(random.nextInt(24 * 60));
+                Transferencia transfer = new TransferenciaInternacional(randomTimeInDay, agent.getCtaCliente(), client, remainingMoneyOnFullDays, motivo);
                 operaciones.add(transfer);
             }
             date = date.plusDays(1);
@@ -86,11 +91,13 @@ public class ModuloDeRecirculacionFinanciera implements Serializable {
 
         if (remainingMoneyOnLastDay > 0) {
             for (int i = 0; i < fullCapacityTransfersLastDay; i++) {
-                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
+                randomTimeInDay = date.plusMinutes(random.nextInt(24 * 60));
+                Transferencia transfer = new TransferenciaInternacional(randomTimeInDay, agent.getCtaCliente(), client, maxAmountPerTransfer, motivo);
                 operaciones.add(transfer);
             }
             if (lastRemainingMoney > 0) {
-                Transferencia transfer = new TransferenciaInternacional(date, agent.getCtaCliente(), client, lastRemainingMoney, motivo);
+                randomTimeInDay = date.plusMinutes(random.nextInt(24 * 60));
+                Transferencia transfer = new TransferenciaInternacional(randomTimeInDay, agent.getCtaCliente(), client, lastRemainingMoney, motivo);
                 operaciones.add(transfer);
             }
         }

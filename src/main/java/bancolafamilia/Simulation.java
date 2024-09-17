@@ -11,24 +11,18 @@ import bancolafamilia.banco.*;
 public class Simulation {
 
     Banco banco;
-    TimeSimulation timeSim;
     private PriorityQueue<Operacion> plannedOperations = new PriorityQueue<>();
 
-    public Simulation(Banco banco, TimeSimulation timeSim) {
+    public Simulation(Banco banco) {
         this.banco = banco;
     }
 
     /**
      * Genera una secuencia aleatoria de operaciones
-     * De ser necesario, agregará clientes al banco
      * @param operationsAmount
      */
     public void createSimulation(int amountOfOperations, int days) {
-        
-    }
-
-    public void startSimulation() {
-        
+        banco.programarOperaciones(null);
     }
 }
 
