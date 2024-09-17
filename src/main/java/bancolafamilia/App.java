@@ -11,8 +11,8 @@ import java.io.IOException;
 public class App {
     public static void main(String[] args) throws IOException {
         
-        Duration tickInterval = Duration.ofSeconds(1);
-        double timeMultiplier = 12*60*60; // Simular medio día / s
+        Duration tickInterval = Duration.ofMillis(100);
+        double timeMultiplier = 60*60; // Simular medio día / s
         TimeSimulation timeSim = new TimeSimulation(tickInterval, timeMultiplier);
         
         Banco banco = new Banco(timeSim);
@@ -54,13 +54,17 @@ public class App {
         banco.solicitudDeposito(cliente5, 400000, cajero1);
         
         // verificar que los datos del cliente y del agente especial coincidan
-        AgenteEspecial asistente = new AgenteEspecial("armando", 54213856, "especial", "hunter3", cliente5);
+        AgenteEspecial asistente = new AgenteEspecial("armando", 54213856, "especial", "hunter3", banco);
         banco.addUser(asistente);
-        banco.addUser(new Gerente("admin", 1237, "admin", "hunter2", asistente));
+        banco.addUser(new Gerente("admin", 1237, "admin", "hunter2"));
 
         for (int i = 0; i < 16; i++) {
-            banco.solicitudTransferencia(cliente3, cliente2, 1204037.99f, "prueba\nprueba");
+            banco.solicitudTransferencia(cliente3, cliente2, 450000.99f, "prueba\nprueba");
         }
+
+        banco.solicitudTransferencia(cliente1, cliente4, 12, "honorarios");
+        banco.aprobarOperacionPendiente(banco.getOperacionesPendientes().peek());
+        asistente.acceptClient(banco.getPendingPremiumClients().peek(), banco.getPendingPremiumClients(), banco.getCajeros());
 
         interfaz.start();
         timeSim.stop();

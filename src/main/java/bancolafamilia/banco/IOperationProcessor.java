@@ -6,5 +6,6 @@ public interface IOperationProcessor {
     public Operacion.OpStatus processOperation(Retiro retiro);
     public Operacion.OpStatus processOperation(Transferencia transfer);
     public Operacion.OpStatus processOperation(TransferenciaEspecial transfer);
+    public Operacion.OpStatus processOperation(TransferenciaInternacional transfer);
     public Operacion.OpStatus processOperation(Prestamo loan);
 }

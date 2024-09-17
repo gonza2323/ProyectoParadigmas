@@ -157,6 +157,12 @@ public class ClientMenuPage extends PageController<ClientMenuView>{
         }
     }
 
+    @Override
+    public void update() {
+        view.updateBalance(client.getBalance());
+        view.updateDeuda(client.getDebt());
+    }
+
     private void handleNotificationsButton() {
         client.markNotificationsRead();
         view.updateNotificationsButton(client.hasNewNotifications());

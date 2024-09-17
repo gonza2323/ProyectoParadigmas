@@ -342,4 +342,9 @@ public class ClientMenuView extends PageView {
     public void bindExitButton(Runnable action) {
         exitButton.addListener(b -> action.run());
     }
+
+    @Override
+    public void setupClockUI() {
+        
+    }
 }

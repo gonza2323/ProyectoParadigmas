@@ -41,10 +41,5 @@ public class Prestamo extends Operacion{
         return processor.processOperation(this);
     }
 
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Gerente;
-    }
-
     public int getMonths() { return months; }
 }

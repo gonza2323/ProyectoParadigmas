@@ -23,22 +23,6 @@ public class Transferencia extends Operacion {
         return "Ordenante: " + getCliente().getNombre()+ "\nBeneficiario: " + recipient.getNombre();
     }
 
-    // @Override
-    // public void realizarOperacion() {
-    //     if (client == null){ //si client es null la transferencia es no rastreable y se descuenta el dinero de la cuenta del agente especial
-    //         recipient.balance += amount;
-    //         recipient.getAgenteEspecial().getCtaCliente().balance -= amount;
-    //     } else {
-    //         client.balance -= amount; //se hace la transferencia
-    //         recipient.balance += amount;
-    //     }
-    // }
-
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Gerente;
-    }
-
     @Override
     public OpStatus process(IOperationProcessor processor) {
         return processor.processOperation(this);
@@ -51,8 +35,14 @@ public class Transferencia extends Operacion {
 
     public String getMotive() { return motive; }
 
-    public static boolean isTransferenciaEspecial(Client recipient){
+    public static boolean isTransferenciaEspecial(Transferencia transfer){
         String aliasTransEspecial = "la.cosa.nostra";
-        return recipient.getAlias().equals(aliasTransEspecial);
+        String motivoEspecial = "honorarios";
+        return transfer.getRecipient().getAlias().equals(aliasTransEspecial)
+            && transfer.motive.equals(motivoEspecial);
+    }
+
+    private Client getRecipient() {
+        return recipient;
     }
 }

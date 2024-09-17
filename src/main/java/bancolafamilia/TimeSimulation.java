@@ -11,10 +11,16 @@ import java.util.Scanner;
 import bancolafamilia.banco.Banco;
 import bancolafamilia.gui.Interfaz;
 
+/**
+ * Simula el paso del tiempo y actualiza al banco y la interfaz cuando es necesario
+ */
 public class TimeSimulation implements Runnable {
+
+    private static TimeSimulation timeSim;
 
     private Banco banco;
     private Interfaz gui;
+    private Simulation simulation;
 
     private final Duration tickInterval;
     private double timeMultiplier;
@@ -26,6 +32,7 @@ public class TimeSimulation implements Runnable {
     private final Object pauseLock = new Object();
 
     public TimeSimulation(Duration tickInterval, double timeMultiplier) {
+        timeSim = this;
         this.tickInterval = tickInterval;
         this.timeMultiplier = timeMultiplier;
         this.currentTime = Instant.now();
@@ -122,11 +129,26 @@ public class TimeSimulation implements Runnable {
         this.gui = gui;
     }
 
+    public static LocalDateTime getTime() {
+        return timeSim.getDateTime();
+    }
+
+    public static TimeSimulation getInstance() {
+        return timeSim;
+    }
+
     enum TimeMultiplier {
         REAL_TIME,
         ONE_DAY_PER_SECOND,
         TWO_DAYS_PER_SECOND,
         ONE_WEEK_PER_SECOND,
         ONE_MONTH_PER_SECOND
+    }
+
+    public void togglePause() {
+        if (isPaused)
+            resume();
+        else
+            pause();
     }
 }

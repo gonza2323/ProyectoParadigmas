@@ -28,11 +28,6 @@ public class Deposito extends Operacion {
         return cajeroResponsable;
     }
 
-    @Override
-    public boolean isAprobadaPor(Empleado employee) {
-        return employee instanceof Cajero;
-    }
-
     public void setClient(Client client) {
         this.client = client;
     }

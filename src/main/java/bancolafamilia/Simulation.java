@@ -32,7 +32,7 @@ public class Simulation {
     }
 }
 
-abstract class Event implements Comparable<Event> {
+abstract class Event implements Comparable<Event>, Runnable {
     private final LocalDateTime date;
 
     public Event(LocalDateTime date) {

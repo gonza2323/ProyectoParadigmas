@@ -54,7 +54,6 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     }
 
     private void handleHistoryButton() {
-        // TODO Auto-generated method stub
         view.showHistory(banco.getOperaciones());
     }
 
@@ -72,7 +71,7 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
         if (shouldApprove)
             banco.aprobarOperacionPendiente(operation);
         else
-            banco.denegarOperacion(operation);
+            banco.denegarOperacionPendiente(operation);
         return true;
     };
 
@@ -90,6 +89,14 @@ public class ManagerMenuPage extends PageController<ManagerMenuView>{
     
     private void handleShowDocumentsButton() {
         return;
+    }
+
+    @Override
+    public void update() {
+        view.updateReserves(banco.getReservesTotal());
+        view.updateDeposits(banco.getDepositsTotal());
+        view.updateLoans(banco.getLoanedTotal());
+        view.updateBalance(banco.getBalance());
     }
 
     private void handleExitButton() {
