@@ -436,9 +436,27 @@ public class Banco implements IOperationProcessor, Serializable {
 
     //OPERACIONES CON EL AGENTE DE BOLSA -------------------------------------------------------------------------------
 
+    /**
+     * Setea el Agente de bolsa del banco, es usado cuando se define el bco en app.java
+     * @param broker AgenteBolsa
+     */
+
     public void setBroker(AgenteBolsa broker) {
         this.broker = broker;
     }
+
+    /**
+     * Recibe la solicitud del cliente y si cumple las condiciones,
+     * delega al broker la operacion de compra o venta de activos
+     * Incrementa o reduce el balance del cliente de acuerdo a la solicitud recibida
+     * @param doc DocumentoInversionBolsa que contiene la informacion del cliente, activo
+     * cantidad de acciones adquiridas, comisiones, etc
+     * @param client Client que desea realizar la transaccion en la bolsa
+     * @param activo Activo que desea comprar o vender
+     * @param cantidad int que indica la cantidad de acciones con las que quiere operar
+     * @param tipo String que informa si la operacion es una compra o una venta
+     * @return Retorna si se aprobó la transaccion en la bolsa
+     */
 
     public boolean operarEnLaBolsa(DocumentoInversionBolsa doc, Client client, Activo activo, int cantidad, String tipo){
         if ((client.getBalance() < (activo.getValue() * cantidad) + broker.comissionRate) && (tipo.equalsIgnoreCase("buy"))) {
@@ -469,6 +487,16 @@ public class Banco implements IOperationProcessor, Serializable {
 
     }
 
+    /**
+     * Busca dentro de la lista inversionesPerCliente un documento asociado
+     * al cliente y activo que recibe por parametro
+     * Es decir, verifica si el cliente ya ha hecho antes alguna transaccion con
+     * ese activo
+     * @param activo Activo con el cual el cliente desea operar en la bolsa
+     * @param client Client que desea operar
+     * @return DocumentoInversionBolsa encontrado - si no lo encuentra devuelve null
+     */
+
     public DocumentoInversionBolsa getInversionPerClient(Activo activo, Client client) {
 
         for (DocumentoInversionBolsa inversion : inversionesPerClient){
@@ -480,6 +508,14 @@ public class Banco implements IOperationProcessor, Serializable {
         return null;
     }
 
+    /**
+     * Recibe la solicitud del cliente y elige un asesor financiero del banco
+     * al azar para derivarle la tarea, una vez que lo consigue, le hace la solicitud
+     * del consejo financiero de acuerdo al tipo de consejo financier que necesita (legal, mofia)
+     * @param client Cliente que pide la asesoría financiera
+     * @param tipo String que informa el tipo de asesoría que solicita
+     * @return Asesoria financiera
+     */
     public financialAdvice solicitudAsesoriaFinanciera(Client client, String tipo){
         List<AsesorFinanciero> asesoresFinancieros = new ArrayList<>();
         financialAdvice advice;
