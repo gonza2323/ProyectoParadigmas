@@ -66,7 +66,7 @@ class ManagerMenuView extends PageView {
 
         // Panel
         Panel panel = new Panel(
-            new GridLayout(2)
+            new GridLayout(1)
                 .setHorizontalSpacing(1)
                 .setVerticalSpacing(1)
                 .setTopMarginSize(1)
@@ -142,12 +142,6 @@ class ManagerMenuView extends PageView {
                 .setLayoutData(leftJustifyWithFill));
         panel.addComponent(
             showEmployeesButton
-                .setLayoutData(leftJustifyWithFill));
-        panel.addComponent(
-            showSpecialAgentsButton
-                .setLayoutData(leftJustifyWithFill));
-        panel.addComponent(
-            showDocumentsButton
                 .setLayoutData(leftJustifyWithFill));
         panel.addComponent(
             exitButton

@@ -100,9 +100,6 @@ class AgenteEspecialMenuView extends PageView {
             pendingTasksButton
                 .setLayoutData(leftJustify));
         panel.addComponent(
-            finishedTasksButton
-                .setLayoutData(leftJustify));
-        panel.addComponent(
             pendingClientsButton
                 .setLayoutData(leftJustify));
         panel.addComponent(
