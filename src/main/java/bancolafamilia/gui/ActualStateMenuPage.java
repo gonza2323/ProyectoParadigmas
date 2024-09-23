@@ -168,7 +168,7 @@ class ActualStateMenuView extends PageView {
         for (Operacion op : operaciones) {
             String id = Integer.toString(op.getId());
             String clase = op.getClass().getSimpleName();
-            String client = op.getClass().getName();
+            String client = op.getCliente().getNombre();
             String fecha = op.getDate().format(formatter);
             String description = op.getDescription();
             String monto = decimalFormat.format(op.getAmount());

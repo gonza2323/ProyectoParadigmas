@@ -229,11 +229,11 @@ class StartMenuView extends PageView {
     public StartMenuView(WindowBasedTextGUI gui) {
         super(gui);
 
-        this.bankLoginButton = new Button("Iniciar sesion");
-        this.goToBankButton = new Button("Ir al banco");
-        this.showBankStateButton = new Button("Estado del banco");
-        this.bankBackupButton = new Button("Copia de seguridad");
-        this.simulateOpsButton = new Button(" Simular movimientos ");
+        this.bankLoginButton = new Button("Iniciar Sesión");
+        this.goToBankButton = new Button("Ir al Banco");
+        this.showBankStateButton = new Button(" Ver Estado del Banco ");
+        this.bankBackupButton = new Button("Copia de Seguridad");
+        this.simulateOpsButton = new Button("Simular Movimientos");
         this.exitButton = new Button("Salir");
     }
 
